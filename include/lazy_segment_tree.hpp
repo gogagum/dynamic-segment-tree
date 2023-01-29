@@ -14,10 +14,11 @@ namespace {
 template <std::integral KeyT,
           class ValueT,
           class ValValOp = std::plus<ValueT>,
-          class ValKeyOp = std::multiplies<void>>
+          class ValKeyOp = std::multiplies<void>,
+          class Allocator = std::allocator<ValueT>>
 class LazySegmentTree{
 private:
-    using _Node = Node<ValueT, ValValOp>;
+    using _Node = Node<ValueT, ValValOp, Allocator>;
 public:
     LazySegmentTree(KeyT start, KeyT end, const ValueT& value);
     void update(KeyT start, KeyT end, ValueT&& toUpdate);
@@ -41,22 +42,35 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
-LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::LazySegmentTree(
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
+LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::LazySegmentTree(
         KeyT begin, KeyT end, const ValueT& value)
     : _rootNode(value), _begin(begin), _end(end) {}
 
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
-void LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::update(
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
+void LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::update(
         KeyT begin, KeyT end, ValueT&& toUpdate) {
     _updateImpl(begin, end, _begin, _end, &_rootNode,
                 std::forward<ValueT>(toUpdate));
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
-ValueT LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::get(KeyT key) const {
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
+ValueT LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::get(
+        KeyT key) const {
     if (key >= _end || key < _begin) {
         return ValueT{};
     }
@@ -64,15 +78,23 @@ ValueT LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::get(KeyT key) const {
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
-ValueT LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::rangeGet(
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
+ValueT LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::rangeGet(
         KeyT begin, KeyT end) const {
     return _rangeGetImpl(begin, end, _begin, _end, &_rootNode);
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
-void LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::_updateImpl(
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
+void LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::_updateImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
         _Node* currNode, const ValueT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
@@ -95,9 +117,12 @@ void LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::_updateImpl(
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
-ValueT
-LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::_getImpl(
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
+ValueT LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::_getImpl(
         KeyT key, KeyT currBegin, KeyT currEnd,
         _Node* currNode, const ValueT& currValue) const {
     if (currNode->isList()) {
@@ -114,16 +139,20 @@ LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::_getImpl(
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral KeyT, class ValueT, class ValValOp, class ValKeyOp>
+template <std::integral KeyT,
+          class ValueT,
+          class ValValOp,
+          class ValKeyOp,
+          class Allocator>
 ValueT
-LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp>::_rangeGetImpl(
+LazySegmentTree<KeyT, ValueT, ValValOp, ValKeyOp, Allocator>::_rangeGetImpl(
         KeyT begin, KeyT end, KeyT currBegin,
         KeyT currEnd, _Node* currNode) const {
     if (begin >= currEnd || currBegin >= end) {
         return ValueT{};
     }
     if (end >= currEnd && begin <= currBegin && currNode->isList()) {
-        return _valKeyOp(currNode->getValue(), end - begin);
+        return _valKeyOp(currNode->getValue(), currEnd - currBegin);
     }
     currNode->siftDown();
     const auto m = (currBegin + currEnd) / 2;
