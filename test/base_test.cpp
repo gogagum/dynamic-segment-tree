@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 #include <lazy_segment_tree.hpp>
+#include <operations.hpp>
+
+using lst::LazySegmentTree;
 
 TEST(LazySegmentTree, Construct) {
     auto tree = LazySegmentTree<int, int>(0, 42, 54);
@@ -64,9 +67,12 @@ TEST(LazySegmentTree, TwoIntersectingUpdates) {
     EXPECT_EQ(tree.get(19), 54 + 18);
     EXPECT_EQ(tree.get(20), 54 + 18 + 14);
     EXPECT_EQ(tree.get(25), 54 + 18 + 14);
+    EXPECT_EQ(tree.get(35), 54 + 18 + 14);
     EXPECT_EQ(tree.get(36), 54 + 18 + 14);
     EXPECT_EQ(tree.get(37), 54 + 14);
+    EXPECT_EQ(tree.get(38), 54 + 14);
     EXPECT_EQ(tree.get(39), 54 + 14);
+    EXPECT_EQ(tree.get(40), 54 + 14);
     EXPECT_EQ(tree.get(41), 54);
     EXPECT_EQ(tree.get(42), 0);
 }
@@ -167,5 +173,28 @@ TEST(LazySegmentTree, LongLongToLongLongLadder) {
     auto testVal2 = tree.get(topBorder - topBorder / 32 - 1);
     EXPECT_EQ(testVal2, 1111);
 }
+
+TEST(LazySegmentTree, Set) {
+    auto tree = LazySegmentTree<int, int>(0, 42, 21);
+    tree.set(0, 37, 73);
+    EXPECT_EQ(tree.get(0), 73);
+    EXPECT_EQ(tree.get(15), 73);
+    EXPECT_EQ(tree.get(37), 21);
+    EXPECT_EQ(tree.get(40), 21);
+}
+
+TEST(LazySegmentTree, SetOnTheSameRange) {
+    auto tree = LazySegmentTree<int, int>(0, 42, 21);
+    tree.set(0, 37, 73);
+    tree.set(0, 37, 37);
+    EXPECT_EQ(tree.get(0), 37);
+    EXPECT_EQ(tree.get(15), 37);
+    EXPECT_EQ(tree.get(37), 21);
+    EXPECT_EQ(tree.get(40), 21);
+}
+
+
+
+
 
 

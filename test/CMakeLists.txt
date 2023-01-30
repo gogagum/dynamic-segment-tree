@@ -16,7 +16,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
-add_executable(segment_tree_test test.cpp)
+add_executable(segment_tree_test
+    base_test.cpp
+    min_test.cpp
+    max_test.cpp)
 
 enable_testing()
 
