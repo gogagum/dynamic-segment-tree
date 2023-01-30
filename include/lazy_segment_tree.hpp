@@ -6,11 +6,8 @@
 
 #include <node.hpp>
 
-namespace {
+namespace lst{
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief The LazySegmentTree class
-///
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp = std::plus<ValueT>,
@@ -44,8 +41,6 @@ private:
     KeyT _end;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -57,7 +52,6 @@ LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
         KeyT begin, KeyT end, const ValueT& value)
     : _rootNode(value), _begin(begin), _end(end) {}
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -70,7 +64,6 @@ void LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     _updateImpl(begin, end, _begin, _end, &_rootNode, toUpdate);
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -83,7 +76,6 @@ void LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     _setImpl(begin, end, _begin, _end, &_rootNode, toUpdate);
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -99,7 +91,6 @@ ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     return _getImpl(key, _begin, _end, &_rootNode);
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -112,7 +103,6 @@ ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     return _rangeGetImpl(begin, end, _begin, _end, &_rootNode);
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -136,13 +126,12 @@ void LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
         auto leftNodePtr = currNode->getLeft();
         _updateImpl(begin, end, currBegin, m, leftNodePtr, toUpdate);
     }
-    if (currEnd >= begin + 1) {
+    if (currEnd >= m + 1) {
         auto rightNodePtr = currNode->getRight();
         _updateImpl(begin, end, m, currEnd, rightNodePtr, toUpdate);
     }
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -172,7 +161,6 @@ void LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     }
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -183,8 +171,7 @@ ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
                        ValValGetOp,  ValKeyGetOp, Allocator>::_getImpl(
         KeyT key, KeyT currBegin, KeyT currEnd,
         _Node* currNode) const {
-    if (currNode->hasValue()) {
-        assert(currNode->isLeaf() && "Only leafs have values.");
+    if (currNode->isLeaf()) {
         return currNode->getValue();
     }
     currNode->siftDown();
@@ -197,7 +184,6 @@ ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     }
 }
 
-//----------------------------------------------------------------------------//
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp,
@@ -210,6 +196,7 @@ LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
         KeyT begin, KeyT end, KeyT currBegin,
         KeyT currEnd, _Node* currNode) const {
     if (begin >= currEnd || currBegin >= end) {
+        assert(false);
         return ValueT{};
     }
     if (end >= currEnd && begin <= currBegin && currNode->isLeaf()) {
@@ -217,16 +204,20 @@ LazySegmentTree<KeyT, ValueT, ValValUpdateOp,
     }
     currNode->siftDown();
     const auto m = (currBegin + currEnd) / 2;
-    _Node* leftNodePtr = currNode->getLeft();
-    const bool leftNodeExists = (m >= currBegin + 1);
-    const ValueT lVal = leftNodeExists
-            ? _rangeGetImpl(begin, end, currBegin, m, leftNodePtr)
-            : ValueT{};
+
     _Node* rightNodePtr = currNode->getRight();
-    const bool rightNodeExists = (currEnd >= m + 1);
-    const ValueT rVal = rightNodeExists
-            ? _rangeGetImpl(begin, end, m, currEnd, rightNodePtr)
-            : ValueT{};
+    _Node* leftNodePtr = currNode->getLeft();
+
+    if (begin >= m) { // only right
+        return _rangeGetImpl(begin, end, m, currEnd, rightNodePtr);
+    }
+    if (end <= m) { // only left
+        return _rangeGetImpl(begin, end, currBegin, m, leftNodePtr);
+    }
+
+    const ValueT lVal = _rangeGetImpl(begin, end, currBegin, m, leftNodePtr);
+    const ValueT rVal = _rangeGetImpl(begin, end, m, currEnd, rightNodePtr);
+
     return _valValGetOp(lVal, rVal);
 }
 

@@ -39,7 +39,6 @@ public:
 private:
     _Allocator _allocator;
     std::optional<T> _value;
-    std::optional<T> _updateValue;
     _Type* _left {nullptr};
     _Type* _right {nullptr};
 };
@@ -75,39 +74,31 @@ template<class T, class UpdateOp, class BinaryOp, class Allocator>
 void Node<T, UpdateOp, BinaryOp, Allocator>::siftDown() {
     if (isLeaf()) {
         initChildren();
-    }
-    if (_value.has_value()) {
         _left->setValue(_value.value());
         _right->setValue(_value.value());
-        _value = std::nullopt;
-    }
-    if (_updateValue.has_value()) {
-        _left->update(_updateValue.value());
-        _right->update(_updateValue.value());
-        _updateValue = std::nullopt;
+        _value = std::nullopt;  // _value now has a meaning of
+                                // a delayed operation.
+    } else {
+        if (_value.has_value()) {
+            _left->update(_value.value());
+            _right->update(_value.value());
+            _value = std::nullopt;
+        }
     }
 }
 
 template<class T, class UpdateOp, class BinaryOp, class Allocator>
 void Node<T, UpdateOp, BinaryOp, Allocator>::update(const T& updateValue) {
-    if (_updateValue.has_value()) {
-        // _updateValue.has_value() means that there is a _value == std::nullopt
-        // (it should have been updated in other case.)
-        assert(!_value.has_value() && "There must be no value.");
-        // If _value == std::nullopt this is not a leaf.
-        assert(!isLeaf() && "It must not be a leaf.");
-        _left->update(_updateValue.value());  // update left with old update
-        _right->update(_updateValue.value()); // update right with old update
-        _updateValue = updateValue;
-    } else if (!_value.has_value()) {  // !_updateValue.has_value()
-        // This node is not a leaf.
-        assert(!isLeaf() && "It must not be a leaf.");
-        _updateValue = updateValue;
-    } else { // _value.has_value()
-        // This node is a leaf.
-        assert(isLeaf() && "It must be a leaf.");
-        // So it must not have an _updateValue.
-        assert(!_updateValue.has_value() && "There mast be no update value.");
+    if (!isLeaf()) {
+        // _value means delayed update.
+        if (_value.has_value()) {
+            _left->update(_value.value());  // update left with old update
+            _right->update(_value.value()); // update right with old update
+        }
+        // _value continues to have delayed update meaning.
+        _value = updateValue;
+    } else { // isLeaf()
+        assert(_value.has_value() && "Leaf must have a value.");
         _value = _updateOp(_value.value(), updateValue);
     }
 }

@@ -20,7 +20,7 @@ target_sources(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         # where the library itself will look for its internal headers
-        #${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
     PUBLIC
         # where top-level project will look for the library's public headers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -31,6 +31,9 @@ target_include_directories(${PROJECT_NAME}
 # without it public headers won't get installed
 set(public_headers
     include/lazy_segmentation_tree.hpp
+    include/min_lazy_segment_tree.hpp
+    include/max_lazy_segment_tree.hpp
+    include/operations.hpp
 )
 # note that ${public_headers} has to be in quotes
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
