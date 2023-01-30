@@ -168,4 +168,23 @@ TEST(LazySegmentTree, LongLongToLongLongLadder) {
     EXPECT_EQ(testVal2, 1111);
 }
 
+TEST(LazySegmentTree, Set) {
+    auto tree = LazySegmentTree<int, int>(0, 42, 21);
+    tree.set(0, 37, 73);
+    EXPECT_EQ(tree.get(0), 73);
+    EXPECT_EQ(tree.get(15), 73);
+    EXPECT_EQ(tree.get(37), 21);
+    EXPECT_EQ(tree.get(40), 21);
+}
+
+TEST(LazySegmentTree, SetOnTheSameRange) {
+    auto tree = LazySegmentTree<int, int>(0, 42, 21);
+    tree.set(0, 37, 73);
+    tree.set(0, 37, 37);
+    EXPECT_EQ(tree.get(0), 37);
+    EXPECT_EQ(tree.get(15), 37);
+    EXPECT_EQ(tree.get(37), 21);
+    EXPECT_EQ(tree.get(40), 21);
+}
+
 
