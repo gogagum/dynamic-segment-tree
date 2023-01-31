@@ -23,7 +23,7 @@ public:
     Node() = default;
     Node(const T& value) : _value(value) {}
     Node(T&& value) : _value(std::move(value)) {}
-    bool isLeaf() const           { return _left == nullptr && _right == nullptr; }
+    bool isLeaf() const;
     const T& getValue() const     { return _value.value(); }
     bool hasValue() const         { return _value.has_value(); }
     void setValue(const T& value);
@@ -41,11 +41,13 @@ private:
     _Type* _right {nullptr};
 };
 
-//template<class T, class UpdateOp, class BinaryOp, class Allocator>
-//BinaryOp Node<T, UpdateOp, Allocator>::_binaryOp = BinaryOp();
-
 template<class T, class UpdateOp, class Allocator>
 UpdateOp Node<T, UpdateOp, Allocator>::_updateOp = UpdateOp();
+
+template<class T, class UpdateOp, class Allocator>
+bool Node<T, UpdateOp, Allocator>::isLeaf() const {
+    return _left == nullptr && _right == nullptr;
+}
 
 template<class T, class UpdateOp, class Allocator>
 void Node<T, UpdateOp, Allocator>::setValue(const T& value) {
