@@ -1,5 +1,5 @@
-#ifndef DYNAMIC_MIN_SEGMENT_TREE_HPP
-#define DYNAMIC_MIN_SEGMENT_TREE_HPP
+#ifndef DYNAMIC_SUM_SEGMENT_TREE_HPP
+#define DYNAMIC_SUM_SEGMENT_TREE_HPP
 
 #include <concepts>
 
@@ -11,16 +11,16 @@ template <std::integral KeyT,
           class ValueT,
           class UpdateOp = void,
           class Allocator = std::allocator<ValueT>>
-using DynamicMinSegmentTree =
+using DynamicSumSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
-        decltype([](const auto& left, const auto& right) { return std::min(left, right); }),
-        std::identity,
+        std::plus<ValueT>,
+        std::multiplies<>,
         UpdateOp,
         Allocator
     >;
 
 }
 
-#endif // DYNAMIC_MIN_SEGMENT_TREE_HPP
+#endif // DYNAMIC_SUM_SEGMENT_TREE_HPP

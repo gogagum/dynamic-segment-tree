@@ -16,7 +16,7 @@ TEST(DynamicMinSegmentTree, SimpleRangeGet) {
 }
 
 TEST(DynamicMinSegmentTree, RangeGetAfterUpdate) {
-    auto tree = DynamicMinSegmentTree<int, int>(0, 42, 34);
+    auto tree = DynamicMinSegmentTree<int, int, std::plus<int>>(0, 42, 34);
     tree.update(12, 22, 4);
     EXPECT_EQ(tree.rangeGet(5, 17), 34);
     EXPECT_EQ(tree.rangeGet(12, 18), 34 + 4);
