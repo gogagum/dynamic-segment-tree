@@ -31,9 +31,8 @@ target_include_directories(${PROJECT_NAME}
 # without it public headers won't get installed
 set(public_headers
     include/lazy_segmentation_tree.hpp
-    include/min_lazy_segment_tree.hpp
-    include/max_lazy_segment_tree.hpp
-    include/operations.hpp
+    include/lazy_max_segment_tree.hpp
+    include/lazy_min_segment_tree.hpp
 )
 # note that ${public_headers} has to be in quotes
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")

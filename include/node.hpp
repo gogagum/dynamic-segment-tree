@@ -9,16 +9,14 @@ namespace {
 
 template<class T,
          class UpdateOp,
-         class BinaryOp,
          class Allocator = std::allocator<T>>
 class Node{
 private:
-    using _Type = Node<T, UpdateOp, BinaryOp, Allocator>;
+    using _Type = Node<T, UpdateOp, Allocator>;
     using _Allocator =
         typename std::allocator_traits<Allocator>::template rebind_alloc<_Type>;
     using _AllocatorTraits = std::allocator_traits<_Allocator>;
 
-    static BinaryOp _binaryOp;
     static UpdateOp _updateOp;
 
 public:
@@ -43,26 +41,26 @@ private:
     _Type* _right {nullptr};
 };
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-BinaryOp Node<T, UpdateOp, BinaryOp, Allocator>::_binaryOp = BinaryOp();
+//template<class T, class UpdateOp, class BinaryOp, class Allocator>
+//BinaryOp Node<T, UpdateOp, Allocator>::_binaryOp = BinaryOp();
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-UpdateOp Node<T, UpdateOp, BinaryOp, Allocator>::_updateOp = UpdateOp();
+template<class T, class UpdateOp, class Allocator>
+UpdateOp Node<T, UpdateOp, Allocator>::_updateOp = UpdateOp();
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-void Node<T, UpdateOp, BinaryOp, Allocator>::setValue(const T& value) {
+template<class T, class UpdateOp, class Allocator>
+void Node<T, UpdateOp, Allocator>::setValue(const T& value) {
     _value = value;
     if (!isLeaf()) {
-        _left->~Node<T, UpdateOp, BinaryOp, Allocator>();
-        _right->~Node<T, UpdateOp, BinaryOp, Allocator>();
+        _left->~Node<T, UpdateOp, Allocator>();
+        _right->~Node<T, UpdateOp, Allocator>();
         _allocator.deallocate(_left, 2);
         _left = nullptr;
         _right = nullptr;
     }
 }
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-void Node<T, UpdateOp, BinaryOp, Allocator>::initChildren() {
+template<class T, class UpdateOp, class Allocator>
+void Node<T, UpdateOp, Allocator>::initChildren() {
     auto nodesPtr = _AllocatorTraits::allocate(_allocator, 2);
     _left = nodesPtr;
     _right = nodesPtr + 1;
@@ -70,8 +68,8 @@ void Node<T, UpdateOp, BinaryOp, Allocator>::initChildren() {
     std::construct_at(_right);
 }
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-void Node<T, UpdateOp, BinaryOp, Allocator>::siftDown() {
+template<class T, class UpdateOp, class Allocator>
+void Node<T, UpdateOp, Allocator>::siftDown() {
     if (isLeaf()) {
         initChildren();
         _left->setValue(_value.value());
@@ -87,8 +85,8 @@ void Node<T, UpdateOp, BinaryOp, Allocator>::siftDown() {
     }
 }
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-void Node<T, UpdateOp, BinaryOp, Allocator>::update(const T& updateValue) {
+template<class T, class UpdateOp, class Allocator>
+void Node<T, UpdateOp, Allocator>::update(const T& updateValue) {
     if (!isLeaf()) {
         // _value means delayed update.
         if (_value.has_value()) {
@@ -103,11 +101,11 @@ void Node<T, UpdateOp, BinaryOp, Allocator>::update(const T& updateValue) {
     }
 }
 
-template<class T, class UpdateOp, class BinaryOp, class Allocator>
-Node<T, UpdateOp, BinaryOp, Allocator>::~Node() {
+template<class T, class UpdateOp, class Allocator>
+Node<T, UpdateOp, Allocator>::~Node() {
     if (!isLeaf()) {
-        _left->~Node<T, UpdateOp, BinaryOp, Allocator>();
-        _right->~Node<T, UpdateOp, BinaryOp, Allocator>();
+        _left->~Node<T, UpdateOp, Allocator>();
+        _right->~Node<T, UpdateOp, Allocator>();
         _allocator.deallocate(_left, 2);
     }
 }

@@ -4,7 +4,6 @@
 #include <concepts>
 
 #include <lazy_segment_tree.hpp>
-#include <operations.hpp>
 
 namespace lst {
 
@@ -12,12 +11,15 @@ template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp = std::plus<ValueT>,
           class Allocator = std::allocator<ValueT>>
-using LazyMaxSegmentTree = LazySegmentTree<KeyT,
-                                           ValueT,
-                                           ValValUpdateOp,
-                                           op::ValValMaxGetOp<ValueT>,
-                                           op::ValKeyKeyIgnoringGetOp<ValueT>,
-                                           Allocator>;
+using LazyMaxSegmentTree =
+    LazySegmentTree<
+        KeyT,
+        ValueT,
+        ValValUpdateOp,
+        decltype([](const auto& left, const auto& right) { return std::max(left, right); }),
+        std::identity,
+        Allocator
+    >;
 
 }
 

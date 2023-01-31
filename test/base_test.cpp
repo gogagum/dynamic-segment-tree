@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <lazy_segment_tree.hpp>
-#include <operations.hpp>
 
 using lst::LazySegmentTree;
 
