@@ -8,44 +8,45 @@
 
 namespace dst{
 
-template <class T, class  ValueT>
+template <class T, class  GetValueT>
 concept ValueSegmentCombiner =
-    requires(const T& segComb, const ValueT& left, const ValueT& right) {
-         { segComb(left, right) } -> std::same_as<ValueT>;
+    requires(const T& segComb, const GetValueT& left, const GetValueT& right) {
+         { segComb(left, right) } -> std::same_as<GetValueT>;
     };
 
-template <class T, class ValueT, class KeyT>
+template <class T, class GetValueT, class KeyT>
 concept ValueAndLengthCombiner =
-    requires(const T& segComb, const ValueT& left, const ValueT& right,
+    requires(const T& segComb, const GetValueT& left, const GetValueT& right,
              KeyT leftLength, KeyT rightLength) {
-        { segComb(left, right, leftLength, rightLength) } -> std::same_as<ValueT>;
+        { segComb(left, right, leftLength, rightLength) } -> std::same_as<GetValueT>;
     };
 
-template <class T, class ValueT, class KeyT>
-concept SegmentCombiner = ValueSegmentCombiner<T, ValueT>
-                          || ValueAndLengthCombiner<T, ValueT, KeyT>;
+template <class T, class GetValueT, class KeyT>
+concept SegmentCombiner = ValueSegmentCombiner<T, GetValueT>
+                          || ValueAndLengthCombiner<T, GetValueT, KeyT>;
 
-template <class T, class  ValueT>
+template <class T, class ValueT, class GetValueT>
 concept ValueSegmentInitializer =
     requires(const T& segInit, const ValueT& value) {
-         { segInit(value) } -> std::convertible_to<ValueT>;
+         { segInit(value) } -> std::convertible_to<GetValueT>;
     };
 
-template <class T, class ValueT, class KeyT>
+template <class T, class ValueT, class KeyT, class GetValueT>
 concept ValueAndLengthSegmentInitializer =
     requires(const T& segInit, const ValueT& value, KeyT length) {
-        { segInit(value, length) } -> std::convertible_to<ValueT>;
+        { segInit(value, length) } -> std::convertible_to<GetValueT>;
     };
 
-template <class T, class ValueT, class KeyT>
-concept SegmentInitializer = ValueSegmentInitializer<T, ValueT>
-                          || ValueAndLengthSegmentInitializer<T, ValueT, KeyT>;
+template <class T, class ValueT, class KeyT, class GetValueT>
+concept SegmentInitializer = ValueSegmentInitializer<T, ValueT, GetValueT>
+                          || ValueAndLengthSegmentInitializer<T, ValueT, KeyT, GetValueT>;
 
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator = std::allocator<ValueT>>
 class DynamicSegmentTree{
@@ -54,8 +55,7 @@ private:
 
 public:
     DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value);
-    template <class _UpdateOp = UpdateOp> requires (!std::is_same_v<UpdateOp, void>)
-    void update(KeyT begin, KeyT end, const ValueT& toUpdate);
+    void update(KeyT begin, KeyT end, const ValueT& toUpdate) requires (!std::is_same_v<UpdateOp, void>);
     void set(KeyT begin, KeyT end, const ValueT& toSet);
     ValueT get(KeyT key) const;
     ValueT rangeGet(KeyT begin, KeyT end) const;
@@ -79,48 +79,51 @@ private:
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                   SegmentInitializer, UpdateOp, Allocator>::DynamicSegmentTree(
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                   SegInitializer, UpdateOp, Allocator>::DynamicSegmentTree(
         KeyT begin, KeyT end, const ValueT& value)
     : _rootNode(value), _begin(begin), _end(end) {}
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-template <class _UpdateOp> requires (!std::is_same_v<UpdateOp, void>)
-void DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                        SegmentInitializer, UpdateOp, Allocator>::update(
-        KeyT begin, KeyT end, const ValueT& toUpdate) {
+void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                        SegInitializer, UpdateOp, Allocator>::update(
+        KeyT begin, KeyT end, const ValueT& toUpdate) requires (!std::is_same_v<UpdateOp, void>) {
     _updateImpl(begin, end, _begin, _end, &_rootNode, toUpdate);
 }
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-void DynamicSegmentTree<KeyT, ValueT, SegCombiner, SegmentInitializer,
-                        UpdateOp, Allocator>::set(
+void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                        SegInitializer, UpdateOp, Allocator>::set(
         KeyT begin, KeyT end, const ValueT& toUpdate) {
     _setImpl(begin, end, _begin, _end, &_rootNode, toUpdate);
 }
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                          SegmentInitializer, UpdateOp, Allocator>::get(
+ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                          SegInitializer, UpdateOp, Allocator>::get(
         KeyT key) const {
     if (key >= _end || key < _begin) {
         return ValueT{};
@@ -130,24 +133,26 @@ ValueT DynamicSegmentTree<KeyT, ValueT, SegCombiner,
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                          SegmentInitializer, UpdateOp, Allocator>::rangeGet(
+ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                          SegInitializer, UpdateOp, Allocator>::rangeGet(
         KeyT begin, KeyT end) const {
     return _rangeGetImpl(begin, end, _begin, _end, &_rootNode);
 }
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-void DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                        SegmentInitializer, UpdateOp, Allocator>::_updateImpl(
+void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                        SegInitializer, UpdateOp, Allocator>::_updateImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
         _Node* currNode, const ValueT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
@@ -171,12 +176,13 @@ void DynamicSegmentTree<KeyT, ValueT, SegCombiner,
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-void DynamicSegmentTree<KeyT, ValueT, SegCombiner, SegmentInitializer,
-                        UpdateOp, Allocator>::_setImpl(
+void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                        SegInitializer, UpdateOp, Allocator>::_setImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
         _Node* currNode, const ValueT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
@@ -200,12 +206,13 @@ void DynamicSegmentTree<KeyT, ValueT, SegCombiner, SegmentInitializer,
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                          SegmentInitializer, UpdateOp, Allocator>::_getImpl(
+ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                          SegInitializer, UpdateOp, Allocator>::_getImpl(
         KeyT key, KeyT currBegin, KeyT currEnd,
         _Node* currNode) const {
     if (currNode->isLeaf()) {
@@ -223,13 +230,14 @@ ValueT DynamicSegmentTree<KeyT, ValueT, SegCombiner,
 
 template <std::integral KeyT,
           class ValueT,
-          SegmentCombiner<ValueT, KeyT> SegCombiner,
-          SegmentInitializer<ValueT, KeyT> SegmentInitializer,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
 ValueT
-DynamicSegmentTree<KeyT, ValueT, SegCombiner,
-                   SegmentInitializer, UpdateOp, Allocator>::_rangeGetImpl(
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                   SegInitializer, UpdateOp, Allocator>::_rangeGetImpl(
         KeyT begin, KeyT end, KeyT currBegin,
         KeyT currEnd, _Node* currNode) const {
     if (begin >= currEnd || currBegin >= end) {
@@ -237,7 +245,7 @@ DynamicSegmentTree<KeyT, ValueT, SegCombiner,
         return ValueT{};
     }
     if (end >= currEnd && begin <= currBegin && currNode->isLeaf()) {
-        if constexpr (ValueSegmentInitializer<SegmentInitializer, ValueT>) {
+        if constexpr (ValueSegmentInitializer<SegInitializer, ValueT, GetValueT>) {
             return _segInitializer(currNode->getValue());
         } else {
             return _segInitializer(currNode->getValue(), currEnd - currBegin);

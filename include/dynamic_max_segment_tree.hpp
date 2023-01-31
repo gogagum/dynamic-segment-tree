@@ -15,6 +15,7 @@ using DynamicMaxSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
+        ValueT,
         decltype([](const auto& left, const auto& right) { return std::max(left, right); }),
         std::identity,
         UpdateOp,

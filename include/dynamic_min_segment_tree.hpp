@@ -15,6 +15,7 @@ using DynamicMinSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
+        ValueT,
         decltype([](const auto& left, const auto& right) { return std::min(left, right); }),
         std::identity,
         UpdateOp,

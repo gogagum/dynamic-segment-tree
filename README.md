@@ -54,7 +54,6 @@ your CMakeLists.txt:
 
 TODO list (with no priority):
 
-- Separate `get` result type and `ValueT`
 - Think of different overloads of functions that take value as argument.
 - Do something about default filling value of segment tree constructor.
 - Add benchmarks.
