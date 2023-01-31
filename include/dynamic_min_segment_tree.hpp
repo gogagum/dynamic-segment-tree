@@ -1,16 +1,18 @@
-#ifndef MIN_LAZY_TREE_HPP
-#define MIN_LAZY_TREE_HPP
+#ifndef DYNAMIC_MIN_SEGMENT_TREE_HPP
+#define DYNAMIC_MIN_SEGMENT_TREE_HPP
 
-#include <lazy_segment_tree.hpp>
+#include <concepts>
 
-namespace lst {
+#include <dynamic_segment_tree.hpp>
+
+namespace dst {
 
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp = std::plus<ValueT>,
           class Allocator = std::allocator<ValueT>>
-using LazyMinSegmentTree =
-    LazySegmentTree<
+using DynamicMinSegmentTree =
+    DynamicSegmentTree<
         KeyT,
         ValueT,
         ValValUpdateOp,
@@ -21,4 +23,4 @@ using LazyMinSegmentTree =
 
 }
 
-#endif // MIN_LAZY_TREE_HPP
+#endif // DYNAMIC_MIN_SEGMENT_TREE_HPP

@@ -1,39 +1,39 @@
 #include <gtest/gtest.h>
-#include <lazy_segment_tree.hpp>
+#include <dynamic_segment_tree.hpp>
 
-using lst::LazySegmentTree;
+using dst::DynamicSegmentTree;
 
-TEST(LazySegmentTree, Construct) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, Construct) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
 }
 
-TEST(LazySegmentTree, QueryMiddle) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, QueryMiddle) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(21), 54);
 }
 
-TEST(LazySegmentTree, QueryEnd) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, QueryEnd) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(42), 0);
 }
 
-TEST(LazySegmentTree, QueryAfterEnd) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, QueryAfterEnd) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(73), 0);
 }
 
-TEST(LazySegmentTree, QueryBegin) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, QueryBegin) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(0), 54);
 }
 
-TEST(LazySegmentTree, QueryBeforeBegin) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, QueryBeforeBegin) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(-5), 0);
 }
 
-TEST(LazySegmentTree, OneUpdate) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, OneUpdate) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     tree.update(15, 37, 18);
     EXPECT_EQ(tree.get(5), 54);
     EXPECT_EQ(tree.get(14), 54);
@@ -43,8 +43,8 @@ TEST(LazySegmentTree, OneUpdate) {
     EXPECT_EQ(tree.get(37), 54);
 }
 
-TEST(LazySegmentTree, TwoSameUpdates) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, TwoSameUpdates) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     tree.update(15, 37, 18);
     tree.update(15, 37, 14);
     EXPECT_EQ(tree.get(5), 54);
@@ -55,8 +55,8 @@ TEST(LazySegmentTree, TwoSameUpdates) {
     EXPECT_EQ(tree.get(37), 54);
 }
 
-TEST(LazySegmentTree, TwoIntersectingUpdates) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, TwoIntersectingUpdates) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     tree.update(15, 37, 18);
     tree.update(20, 41, 14);
     EXPECT_EQ(tree.get(5), 54);
@@ -76,8 +76,8 @@ TEST(LazySegmentTree, TwoIntersectingUpdates) {
     EXPECT_EQ(tree.get(42), 0);
 }
 
-TEST(LazySegmentTree, TwoNonIntersectingUpdates) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, TwoNonIntersectingUpdates) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     tree.update(5, 8, 18);
     tree.update(17, 38, 14);
     EXPECT_EQ(tree.get(3), 54);
@@ -93,26 +93,26 @@ TEST(LazySegmentTree, TwoNonIntersectingUpdates) {
     EXPECT_EQ(tree.get(42), 0);
 }
 
-TEST(LazySegmentTree, SimpleRangeGetAll) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, SimpleRangeGetAll) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     auto rangeGetResult = tree.rangeGet(0, 42);
     EXPECT_EQ(rangeGetResult, 54 * 42);
 }
 
-TEST(LazySegmentTree, SimpleRangeGetPart) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, SimpleRangeGetPart) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     auto rangeGetResult = tree.rangeGet(12, 23);
     EXPECT_EQ(rangeGetResult, 54 * (23 - 12));
 }
 
-TEST(LazySegmentTree, SimpleRangeGetMoreThanAll) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, SimpleRangeGetMoreThanAll) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     auto rangeGetResult = tree.rangeGet(-5, 50);
     EXPECT_EQ(rangeGetResult, 54 * 42);
 }
 
-TEST(LazySegmentTree, RangeGetAfterUpdate) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSegmentTree, RangeGetAfterUpdate) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
     tree.update(15, 37, 18);
 
     auto getInsideUpdateRes = tree.rangeGet(17, 30);
@@ -131,32 +131,32 @@ TEST(LazySegmentTree, RangeGetAfterUpdate) {
     EXPECT_EQ(intersectingGet2Res, 54 * (40 - 30) + 18 * (37 - 30));
 }
 
-TEST(LazySegmentTree, LongLongToInt) {
-    auto tree = LazySegmentTree<long long, int>(-100500, 100500, 42);
+TEST(DynamicSegmentTree, LongLongToInt) {
+    auto tree = DynamicSegmentTree<long long, int>(-100500, 100500, 42);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 42);
 }
 
-TEST(LazySegmentTree, IntToLong) {
+TEST(DynamicSegmentTree, IntToLong) {
     auto tree =
-        LazySegmentTree<int, long long>(-100500, 100500, 1234567890098765432);
+        DynamicSegmentTree<int, long long>(-100500, 100500, 1234567890098765432);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 1234567890098765432);
 }
 
-TEST(LazySegmentTree, LongLongToLongLong) {
+TEST(DynamicSegmentTree, LongLongToLongLong) {
     auto tree =
-        LazySegmentTree<long long, long long>(-100500, 100500, 1234567890098765432);
+        DynamicSegmentTree<long long, long long>(-100500, 100500, 1234567890098765432);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 1234567890098765432);
 }
 
-TEST(LazySegmentTree, LongLongToLongLongLadder) {
+TEST(DynamicSegmentTree, LongLongToLongLongLadder) {
     const auto topBorder = 1000000ll;
-    auto tree = LazySegmentTree<long long, long long>(0, topBorder, 0);
+    auto tree = DynamicSegmentTree<long long, long long>(0, topBorder, 0);
 
     tree.update(topBorder - topBorder / 2, topBorder, 1);
     tree.update(topBorder - topBorder / 4, topBorder, 10);
@@ -173,8 +173,8 @@ TEST(LazySegmentTree, LongLongToLongLongLadder) {
     EXPECT_EQ(testVal2, 1111);
 }
 
-TEST(LazySegmentTree, Set) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 21);
+TEST(DynamicSegmentTree, Set) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 21);
     tree.set(0, 37, 73);
     EXPECT_EQ(tree.get(0), 73);
     EXPECT_EQ(tree.get(15), 73);
@@ -182,8 +182,8 @@ TEST(LazySegmentTree, Set) {
     EXPECT_EQ(tree.get(40), 21);
 }
 
-TEST(LazySegmentTree, SetOnTheSameRange) {
-    auto tree = LazySegmentTree<int, int>(0, 42, 21);
+TEST(DynamicSegmentTree, SetOnTheSameRange) {
+    auto tree = DynamicSegmentTree<int, int>(0, 42, 21);
     tree.set(0, 37, 73);
     tree.set(0, 37, 37);
     EXPECT_EQ(tree.get(0), 37);

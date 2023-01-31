@@ -1,12 +1,12 @@
-#ifndef LAZY_SEGMENT_TREE_HPP
-#define LAZY_SEGMENT_TREE_HPP
+#ifndef DYNAMIC_SEGMENT_TREE_HPP
+#define DYNAMIC_SEGMENT_TREE_HPP
 
 #include <concepts>
 #include <functional>
 
 #include <node.hpp>
 
-namespace lst{
+namespace dst{
 
 template <class T, class  ValueT>
 concept ValueSegmentCombiner =
@@ -48,12 +48,12 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner = std::plus<ValueT>,
           SegmentInitializer<ValueT, KeyT> SegInitializer = std::multiplies<>,
           class Allocator = std::allocator<ValueT>>
-class LazySegmentTree{
+class DynamicSegmentTree{
 private:
     using _Node = Node<ValueT, ValValUpdateOp, Allocator>;
 
 public:
-    LazySegmentTree(KeyT start, KeyT end, const ValueT& value);
+    DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value);
     void update(KeyT begin, KeyT end, const ValueT& toUpdate);
     void set(KeyT begin, KeyT end, const ValueT& toSet);
     ValueT get(KeyT key) const;
@@ -82,8 +82,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> SegmentInitializer,
           class Allocator>
-LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                SegmentInitializer, Allocator>::LazySegmentTree(
+DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                   SegmentInitializer, Allocator>::DynamicSegmentTree(
         KeyT begin, KeyT end, const ValueT& value)
     : _rootNode(value), _begin(begin), _end(end) {}
 
@@ -93,8 +93,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-void LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                     EqualSegmentCounter, Allocator>::update(
+void DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                        EqualSegmentCounter, Allocator>::update(
         KeyT begin, KeyT end, const ValueT& toUpdate) {
     _updateImpl(begin, end, _begin, _end, &_rootNode, toUpdate);
 }
@@ -105,8 +105,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-void LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                     EqualSegmentCounter, Allocator>::set(
+void DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                        EqualSegmentCounter, Allocator>::set(
         KeyT begin, KeyT end, const ValueT& toUpdate) {
     _setImpl(begin, end, _begin, _end, &_rootNode, toUpdate);
 }
@@ -117,8 +117,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                       EqualSegmentCounter, Allocator>::get(
+ValueT DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                          EqualSegmentCounter, Allocator>::get(
         KeyT key) const {
     if (key >= _end || key < _begin) {
         return ValueT{};
@@ -132,8 +132,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                       EqualSegmentCounter, Allocator>::rangeGet(
+ValueT DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                          EqualSegmentCounter, Allocator>::rangeGet(
         KeyT begin, KeyT end) const {
     return _rangeGetImpl(begin, end, _begin, _end, &_rootNode);
 }
@@ -144,8 +144,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-void LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                     EqualSegmentCounter, Allocator>::_updateImpl(
+void DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                        EqualSegmentCounter, Allocator>::_updateImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
         _Node* currNode, const ValueT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
@@ -173,8 +173,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-void LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                     EqualSegmentCounter, Allocator>::_setImpl(
+void DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                        EqualSegmentCounter, Allocator>::_setImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
         _Node* currNode, const ValueT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
@@ -202,8 +202,8 @@ template <std::integral KeyT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> EqualSegmentCounter,
           class Allocator>
-ValueT LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                       EqualSegmentCounter, Allocator>::_getImpl(
+ValueT DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                          EqualSegmentCounter, Allocator>::_getImpl(
         KeyT key, KeyT currBegin, KeyT currEnd,
         _Node* currNode) const {
     if (currNode->isLeaf()) {
@@ -226,8 +226,8 @@ template <std::integral KeyT,
           SegmentInitializer<ValueT, KeyT> SegInitializer,
           class Allocator>
 ValueT
-LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
-                SegInitializer, Allocator>::_rangeGetImpl(
+DynamicSegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
+                   SegInitializer, Allocator>::_rangeGetImpl(
         KeyT begin, KeyT end, KeyT currBegin,
         KeyT currEnd, _Node* currNode) const {
     if (begin >= currEnd || currBegin >= end) {
@@ -269,4 +269,4 @@ LazySegmentTree<KeyT, ValueT, ValValUpdateOp, SegCombiner,
 
 }
 
-#endif // LAZY_SEGMENT_TREE_HPP
+#endif // DYNAMIC_SEGMENT_TREE_HPP

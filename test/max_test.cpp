@@ -1,33 +1,33 @@
 #include <gtest/gtest.h>
-#include <lazy_max_segment_tree.hpp>
+#include <dynamic_max_segment_tree.hpp>
 
-using lst::LazyMaxSegmentTree;
+using dst::DynamicMaxSegmentTree;
 
-TEST(LazyMaxSegmentTree, Construct) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 34);
+TEST(DynamicMaxSegmentTree, Construct) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 34);
 }
 
-TEST(LazyMaxSegmentTree, SimpleRangeGet) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 34);
+TEST(DynamicMaxSegmentTree, SimpleRangeGet) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 34);
     EXPECT_EQ(tree.rangeGet(5, 17), 34);
 }
 
-TEST(LazyMaxSegmentTree, RangeGetAfterUpdate) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 34);
+TEST(DynamicMaxSegmentTree, RangeGetAfterUpdate) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 34);
     tree.update(12, 22, 4);
     EXPECT_EQ(tree.rangeGet(5, 17), 34 + 4);
     EXPECT_EQ(tree.rangeGet(12, 18), 34 + 4);
 }
 
-TEST(LazyMaxSegmentTree, RangeGetAfterSet) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 34);
+TEST(DynamicMaxSegmentTree, RangeGetAfterSet) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 34);
     tree.set(12, 22, 4);
     EXPECT_EQ(tree.rangeGet(13, 20), 4);
     EXPECT_EQ(tree.rangeGet(2, 35), 34);
 }
 
-TEST(LazyMaxSegmentTree, LadderUpRight) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 0);
+TEST(DynamicMaxSegmentTree, LadderUpRight) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 0);
     tree.set(41, 42, 10000000);
     tree.set(40, 41, 1000000);
     tree.set(39, 40, 100000);
@@ -44,8 +44,8 @@ TEST(LazyMaxSegmentTree, LadderUpRight) {
     EXPECT_EQ(tree.rangeGet(0, 39), 10000);
 }
 
-TEST(LazyMaxSegmentTree, LadderUpLeft) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 0);
+TEST(DynamicMaxSegmentTree, LadderUpLeft) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 0);
     tree.set(0, 1, 10000000);
     tree.set(1, 2, 1000000);
     tree.set(2, 3, 100000);
@@ -62,8 +62,8 @@ TEST(LazyMaxSegmentTree, LadderUpLeft) {
     EXPECT_EQ(tree.rangeGet(3, 42), 10000);
 }
 
-TEST(LazyMaxSegmentTree, LadderDownRight) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 0);
+TEST(DynamicMaxSegmentTree, LadderDownRight) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 0);
     tree.set(41, 42, -10000000);
     tree.set(40, 41, -1000000);
     tree.set(39, 40, -100000);
@@ -80,8 +80,8 @@ TEST(LazyMaxSegmentTree, LadderDownRight) {
     EXPECT_EQ(tree.rangeGet(0, 39),  0);
 }
 
-TEST(LazyMaxSegmentTree, LadderDownLeft) {
-    auto tree = LazyMaxSegmentTree<int, int>(0, 42, 0);
+TEST(DynamicMaxSegmentTree, LadderDownLeft) {
+    auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 0);
     tree.set(0, 1, -10000000);
     tree.set(1, 2, -1000000);
     tree.set(2, 3, -100000);

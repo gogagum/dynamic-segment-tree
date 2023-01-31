@@ -1,18 +1,18 @@
-#ifndef MAX_LAZY_SEGMENT_TREE_HPP
-#define MAX_LAZY_SEGMENT_TREE_HPP
+#ifndef DYNAMIC_MAX_SEGMENT_TREE_HPP
+#define DYNAMIC_MAX_SEGMENT_TREE_HPP
 
 #include <concepts>
 
-#include <lazy_segment_tree.hpp>
+#include <dynamic_segment_tree.hpp>
 
-namespace lst {
+namespace dst {
 
 template <std::integral KeyT,
           class ValueT,
           class ValValUpdateOp = std::plus<ValueT>,
           class Allocator = std::allocator<ValueT>>
-using LazyMaxSegmentTree =
-    LazySegmentTree<
+using DynamicMaxSegmentTree =
+    DynamicSegmentTree<
         KeyT,
         ValueT,
         ValValUpdateOp,
@@ -23,4 +23,4 @@ using LazyMaxSegmentTree =
 
 }
 
-#endif // MAX_LAZY_SEGMENT_TREE_HPP
+#endif // DYNAMIC_MAX_SEGMENT_TREE_HPP
