@@ -1,1 +1,1 @@
-# lazy-segment-tree
+# dynamic-segment-tree
