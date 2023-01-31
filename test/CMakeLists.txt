@@ -17,7 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(segment_tree_test
-    base_test.cpp
+    sum_test.cpp
     min_test.cpp
     max_test.cpp)
 

@@ -1,39 +1,42 @@
 #include <gtest/gtest.h>
-#include <dynamic_segment_tree.hpp>
+#include <dynamic_sum_segment_tree.hpp>
 
-using dst::DynamicSegmentTree;
+#include <random>
+#include "reference/sum_seg_tree_reference.hpp"
 
-TEST(DynamicSegmentTree, Construct) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+using dst::DynamicSumSegmentTree;
+
+TEST(DynamicSumSegmentTree, Construct) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
 }
 
-TEST(DynamicSegmentTree, QueryMiddle) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, QueryMiddle) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(21), 54);
 }
 
-TEST(DynamicSegmentTree, QueryEnd) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, QueryEnd) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(42), 0);
 }
 
-TEST(DynamicSegmentTree, QueryAfterEnd) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, QueryAfterEnd) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(73), 0);
 }
 
-TEST(DynamicSegmentTree, QueryBegin) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, QueryBegin) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(0), 54);
 }
 
-TEST(DynamicSegmentTree, QueryBeforeBegin) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, QueryBeforeBegin) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     EXPECT_EQ(tree.get(-5), 0);
 }
 
-TEST(DynamicSegmentTree, OneUpdate) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, OneUpdate) {
+    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
     EXPECT_EQ(tree.get(5), 54);
     EXPECT_EQ(tree.get(14), 54);
@@ -43,8 +46,8 @@ TEST(DynamicSegmentTree, OneUpdate) {
     EXPECT_EQ(tree.get(37), 54);
 }
 
-TEST(DynamicSegmentTree, TwoSameUpdates) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, TwoSameUpdates) {
+    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
     tree.update(15, 37, 14);
     EXPECT_EQ(tree.get(5), 54);
@@ -55,8 +58,8 @@ TEST(DynamicSegmentTree, TwoSameUpdates) {
     EXPECT_EQ(tree.get(37), 54);
 }
 
-TEST(DynamicSegmentTree, TwoIntersectingUpdates) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, TwoIntersectingUpdates) {
+    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
     tree.update(20, 41, 14);
     EXPECT_EQ(tree.get(5), 54);
@@ -76,8 +79,8 @@ TEST(DynamicSegmentTree, TwoIntersectingUpdates) {
     EXPECT_EQ(tree.get(42), 0);
 }
 
-TEST(DynamicSegmentTree, TwoNonIntersectingUpdates) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, TwoNonIntersectingUpdates) {
+    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
     tree.update(5, 8, 18);
     tree.update(17, 38, 14);
     EXPECT_EQ(tree.get(3), 54);
@@ -93,26 +96,26 @@ TEST(DynamicSegmentTree, TwoNonIntersectingUpdates) {
     EXPECT_EQ(tree.get(42), 0);
 }
 
-TEST(DynamicSegmentTree, SimpleRangeGetAll) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, SimpleRangeGetAll) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     auto rangeGetResult = tree.rangeGet(0, 42);
     EXPECT_EQ(rangeGetResult, 54 * 42);
 }
 
-TEST(DynamicSegmentTree, SimpleRangeGetPart) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, SimpleRangeGetPart) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     auto rangeGetResult = tree.rangeGet(12, 23);
     EXPECT_EQ(rangeGetResult, 54 * (23 - 12));
 }
 
-TEST(DynamicSegmentTree, SimpleRangeGetMoreThanAll) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, SimpleRangeGetMoreThanAll) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
     auto rangeGetResult = tree.rangeGet(-5, 50);
     EXPECT_EQ(rangeGetResult, 54 * 42);
 }
 
-TEST(DynamicSegmentTree, RangeGetAfterUpdate) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 54);
+TEST(DynamicSumSegmentTree, RangeGetAfterUpdate) {
+    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
 
     auto getInsideUpdateRes = tree.rangeGet(17, 30);
@@ -131,32 +134,32 @@ TEST(DynamicSegmentTree, RangeGetAfterUpdate) {
     EXPECT_EQ(intersectingGet2Res, 54 * (40 - 30) + 18 * (37 - 30));
 }
 
-TEST(DynamicSegmentTree, LongLongToInt) {
-    auto tree = DynamicSegmentTree<long long, int>(-100500, 100500, 42);
+TEST(DynamicSumSegmentTree, LongLongToInt) {
+    auto tree = DynamicSumSegmentTree<long long, int>(-100500, 100500, 42);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 42);
 }
 
-TEST(DynamicSegmentTree, IntToLong) {
+TEST(DynamicSumSegmentTree, IntToLong) {
     auto tree =
-        DynamicSegmentTree<int, long long>(-100500, 100500, 1234567890098765432);
+        DynamicSumSegmentTree<int, long long>(-100500, 100500, 1234567890098765432);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 1234567890098765432);
 }
 
-TEST(DynamicSegmentTree, LongLongToLongLong) {
+TEST(DynamicSumSegmentTree, LongLongToLongLong) {
     auto tree =
-        DynamicSegmentTree<long long, long long>(-100500, 100500, 1234567890098765432);
+        DynamicSumSegmentTree<long long, long long>(-100500, 100500, 1234567890098765432);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 1234567890098765432);
 }
 
-TEST(DynamicSegmentTree, LongLongToLongLongLadder) {
+TEST(DynamicSumSegmentTree, LongLongToLongLongLadder) {
     const auto topBorder = 1000000ll;
-    auto tree = DynamicSegmentTree<long long, long long>(0, topBorder, 0);
+    auto tree = DynamicSumSegmentTree<long long, long long, std::plus<long long>>(0, topBorder, 0);
 
     tree.update(topBorder - topBorder / 2, topBorder, 1);
     tree.update(topBorder - topBorder / 4, topBorder, 10);
@@ -173,8 +176,8 @@ TEST(DynamicSegmentTree, LongLongToLongLongLadder) {
     EXPECT_EQ(testVal2, 1111);
 }
 
-TEST(DynamicSegmentTree, Set) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 21);
+TEST(DynamicSumSegmentTree, Set) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 21);
     tree.set(0, 37, 73);
     EXPECT_EQ(tree.get(0), 73);
     EXPECT_EQ(tree.get(15), 73);
@@ -182,14 +185,37 @@ TEST(DynamicSegmentTree, Set) {
     EXPECT_EQ(tree.get(40), 21);
 }
 
-TEST(DynamicSegmentTree, SetOnTheSameRange) {
-    auto tree = DynamicSegmentTree<int, int>(0, 42, 21);
+TEST(DynamicSumSegmentTree, SetOnTheSameRange) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 42, 21);
     tree.set(0, 37, 73);
     tree.set(0, 37, 37);
     EXPECT_EQ(tree.get(0), 37);
     EXPECT_EQ(tree.get(15), 37);
     EXPECT_EQ(tree.get(37), 21);
     EXPECT_EQ(tree.get(40), 21);
+}
+
+TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
+    auto tree = DynamicSumSegmentTree<int, int>(0, 1000, 0);
+    auto reference = SumSegTreeReference<int, int>(0, 1000, 0);
+
+    std::mt19937 generator(42);
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+        int setVal = generator() % 1000; // [0..100)
+        tree.set(rngStart, rngStart + rngLen, setVal);
+        reference.set(rngStart, rngStart + rngLen, setVal);
+    }
+
+    for (std::size_t i = 0; i < 50; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+        auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
+        auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
+        EXPECT_EQ(treeRes, refRes);
+    }
 }
 
 

@@ -9,15 +9,15 @@ namespace dst {
 
 template <std::integral KeyT,
           class ValueT,
-          class ValValUpdateOp = std::plus<ValueT>,
+          class UpdateOp = void,
           class Allocator = std::allocator<ValueT>>
 using DynamicMaxSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
-        ValValUpdateOp,
         decltype([](const auto& left, const auto& right) { return std::max(left, right); }),
         std::identity,
+        UpdateOp,
         Allocator
     >;
 
