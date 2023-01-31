@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include <dynamic_segment_tree.hpp>
 
+#include <random>
+#include "reference/sum_seg_tree_reference.hpp"
+
 using dst::DynamicSegmentTree;
 
 TEST(DynamicSegmentTree, Construct) {
@@ -190,6 +193,29 @@ TEST(DynamicSegmentTree, SetOnTheSameRange) {
     EXPECT_EQ(tree.get(15), 37);
     EXPECT_EQ(tree.get(37), 21);
     EXPECT_EQ(tree.get(40), 21);
+}
+
+TEST(DynamicSegmentTree, FuzzTestSetRangeGet) {
+    auto tree = DynamicSegmentTree<int, int>(0, 1000, 0);
+    auto reference = SumSegTreeReference<int, int>(0, 1000, 0);
+
+    std::mt19937 generator(42);
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+        int setVal = generator() % 1000; // [0..100)
+        tree.set(rngStart, rngStart + rngLen, setVal);
+        reference.set(rngStart, rngStart + rngLen, setVal);
+    }
+
+    for (std::size_t i = 0; i < 50; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+        auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
+        auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
+        EXPECT_EQ(treeRes, refRes);
+    }
 }
 
 
