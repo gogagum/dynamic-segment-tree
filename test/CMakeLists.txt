@@ -1,4 +1,4 @@
-project(lazy-segment-tree-tests LANGUAGES CXX)
+project(dynamic-segment-tree-tests LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -23,7 +23,7 @@ add_executable(segment_tree_test
 
 enable_testing()
 
-target_link_libraries(segment_tree_test PRIVATE gtest_main lazy-segment-tree)
+target_link_libraries(segment_tree_test PRIVATE gtest_main dynamic-segment-tree)
 
 include(GoogleTest)
 gtest_discover_tests(segment_tree_test)

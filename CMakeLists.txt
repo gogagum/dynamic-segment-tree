@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(lazy-segment-tree LANGUAGES CXX)
+project(dynamic-segment-tree LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -8,14 +8,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-add_library(${PROJECT_NAME} STATIC)
+add_library(${PROJECT_NAME} STATIC src/dynamic_segment_tree.cpp)
 
-target_sources(${PROJECT_NAME}
-    PRIVATE
-    src/lazy_segment_tree.cpp
-)
+target_sources(${PROJECT_NAME} PRIVATE)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -30,10 +27,9 @@ target_include_directories(${PROJECT_NAME}
 
 # without it public headers won't get installed
 set(public_headers
-    include/lazy_segmentation_tree.hpp
-    include/min_lazy_segment_tree.hpp
-    include/max_lazy_segment_tree.hpp
-    include/operations.hpp
+    include/dynamic_segment_tree.hpp
+    include/dynamic_max_segment_tree.hpp
+    include/dynamic_min_segment_tree.hpp
 )
 # note that ${public_headers} has to be in quotes
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
