@@ -46,15 +46,15 @@ template <std::integral KeyT,
           class ValueT,
           SegmentCombiner<ValueT, KeyT> SegCombiner,
           SegmentInitializer<ValueT, KeyT> SegInitializer,
-          class ValValUpdateOp,
+          class UpdateOp,
           class Allocator = std::allocator<ValueT>>
 class DynamicSegmentTree{
 private:
-    using _Node = Node<ValueT, ValValUpdateOp, Allocator>;
+    using _Node = Node<ValueT, UpdateOp, Allocator>;
 
 public:
     DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value);
-    template <class _UpdateOp = ValValUpdateOp> requires (!std::is_same_v<ValValUpdateOp, void>)
+    template <class _UpdateOp = UpdateOp> requires (!std::is_same_v<UpdateOp, void>)
     void update(KeyT begin, KeyT end, const ValueT& toUpdate);
     void set(KeyT begin, KeyT end, const ValueT& toSet);
     ValueT get(KeyT key) const;
@@ -267,7 +267,6 @@ DynamicSegmentTree<KeyT, ValueT, SegCombiner,
         return _segCombiner(lVal, rVal);
     }
 }
-
 
 }
 
