@@ -27,8 +27,8 @@ public:
     void setUpdateValue(const T& value);
     void setNullValue()           { _value = std::nullopt; }
     void initChildren();
-    _Type* getLeft() const    { return _left; }
-    _Type* getRight() const   { return _right; }
+    _Type* getLeft() const        { return _left; }
+    _Type* getRight() const       { return _right; }
     ~Node();
 
 private:
