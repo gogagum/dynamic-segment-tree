@@ -38,6 +38,16 @@ template <class T, class ValueT, class KeyT, class GetValueT>
 concept SegmentInitializer = ValueSegmentInitializer<T, ValueT, GetValueT>
                           || ValueAndLengthSegmentInitializer<T, ValueT, KeyT, GetValueT>;
 
+template <class T, class ValueT>
+concept OneArgUpdateOp = requires(const T& op, const ValueT& val) {
+        { op(val) } -> std::convertible_to<ValueT>;
+    };
+
+template <class T, class ValueT, class UpdateArgT>
+concept TwoArgsUpdateOp = requires(const T& op, const ValueT& val, const UpdateArgT& updateArg) {
+        { op(val, updateArg) } -> std::convertible_to<ValueT>;
+    };
+
 }
 
 #endif // CONCEPTS_HPP

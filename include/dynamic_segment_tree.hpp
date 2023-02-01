@@ -9,6 +9,8 @@
 
 namespace dst{
 
+namespace mplimpl{
+
 template <class ValueT, class UpdateOp>
 struct DefaultUpdateArg {
     using Type = ValueT;
@@ -22,28 +24,59 @@ struct DefaultUpdateArg<ValueT, void> {
 template <class ValueT, class UpdateOp>
 using DefaultUpdateArgT = typename DefaultUpdateArg<ValueT, UpdateOp>::Type;
 
+template <class ValueT, class UpdateOp, class UpdateArg>
+struct NodeUpdateArg;
+
+template <class ValueT>
+struct NodeUpdateArg<ValueT, void, void> {
+    using Type = void;
+};
+
+template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp>
+struct NodeUpdateArg<ValueT, UpdateOp, void> {
+    using Type = bool;
+};
+
+
+template <class ValueT, class UpdateArgT, conc::TwoArgsUpdateOp<ValueT, UpdateArgT> UpdateOp>
+struct NodeUpdateArg<ValueT, UpdateOp, UpdateArgT> {
+    using Type = std::optional<UpdateArgT>;
+};
+
+template <class ValueT, class UpdateOpT, class UpdateArgT>
+using NodeUpdateArgT = typename NodeUpdateArg<ValueT, UpdateOpT, UpdateArgT>::Type;
+
+}
+
 template <std::integral KeyT,
           class ValueT,
           class GetValueT,
           conc::SegmentCombiner<GetValueT, KeyT> SegCombiner,
           conc::SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp = void,
-          class UpdateArgT = DefaultUpdateArgT<UpdateOp, ValueT>,
+          class UpdateArgT = mplimpl::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 class DynamicSegmentTree {
 private:
-    using _Node = Node<ValueT, UpdateArgT, Allocator>;
+    using _Node = Node<
+        ValueT,
+        mplimpl::NodeUpdateArgT<ValueT, UpdateOp, UpdateArgT>,
+        Allocator>;
 
 public:
     DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value = ValueT{});
-    void update(KeyT begin, KeyT end, const auto& toUpdate);
+    void update(KeyT begin, KeyT end, const auto& toUpdate) requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>;
+    void update(KeyT begin, KeyT end) requires conc::OneArgUpdateOp<UpdateOp, ValueT>;
     void set(KeyT begin, KeyT end, const ValueT& toSet);
     ValueT get(KeyT key) const;
     ValueT rangeGet(KeyT begin, KeyT end) const;
 private:
     void _updateImpl(
             KeyT start, KeyT end, KeyT currStart, KeyT currEnd, _Node* currNode,
-            const UpdateArgT* toUpdate) requires (!std::is_same_v<UpdateArgT, void>);
+            const UpdateArgT* toUpdate) requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>;
+    void _updateImpl(
+            KeyT start, KeyT end, KeyT currStart,
+            KeyT currEnd, _Node* currNode) requires conc::OneArgUpdateOp<UpdateOp, ValueT>;
     void _setImpl(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
                      _Node* currNode, const ValueT& toUpdate);
     ValueT _getImpl(KeyT key, KeyT currBegin, KeyT currEnd,
@@ -83,10 +116,25 @@ template <std::integral KeyT,
           class Allocator>
 void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
                         SegInitializer, UpdateOp, UpdateArgT, Allocator>::update(
-        KeyT begin, KeyT end, const auto& toUpdate) {
+        KeyT begin, KeyT end, const auto& toUpdate) requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT> {
     _updateImpl(begin, end, _begin, _end, &_rootNode,
                 &static_cast<const UpdateArgT&>(toUpdate));
 }
+
+template <std::integral KeyT,
+          class ValueT,
+          class GetValueT,
+          conc::SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          conc::SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
+          class UpdateOp,
+          class UpdateArgT,
+          class Allocator>
+void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                        SegInitializer, UpdateOp, UpdateArgT, Allocator>::update(
+        KeyT begin, KeyT end) requires conc::OneArgUpdateOp<UpdateOp, ValueT> {
+    _updateImpl(begin, end, _begin, _end, &_rootNode);
+}
+
 
 template <std::integral KeyT,
           class ValueT,
@@ -144,7 +192,7 @@ template <std::integral KeyT,
 void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
                         SegInitializer, UpdateOp, UpdateArgT, Allocator>::_updateImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-        _Node* currNode, const UpdateArgT* toUpdate) requires (!std::is_same_v<UpdateArgT, void>) {
+        _Node* currNode, const UpdateArgT* toUpdate) requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT> {
     if (begin >= currEnd || currBegin >= end) {
         return;
     }
@@ -166,6 +214,42 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
     if (currEnd >= m + 1) {
         auto rightNodePtr = currNode->getRight();
         _updateImpl(begin, end, m, currEnd, rightNodePtr, toUpdate);
+    }
+}
+
+template <std::integral KeyT,
+          class ValueT,
+          class GetValueT,
+          conc::SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          conc::SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
+          class UpdateOp,
+          class UpdateArgT,
+          class Allocator>
+void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                        SegInitializer, UpdateOp, UpdateArgT, Allocator>::_updateImpl(
+        KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
+        _Node* currNode) requires conc::OneArgUpdateOp<UpdateOp, ValueT> {
+    if (begin >= currEnd || currBegin >= end) {
+        return;
+    }
+    if (end >= currEnd && begin <= currBegin) {
+        currNode->update(UpdateOp());
+        return;
+    }
+    const auto m = (currBegin + currEnd) / 2;
+    if (currNode->isLeaf()) {
+        currNode->initChildren();
+    }
+    if constexpr (!std::is_same_v<UpdateOp, void>) {
+        currNode->siftOptUpdate(UpdateOp());
+    }
+    if (m >= currBegin + 1) {
+        auto leftNodePtr = currNode->getLeft();
+        _updateImpl(begin, end, currBegin, m, leftNodePtr);
+    }
+    if (currEnd >= m + 1) {
+        auto rightNodePtr = currNode->getRight();
+        _updateImpl(begin, end, m, currEnd, rightNodePtr);
     }
 }
 

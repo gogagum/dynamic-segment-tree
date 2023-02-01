@@ -11,7 +11,7 @@ template <std::integral KeyT,
           class ValueT,
           class SumT = ValueT,
           class UpdateOp = void,
-          class UpdateArgT = DefaultUpdateArgT<ValueT, UpdateOp>,
+          class UpdateArgT = mplimpl::DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicSumSegmentTree =
     DynamicSegmentTree<
