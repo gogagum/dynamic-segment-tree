@@ -55,7 +55,6 @@ your CMakeLists.txt:
 TODO list (with no priority):
 
 - Think of different overloads of functions that take value as argument.
-- Do something about default filling value of segment tree constructor.
 - Add benchmarks.
 - Custom allocators checks.
 - Support non-default_constructible functors.

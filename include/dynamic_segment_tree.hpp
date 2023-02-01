@@ -35,7 +35,7 @@ private:
     using _Node = Node<ValueT, UpdateArgT, Allocator>;
 
 public:
-    DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value);
+    DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value = ValueT{});
     void update(KeyT begin, KeyT end, const auto& toUpdate);
     void set(KeyT begin, KeyT end, const ValueT& toSet);
     ValueT get(KeyT key) const;
