@@ -32,7 +32,7 @@ template <std::integral KeyT,
           class Allocator = std::allocator<ValueT>>
 class DynamicSegmentTree{
 private:
-    using _Node = Node<ValueT, Allocator>;
+    using _Node = Node<ValueT, UpdateArgT, Allocator>;
 
 public:
     DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value);
@@ -290,10 +290,10 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
         if constexpr (std::is_same_v<UpdateOp, void>) {
             assert(!node->hasValue() && "Non leaf node can not have value while there are no update operations.");
         } else {
-            if (node->hasValue()) {
-                _updateNode(node->getLeft(), node->getValue());
-                _updateNode(node->getRight(), node->getValue());
-                node->setNullValue();
+            if (node->hasUpdateValue()) {
+                _updateNode(node->getLeft(), node->getUpdateValue());
+                _updateNode(node->getRight(), node->getUpdateValue());
+                node->setNullUpdateValue();
             }
         }
     }
@@ -313,10 +313,9 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
                    SegInitializer, UpdateOp, UpdateArgT, Allocator>::_updateNode(
         _Node* node, const _UpdateArgT& updateValue) const {
     if (!node->isLeaf()) {
-        // _value means delayed update.
-        if (node->hasValue()) {
-            _updateNode(node->getLeft(), node->getValue());  // update left with old update
-            _updateNode(node->getRight(), node->getValue()); // update right with old update
+        if (node->hasUpdateValue()) {
+            _updateNode(node->getLeft(), node->getUpdateValue());  // update left with old update
+            _updateNode(node->getRight(), node->getUpdateValue()); // update right with old update
         }
         // _value continues to have delayed update meaning.
         node->setUpdateValue(updateValue);
