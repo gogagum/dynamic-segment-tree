@@ -70,6 +70,7 @@ private:
                          KeyT currBegin, KeyT currEnd,
                          _Node* currNode) const;
     void _siftNodeDown(_Node* node) const;
+    void _updateNode(_Node* node, const ValueT& updateValue) const requires (!std::is_same_v<UpdateOp, void>);
 private:
     const SegCombiner _segCombiner{};
     const SegInitializer _segInitializer{};
@@ -160,7 +161,7 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
         return;
     }
     if (end >= currEnd && begin <= currBegin) {
-        currNode->update(UpdateOp(), toUpdate);
+        _updateNode(currNode, toUpdate);
         return;
     }
     const auto m = (currBegin + currEnd) / 2;
@@ -295,12 +296,37 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
             assert(!node->hasValue() && "Non leaf node can not have value while there are no update operations.");
         } else {
             if (node->hasValue()) {
-                const auto updateOp = UpdateOp();
-                node->getLeft()->update(updateOp, node->getValue());
-                node->getRight()->update(updateOp, node->getValue());
+                _updateNode(node->getLeft(), node->getValue());
+                _updateNode(node->getRight(), node->getValue());
                 node->setNullValue();
             }
         }
+    }
+}
+
+template <std::integral KeyT,
+          class ValueT,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
+          class UpdateOp,
+          class Allocator>
+void
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                   SegInitializer, UpdateOp, Allocator>::_updateNode(
+        _Node* node, const ValueT& updateValue) const requires (!std::is_same_v<UpdateOp, void>) {
+    if (!node->isLeaf()) {
+        // _value means delayed update.
+        if (node->hasValue()) {
+            _updateNode(node->getLeft(), node->getValue());  // update left with old update
+            _updateNode(node->getRight(), node->getValue()); // update right with old update
+        }
+        // _value continues to have delayed update meaning.
+        node->setUpdateValue(updateValue);
+    } else { // isLeaf()
+        UpdateOp updateOp;
+        assert(node->hasValue() && "Leaf must have a value.");
+        node->setValue(updateOp(node->getValue(), updateValue));
     }
 }
 
