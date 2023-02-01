@@ -51,7 +51,7 @@ template <std::integral KeyT,
           class Allocator = std::allocator<ValueT>>
 class DynamicSegmentTree{
 private:
-    using _Node = Node<ValueT, UpdateOp, Allocator>;
+    using _Node = Node<ValueT, Allocator>;
 
 public:
     DynamicSegmentTree(KeyT start, KeyT end, const ValueT& value);
@@ -61,7 +61,7 @@ public:
     ValueT rangeGet(KeyT begin, KeyT end) const;
 private:
     void _updateImpl(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
-                     _Node* currNode, const ValueT& toUpdate);
+                     _Node* currNode, const ValueT& toUpdate) requires (!std::is_same_v<UpdateOp, void>);
     void _setImpl(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
                      _Node* currNode, const ValueT& toUpdate);
     ValueT _getImpl(KeyT key, KeyT currBegin, KeyT currEnd,
@@ -69,6 +69,7 @@ private:
     ValueT _rangeGetImpl(KeyT begin, KeyT end,
                          KeyT currBegin, KeyT currEnd,
                          _Node* currNode) const;
+    void _siftNodeDown(_Node* node) const;
 private:
     const SegCombiner _segCombiner{};
     const SegInitializer _segInitializer{};
@@ -122,9 +123,9 @@ template <std::integral KeyT,
           SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
           class UpdateOp,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
-                          SegInitializer, UpdateOp, Allocator>::get(
-        KeyT key) const {
+ValueT
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                   SegInitializer, UpdateOp, Allocator>::get(KeyT key) const {
     if (key >= _end || key < _begin) {
         return ValueT{};
     }
@@ -154,16 +155,16 @@ template <std::integral KeyT,
 void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
                         SegInitializer, UpdateOp, Allocator>::_updateImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-        _Node* currNode, const ValueT& toUpdate) {
+        _Node* currNode, const ValueT& toUpdate) requires (!std::is_same_v<UpdateOp, void>) {
     if (begin >= currEnd || currBegin >= end) {
         return;
     }
     if (end >= currEnd && begin <= currBegin) {
-        currNode->update(toUpdate);
+        currNode->update(UpdateOp(), toUpdate);
         return;
     }
     const auto m = (currBegin + currEnd) / 2;
-    currNode->siftDown();
+    _siftNodeDown(currNode);
     if (m >= currBegin + 1) {
         auto leftNodePtr = currNode->getLeft();
         _updateImpl(begin, end, currBegin, m, leftNodePtr, toUpdate);
@@ -193,7 +194,7 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
         return;
     }
     const auto m = (currBegin + currEnd) / 2;
-    currNode->siftDown();
+    _siftNodeDown(currNode);
     if (m >= currBegin + 1) {
         auto leftNodePtr = currNode->getLeft();
         _setImpl(begin, end, currBegin, m, leftNodePtr, toUpdate);
@@ -218,7 +219,7 @@ ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
     if (currNode->isLeaf()) {
         return currNode->getValue();
     }
-    currNode->siftDown();
+    _siftNodeDown(currNode);
     if (auto m = (currBegin + currEnd) / 2; key >= m) {
         _Node* visitedNode = currNode->getRight();
         return _getImpl(key, m, currEnd, visitedNode);
@@ -251,7 +252,7 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
             return _segInitializer(currNode->getValue(), currEnd - currBegin);
         }
     }
-    currNode->siftDown();
+    _siftNodeDown(currNode);
     const auto m = (currBegin + currEnd) / 2;
 
     _Node* rightNodePtr = currNode->getRight();
@@ -273,6 +274,33 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
         return _segCombiner(lVal, rVal, leftLength, rightLength);
     } else if constexpr (ValueSegmentCombiner<SegCombiner, ValueT>) {
         return _segCombiner(lVal, rVal);
+    }
+}
+
+template <std::integral KeyT,
+          class ValueT,
+          class GetValueT,
+          SegmentCombiner<GetValueT, KeyT> SegCombiner,
+          SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
+          class UpdateOp,
+          class Allocator>
+void
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner,
+                   SegInitializer, UpdateOp, Allocator>::_siftNodeDown(
+        _Node* node) const {
+    if (node->isLeaf()) {
+        node->initChildren();
+    } else {
+        if constexpr (std::is_same_v<UpdateOp, void>) {
+            assert(!node->hasValue() && "Non leaf node can not have value while there are no update operations.");
+        } else {
+            if (node->hasValue()) {
+                const auto updateOp = UpdateOp();
+                node->getLeft()->update(updateOp, node->getValue());
+                node->getRight()->update(updateOp, node->getValue());
+                node->setNullValue();
+            }
+        }
     }
 }
 
