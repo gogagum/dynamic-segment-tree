@@ -10,6 +10,7 @@ namespace dst {
 template <std::integral KeyT,
           class ValueT,
           class UpdateOp = void,
+          class UpdateArgT = DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicMinSegmentTree =
     DynamicSegmentTree<
@@ -19,6 +20,7 @@ using DynamicMinSegmentTree =
         decltype([](const auto& left, const auto& right) { return std::min(left, right); }),
         std::identity,
         UpdateOp,
+        UpdateArgT,
         Allocator
     >;
 

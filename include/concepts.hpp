@@ -38,7 +38,6 @@ template <class T, class ValueT, class KeyT, class GetValueT>
 concept SegmentInitializer = ValueSegmentInitializer<T, ValueT, GetValueT>
                           || ValueAndLengthSegmentInitializer<T, ValueT, KeyT, GetValueT>;
 
-
 }
 
 #endif // CONCEPTS_HPP

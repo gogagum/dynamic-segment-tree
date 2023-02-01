@@ -11,6 +11,7 @@ template <std::integral KeyT,
           class ValueT,
           class SumT = ValueT,
           class UpdateOp = void,
+          class UpdateArgT = DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicSumSegmentTree =
     DynamicSegmentTree<
@@ -20,6 +21,7 @@ using DynamicSumSegmentTree =
         std::plus<ValueT>,
         std::multiplies<>,
         UpdateOp,
+        UpdateArgT,
         Allocator
     >;
 
