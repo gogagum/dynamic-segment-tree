@@ -61,6 +61,37 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
     }
 }
 
+TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
+    auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
+    auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+
+    const auto updateOp = [](int num) { return -num; };
+    std::mt19937 generator(54);
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+
+        int operationChoise = generator() % 2;
+
+        if (operationChoise) {
+            int setVal = generator() % 1000; // [0..1000)
+            tree.set(rngStart, rngStart + rngLen, setVal);
+            reference.set(rngStart, rngStart + rngLen, setVal);
+        } else {
+            tree.update(rngStart, rngStart + rngLen);
+            reference.update(rngStart, rngStart + rngLen, updateOp);
+        }
+    }
+
+    for (std::size_t i = 0; i < 50; ++i) {
+        int idx = generator() % 100; // [0..1000)
+        auto treeRes = tree.get(idx);
+        auto refRes = reference.get(idx);
+        EXPECT_EQ(treeRes, refRes);
+    }
+}
+
 TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
     auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
