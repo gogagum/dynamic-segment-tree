@@ -48,6 +48,9 @@ concept TwoArgsUpdateOp = requires(const T& op, const ValueT& val, const UpdateA
         { op(val, updateArg) } -> std::convertible_to<ValueT>;
     };
 
+template <class T,  class ValueT, class UpdateArgT>
+concept UpdateOp = OneArgUpdateOp<T, ValueT> || TwoArgsUpdateOp<T, ValueT, UpdateArgT>;
+
 }
 
 #endif // CONCEPTS_HPP

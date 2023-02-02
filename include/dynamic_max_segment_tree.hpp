@@ -11,15 +11,15 @@ template <std::integral KeyT,
           class ValueT,
           class GetValueT = ValueT,
           class UpdateOp = void,
-          class UpdateArgT = mplimpl::DefaultUpdateArgT<ValueT, UpdateOp>,
+          class UpdateArgT = impl::DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicMaxSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
         GetValueT,
-        decltype([](const auto& left, const auto& right) { return std::max(left, right); }),
-        std::identity,
+        decltype([](const GetValueT& left, const GetValueT& right) { return std::max(left, right); }),
+        decltype([](const ValueT& val) { return static_cast<GetValueT>(val); }),
         UpdateOp,
         UpdateArgT,
         Allocator

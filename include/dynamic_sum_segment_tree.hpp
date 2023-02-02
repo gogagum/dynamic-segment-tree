@@ -11,15 +11,15 @@ template <std::integral KeyT,
           class ValueT,
           class SumT = ValueT,
           class UpdateOp = void,
-          class UpdateArgT = mplimpl::DefaultUpdateArgT<ValueT, UpdateOp>,
+          class UpdateArgT = impl::DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicSumSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
         SumT,
-        std::plus<ValueT>,
-        std::multiplies<>,
+        decltype([](const SumT& left, const SumT& right) { return left + right; }),
+        decltype([](const ValueT& val, const KeyT& length) { return val * length; }),
         UpdateOp,
         UpdateArgT,
         Allocator

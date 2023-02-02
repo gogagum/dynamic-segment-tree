@@ -20,7 +20,7 @@ using DynamicNegateSegmentTree =
         GetValueT,
         SegCombiner,
         SegInitializer,
-        decltype([](auto x) { return -x; }),
+        decltype([](const ValueT& x) -> ValueT { return -x; }),
         void,
         Allocator
     >;

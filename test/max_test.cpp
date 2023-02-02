@@ -29,6 +29,14 @@ TEST(DynamicMaxSegmentTree, RangeGetAfterSet) {
     EXPECT_EQ(tree.rangeGet(2, 35), 34);
 }
 
+TEST(DynamicMaxSegmentTree, UpdateAndSet) {
+    auto tree = DynamicMaxSegmentTree<int, int, int, std::plus<int>>(0, 42, 34);
+    tree.update(12, 22, 4);
+    tree.set(17, 27, 66);
+    EXPECT_EQ(tree.rangeGet(5, 17), 34 + 4);
+    EXPECT_EQ(tree.rangeGet(12, 18), 66);
+}
+
 TEST(DynamicMaxSegmentTree, LadderUpRight) {
     auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 0);
     tree.set(41, 42, 10000000);

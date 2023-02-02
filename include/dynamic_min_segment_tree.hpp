@@ -11,7 +11,7 @@ template <std::integral KeyT,
           class ValueT,
           class GetValueT = ValueT,
           class UpdateOp = void,
-          class UpdateArgT = mplimpl::DefaultUpdateArgT<ValueT, UpdateOp>,
+          class UpdateArgT = impl::DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicMinSegmentTree =
     DynamicSegmentTree<
@@ -19,7 +19,7 @@ using DynamicMinSegmentTree =
         ValueT,
         GetValueT,
         decltype([](const auto& left, const auto& right) { return std::min(left, right); }),
-        std::identity,
+        decltype([](const ValueT& val) { return static_cast<GetValueT>(val); }),
         UpdateOp,
         UpdateArgT,
         Allocator
