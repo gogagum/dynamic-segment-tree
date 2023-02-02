@@ -6,16 +6,15 @@
 #include <concepts>
 #include <algorithm>
 
-template<std::integral KeyT, class ValueT, class ValValUpdateOp = std::plus<ValueT>>
+template<std::integral KeyT, class ValueT>
 class MinSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
 public:
-    MinSegTreeReference(KeyT begin, KeyT end, const ValueT& value)
-        : SegTreeReferenceBase<KeyT, ValueT>(begin, end, value) {};
+    using SegTreeReferenceBase<KeyT, ValueT>::SegTreeReferenceBase;
     ValueT rangeGet(KeyT begin, KeyT end) const;
 };
 
-template<std::integral KeyT, class ValueT, class ValValUpdateOp>
-ValueT MinSegTreeReference<KeyT, ValueT, ValValUpdateOp>::rangeGet(KeyT begin, KeyT end) const {
+template<std::integral KeyT, class ValueT>
+ValueT MinSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
     auto ret = this->_getValue(begin);
     for (KeyT i = begin + 1; i < end; ++i) {
         ret = std::min(ret, this->_getValue(i));

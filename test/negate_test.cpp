@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <random>
+
 #include <dynamic_negate_segment_tree.hpp>
+#include "reference/seg_tree_reference_base.hpp"
 
 template <std::integral KeyT, class ValueT, class Allocator = std::allocator<ValueT>>
 using NegateSumDynamicSegmentTree =
@@ -30,5 +33,66 @@ TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
     EXPECT_EQ(tree.get(8), 13);
     EXPECT_EQ(tree.get(3), -13);
     EXPECT_EQ(tree.get(13), -13);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
+    auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
+    auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+
+    const auto updateOp = [](int num) { return -num; };
+    auto gen = std::mt19937(37);
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        int rangeBeg = gen() % 500;  // [0..500)
+        int rangeLen = gen() % 500;  // [0..500)
+
+        tree.update(rangeBeg, rangeBeg + rangeLen);
+        reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
+    }
+
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        int idx = gen() % 1000;
+
+        const auto treeRes = tree.get(idx);
+        const auto referenceRes = reference.get(idx);
+
+        EXPECT_EQ(treeRes, referenceRes);
+    }
+}
+
+TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
+    auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
+    auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+
+    const auto updateOp = [](int num) { return -num; };
+    auto gen = std::mt19937(37);
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        int rangeBeg = gen() % 500;  // [0..500)
+        int rangeLen = gen() % 500;  // [0..500)
+
+        tree.update(rangeBeg, rangeBeg + rangeLen);
+        reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
+    }
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        int rangeBeg = gen() % 500;  // [0..500)
+        int rangeLen = gen() % 500;  // [0..500)
+
+        int valueToSet = gen() % 1000;  // [0..1000)
+
+        tree.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
+        reference.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
+    }
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        int idx = gen() % 1000;
+
+        const auto treeRes = tree.get(idx);
+        const auto referenceRes = reference.get(idx);
+
+        EXPECT_EQ(treeRes, referenceRes);
+    }
 }
 
