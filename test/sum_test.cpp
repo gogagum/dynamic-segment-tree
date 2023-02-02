@@ -36,7 +36,7 @@ TEST(DynamicSumSegmentTree, QueryBeforeBegin) {
 }
 
 TEST(DynamicSumSegmentTree, OneUpdate) {
-    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
+    auto tree = DynamicSumSegmentTree<int, int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
     EXPECT_EQ(tree.get(5), 54);
     EXPECT_EQ(tree.get(14), 54);
@@ -47,7 +47,7 @@ TEST(DynamicSumSegmentTree, OneUpdate) {
 }
 
 TEST(DynamicSumSegmentTree, TwoSameUpdates) {
-    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
+    auto tree = DynamicSumSegmentTree<int, int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
     tree.update(15, 37, 14);
     EXPECT_EQ(tree.get(5), 54);
@@ -59,7 +59,7 @@ TEST(DynamicSumSegmentTree, TwoSameUpdates) {
 }
 
 TEST(DynamicSumSegmentTree, TwoIntersectingUpdates) {
-    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
+    auto tree = DynamicSumSegmentTree<int, int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
     tree.update(20, 41, 14);
     EXPECT_EQ(tree.get(5), 54);
@@ -80,7 +80,7 @@ TEST(DynamicSumSegmentTree, TwoIntersectingUpdates) {
 }
 
 TEST(DynamicSumSegmentTree, TwoNonIntersectingUpdates) {
-    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
+    auto tree = DynamicSumSegmentTree<int, int, int, std::plus<int>>(0, 42, 54);
     tree.update(5, 8, 18);
     tree.update(17, 38, 14);
     EXPECT_EQ(tree.get(3), 54);
@@ -115,7 +115,7 @@ TEST(DynamicSumSegmentTree, SimpleRangeGetMoreThanAll) {
 }
 
 TEST(DynamicSumSegmentTree, RangeGetAfterUpdate) {
-    auto tree = DynamicSumSegmentTree<int, int, std::plus<int>>(0, 42, 54);
+    auto tree = DynamicSumSegmentTree<int, int, int, std::plus<int>>(0, 42, 54);
     tree.update(15, 37, 18);
 
     auto getInsideUpdateRes = tree.rangeGet(17, 30);
@@ -159,16 +159,16 @@ TEST(DynamicSumSegmentTree, LongLongToLongLong) {
 
 TEST(DynamicSumSegmentTree, LongLongToLongLongLadder) {
     const auto topBorder = 1000000ll;
-    auto tree = DynamicSumSegmentTree<long long, long long, std::plus<long long>>(0, topBorder, 0);
+    auto tree = DynamicSumSegmentTree<long long, long long, long long, std::plus<long long>>(0, topBorder, 0);
 
-    tree.update(topBorder - topBorder / 2, topBorder, 1);
-    tree.update(topBorder - topBorder / 4, topBorder, 10);
-    tree.update(topBorder - topBorder / 8, topBorder, 100);
-    tree.update(topBorder - topBorder / 16, topBorder, 1000);
-    tree.update(topBorder - topBorder / 32, topBorder, 10000);
-    tree.update(topBorder - topBorder / 64, topBorder, 100000);
-    tree.update(topBorder - topBorder / 128, topBorder, 1000000);
-    tree.update(topBorder - topBorder / 256, topBorder, 10000000);
+    tree.update(topBorder - topBorder / 2, topBorder, 1ll);
+    tree.update(topBorder - topBorder / 4, topBorder, 10ll);
+    tree.update(topBorder - topBorder / 8, topBorder, 100ll);
+    tree.update(topBorder - topBorder / 16, topBorder, 1000ll);
+    tree.update(topBorder - topBorder / 32, topBorder, 10000ll);
+    tree.update(topBorder - topBorder / 64, topBorder, 100000ll);
+    tree.update(topBorder - topBorder / 128, topBorder, 1000000ll);
+    tree.update(topBorder - topBorder / 256, topBorder, 10000000ll);
 
     auto testVal1 = tree.get(topBorder - 1);
     EXPECT_EQ(testVal1, 11111111);

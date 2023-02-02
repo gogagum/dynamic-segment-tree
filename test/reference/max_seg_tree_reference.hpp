@@ -6,16 +6,15 @@
 #include <concepts>
 #include <algorithm>
 
-template<std::integral KeyT, class ValueT, class ValValUpdateOp = std::plus<ValueT>>
+template<std::integral KeyT, class ValueT>
 class MaxSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
 public:
-    MaxSegTreeReference(KeyT begin, KeyT end, const ValueT& value)
-        : SegTreeReferenceBase<KeyT, ValueT>(begin, end, value) {};
+    using SegTreeReferenceBase<KeyT, ValueT>::SegTreeReferenceBase;
     ValueT rangeGet(KeyT begin, KeyT end) const;
 };
 
-template<std::integral KeyT, class ValueT, class ValValUpdateOp>
-ValueT MaxSegTreeReference<KeyT, ValueT, ValValUpdateOp>::rangeGet(KeyT begin, KeyT end) const {
+template<std::integral KeyT, class ValueT>
+ValueT MaxSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
     auto ret = this->_getValue(begin);
     for (KeyT i = begin + 1; i < end; ++i) {
         ret = std::max(ret, this->_getValue(i));

@@ -7,130 +7,210 @@
 
 namespace {
 
-template<class T,
-         class UpdateOp,
-         class Allocator = std::allocator<T>>
-class Node{
-private:
-    using _Type = Node<T, UpdateOp, Allocator>;
+template <class T, class Derived, class Allocator>
+class BaseNode {
     using _Allocator =
-        typename std::allocator_traits<Allocator>::template rebind_alloc<_Type>;
+        typename std::allocator_traits<Allocator>::template rebind_alloc<Derived>;
     using _AllocatorTraits = std::allocator_traits<_Allocator>;
 
-    template <class _UpdateOp>
-    struct _UpdateOpHolder {};
-
-    template <class _UpdateOp> requires (!std::is_same_v<_UpdateOp, void>)
-    struct _UpdateOpHolder<_UpdateOp>{
-        _UpdateOp _updateOp{};
-    };
-
 public:
-    Node() = default;
-    Node(const T& value) : _value(value) {}
-    Node(T&& value) : _value(std::move(value)) {}
-    bool isLeaf() const;
+    BaseNode() = default;
+    BaseNode(const T& value) : _value(value) {}
+    BaseNode(T&& value) : _value(std::move(value)) {}
     const T& getValue() const     { return _value.value(); }
+    void setValue(const T&);
     bool hasValue() const         { return _value.has_value(); }
-    void setValue(const T& value);
+    void setNullValue()           { _value = std::nullopt; }
+    bool isLeaf() const;
     void initChildren();
-    void siftDown();
-    void update(const T& updateValue) requires (!std::is_same_v<UpdateOp, void>);
-    _Type* getLeft() const    { return _left; }
-    _Type* getRight() const   { return _right; }
-    ~Node();
-
-private:
-    /**
-     * @brief _updateOpHolder
-     * Empty struct if there is no update operation, or a struct with an
-     * only operation - update function.
-     */
-    static const _UpdateOpHolder<UpdateOp> _updateOpHolder;
+    Derived* getLeft() const      { return _left; }
+    Derived* getRight() const     { return _right; }
+    ~BaseNode();
+protected:
     _Allocator _allocator;
     std::optional<T> _value;
-    _Type* _left {nullptr};
-    _Type* _right {nullptr};
+    Derived* _left {nullptr};
+    Derived* _right {nullptr};
 };
 
-template<class T, class UpdateOp, class Allocator>
-const typename Node<T, UpdateOp, Allocator>::template _UpdateOpHolder<UpdateOp>
-Node<T, UpdateOp, Allocator>::_updateOpHolder = Node<T, UpdateOp, Allocator>::template _UpdateOpHolder<UpdateOp>();
+template<class T, class Derived, class Allocator>
+void BaseNode<T, Derived, Allocator>::setValue(const T& value) {
+    this->_value = value;
+    if (!this->isLeaf()) {
+        this->getLeft()->~Derived();
+        this->getRight()->~Derived();
+        _allocator.deallocate(this->_left, 2);
+        this->_left = nullptr;
+        this->_right = nullptr;
+    }
+}
 
-template<class T, class UpdateOp, class Allocator>
-bool Node<T, UpdateOp, Allocator>::isLeaf() const {
+template<class T, class Derived, class Allocator>
+bool BaseNode<T, Derived, Allocator>::isLeaf() const {
     return _left == nullptr && _right == nullptr;
 }
 
-template<class T, class UpdateOp, class Allocator>
-void Node<T, UpdateOp, Allocator>::setValue(const T& value) {
-    _value = value;
-    if (!isLeaf()) {
-        _left->~Node<T, UpdateOp, Allocator>();
-        _right->~Node<T, UpdateOp, Allocator>();
+template<class T, class Derived, class Allocator>
+void BaseNode<T, Derived, Allocator>::initChildren() {
+    assert(this->isLeaf() && "Can only init children for a leaf.");
+    auto nodesPtr = Derived::_AllocatorTraits::allocate(this->_allocator, 2);
+    this->_left = nodesPtr;
+    this->_right = nodesPtr + 1;
+    std::construct_at(this->_left);
+    std::construct_at(this->_right);
+    this->_left->setValue(this->_value.value());
+    this->_right->setValue(this->_value.value());
+    this->_value = std::nullopt;
+}
+
+
+template<class T, class Derived, class Allocator>
+BaseNode<T, Derived, Allocator>::~BaseNode() {
+    if (!this->isLeaf()) {
+        _left->_destruct();
+        _right->_destruct();
         _allocator.deallocate(_left, 2);
         _left = nullptr;
         _right = nullptr;
     }
 }
 
-template<class T, class UpdateOp, class Allocator>
-void Node<T, UpdateOp, Allocator>::initChildren() {
-    auto nodesPtr = _AllocatorTraits::allocate(_allocator, 2);
-    _left = nodesPtr;
-    _right = nodesPtr + 1;
-    std::construct_at(_left);
-    std::construct_at(_right);
-}
+template<class T,
+         class UpdateT,
+         class Allocator = std::allocator<T>>
+class Node;
 
-template<class T, class UpdateOp, class Allocator>
-void Node<T, UpdateOp, Allocator>::siftDown() {
-    if (isLeaf()) {
-        initChildren();
-        _left->setValue(_value.value());
-        _right->setValue(_value.value());
-        _value = std::nullopt;  // _value now has a meaning of
-                                // a delayed operation.
-    } else {
-        if constexpr (!std::is_same_v<UpdateOp, void>) {
-            if (_value.has_value()) {
-                _left->update(_value.value());
-                _right->update(_value.value());
-                _value = std::nullopt;
-            }
-        } else {
-            assert(!_value.has_value()
-                   && "Non null value in internal node in a tree "
-                      "with no update operation.");
-        }
-    }
-}
+template<class T, class UpdateT, class Allocator>
+class Node<T, std::optional<UpdateT>, Allocator>
+        : public BaseNode<T, Node<T, std::optional<UpdateT>, Allocator>, Allocator> {
+private:
+    using _Type = Node<T, std::optional<UpdateT>, Allocator>;
+    using _Base = BaseNode<T, _Type, Allocator>;
+public:
+    Node() = default;
+    Node(const T& value) : _Base(value) {}
+    Node(T&& value) : _Base(std::move(value)) {}
+    void setUpdateValue(const UpdateT& updateValue);
+    template <class UpdateOp>
+    void update(const UpdateOp& updateOp, const UpdateT& update);
+    template <class UpdateOp>
+    void siftOptUpdate(const UpdateOp& updateOp);
+    ~Node() { _destruct(); }
+private:
+    void _destruct()  { reinterpret_cast<_Base*>(this)->~_Base(); }
+private:
+    std::optional<UpdateT> _updateValue;
+private:
+    friend class BaseNode<T, _Type, Allocator>;
+};
 
-template<class T, class UpdateOp, class Allocator>
-void Node<T, UpdateOp, Allocator>::update(
-        const T& updateValue) requires (!std::is_same_v<UpdateOp, void>) {
-    if (!isLeaf()) {
-        // _value means delayed update.
-        if (_value.has_value()) {
-            _left->update(_value.value());  // update left with old update
-            _right->update(_value.value()); // update right with old update
+template<class T, class UpdateT, class Allocator>
+template <class UpdateOp>
+void
+Node<T, std::optional<UpdateT>, Allocator>::update(const UpdateOp& updateOp,
+                                                   const UpdateT& updateVal) {
+    if (!this->isLeaf()) {
+        if (this->_updateValue.has_value()) {
+            // update left with old update
+            this->getLeft()->update(updateOp, this->_updateValue.value());
+            // update right with old update
+            this->getRight()->update(updateOp, this->_updateValue.value());
         }
         // _value continues to have delayed update meaning.
-        _value = updateValue;
+        this->_updateValue = updateVal;
     } else { // isLeaf()
-        assert(_value.has_value() && "Leaf must have a value.");
-        _value = Node<T, UpdateOp, Allocator>::_updateOpHolder._updateOp(_value.value(), updateValue);
+        assert(this->hasValue() && "Leaf must have a value.");
+        this->setValue(updateOp(this->getValue(), updateVal));
     }
 }
 
-template<class T, class UpdateOp, class Allocator>
-Node<T, UpdateOp, Allocator>::~Node() {
-    if (!isLeaf()) {
-        _left->~Node<T, UpdateOp, Allocator>();
-        _right->~Node<T, UpdateOp, Allocator>();
-        _allocator.deallocate(_left, 2);
+template<class T, class UpdateT, class Allocator>
+template <class UpdateOp>
+void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
+        const UpdateOp& updateOp) {
+    if (this->_updateValue.has_value()) {
+        assert(!this->isLeaf() && "It nust not be a leaf.");
+        this->getLeft()->update(updateOp, this->_updateValue.value());
+        this->getRight()->update(updateOp, this->_updateValue.value());
+        this->_updateValue = std::nullopt;
     }
 }
+
+template<class T, class UpdateT, class Allocator>
+void
+Node<T, std::optional<UpdateT>, Allocator>::setUpdateValue(
+        const UpdateT& updateValue) {
+    assert(!this->isLeaf() && "Can`t set update value for a leaf.");
+    _updateValue = updateValue;
+}
+
+template<class T, class Allocator>
+class Node<T, bool, Allocator>
+        : public BaseNode<T, Node<T, bool, Allocator>, Allocator> {
+private:
+    using _Type = Node<T, bool, Allocator>;
+    using _Base = BaseNode<T, _Type, Allocator>;
+public:
+    Node() = default;
+    Node(const T& value) : _Base(value) {}
+    Node(T&& value) : _Base(std::move(value)) {}
+    void addUpdate();
+    template <class UpdateOp>
+    void update(const UpdateOp& updateOp);
+    template <class UpdateOp>
+    void siftOptUpdate(const UpdateOp& updateOp);
+    ~Node() { _destruct(); }
+private:
+    void _destruct()  { reinterpret_cast<_Base*>(this)->~_Base(); }
+private:
+    bool _toUpdate{false};
+private:
+    friend class BaseNode<T, _Type, Allocator>;
+};
+
+template<class T, class Allocator>
+template <class UpdateOp>
+void
+Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
+    if (!this->isLeaf()) {
+        if (_toUpdate) {
+            this->getLeft()->update(updateOp);  // update left with old update
+            this->getRight()->update(updateOp); // update right with old update
+        }
+        _toUpdate = true;
+    } else { // isLeaf()
+        this->_value = updateOp(this->getValue());
+    }
+}
+
+template<class T, class Allocator>
+template <class UpdateOp>
+void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
+    if (_toUpdate) {
+        assert(!this->isLeaf() && "It nust not be a leaf.");
+        this->getLeft()->update(updateOp);
+        this->getRight()->update(updateOp);
+        _toUpdate = false;
+    }
+}
+
+template<class T, class Allocator>
+class Node<T, void, Allocator>
+        : public BaseNode<T, Node<T, void, Allocator>, Allocator> {
+private:
+    using _Type = Node<T, void, Allocator>;
+    using _Base = BaseNode<T, _Type, Allocator>;
+public:
+    Node() = default;
+    Node(const T& value) : BaseNode<T, _Type, Allocator>(value) {}
+    Node(T&& value) : BaseNode<T, _Type, Allocator>(std::move(value)) {}
+    ~Node() { _destruct(); }
+private:
+    void _destruct()  { reinterpret_cast<_Base*>(this)->~_Base(); }
+private:
+    friend class BaseNode<T, Node<T, void, Allocator>, Allocator>;
+};
+
 
 
 

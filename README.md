@@ -13,12 +13,14 @@ by the following template parameters:
 - `SegInitializer` - a function which should implement `get` operation on
 a segment filled with equal elements.
 - `UpdateOp` - one argument operation which is applied to elements in update operation.
+- `UpdateArgT` - argument of update operation. Must be void if operation
+is unary or there is no update operation. 
 
-`SegCombiner` must receive either two or four arguments. In first case these two parameters
+`SegGetComb` must receive either two or four arguments. In first case these two parameters
 are `rangeGet` results of two combined segments, in second -- `rangeGet` result of two
 combined segments and two segments lengths.
 
-`SegInitializer` must receive either one or two arguments. In first case this parameter
+`SegGetInit` must receive either one or two arguments. In first case this parameter
 is a value of a range, in second -- value and length.
 
 `UpdateOp` equals void means that `update` operation is not supported. To support `update` operation
@@ -27,12 +29,15 @@ is a value of a range, in second -- value and length.
 ### Other classes
 
 Examples of DynamicSegmentTree` template usage can be seen in the
-`DynamicMinSegmentTree`, `DynamicMaxSegmentTree` and `DynamicSumSegmentTree` (to be extended).
-You can also see examples of library usage in tests.
+`DynamicMinSegmentTree`, `DynamicMaxSegmentTree`, `DynamicNegateSegmentTree`
+and `DynamicSumSegmentTree` (to be extended).
+You can also see examples of library usage in tests or read a header of 
+DynamicSegmentTree.
 
 ### Tests
 
-To enable tests building use `BUIILD_TEST` option (see `CMakeLists.txt` inside of the root directory). 
+To enable tests building use `BUIILD_TEST` option (see `CMakeLists.txt` in the
+repo root directory). 
 
 ## Requirements:
 
@@ -54,12 +59,9 @@ your CMakeLists.txt:
 
 TODO list (with no priority):
 
-- Separate `get` result type and `ValueT`
-- Think of different overloads of functions that take value as argument.
-- Do something about default filling value of segment tree constructor.
 - Add benchmarks.
 - Custom allocators checks.
-- Support non-default_constructible functors.
+- Test non-default_constructible functors.
 - Add doxygen documentation.
 - Add more classes with operations which are often used with segment tree.
 - Possibly add a combine operation option which supports taking not lengths of segments but their borders.

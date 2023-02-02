@@ -6,16 +6,15 @@
 #include <concepts>
 #include <algorithm>
 
-template<std::integral KeyT, class ValueT, class ValValUpdateOp = std::plus<ValueT>>
+template<std::integral KeyT, class ValueT>
 class SumSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
 public:
-    SumSegTreeReference(KeyT begin, KeyT end, const ValueT& value)
-        : SegTreeReferenceBase<KeyT, ValueT>(begin, end, value) {};
+    using SegTreeReferenceBase<KeyT, ValueT>::SegTreeReferenceBase;
     ValueT rangeGet(KeyT begin, KeyT end) const;
 };
 
-template<std::integral KeyT, class ValueT, class ValValUpdateOp>
-ValueT SumSegTreeReference<KeyT, ValueT, ValValUpdateOp>::rangeGet(KeyT begin, KeyT end) const {
+template<std::integral KeyT, class ValueT>
+ValueT SumSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
     auto ret = 0;
     for (KeyT i = begin; i < end; ++i) {
         ret += this->_getValue(i);

@@ -9,15 +9,19 @@ namespace dst {
 
 template <std::integral KeyT,
           class ValueT,
+          class SumT = ValueT,
           class UpdateOp = void,
+          class UpdateArgT = impl::DefaultUpdateArgT<ValueT, UpdateOp>,
           class Allocator = std::allocator<ValueT>>
 using DynamicSumSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
-        std::plus<ValueT>,
-        std::multiplies<>,
+        SumT,
+        decltype([](const SumT& left, const SumT& right) { return left + right; }),
+        decltype([](const ValueT& val, const KeyT& length) { return val * length; }),
         UpdateOp,
+        UpdateArgT,
         Allocator
     >;
 
