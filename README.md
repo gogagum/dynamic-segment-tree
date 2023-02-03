@@ -61,7 +61,6 @@ TODO list (with no priority):
 
 - Add benchmarks.
 - Custom allocators checks.
-- Test non-default constructible functors.
 - Add doxygen documentation.
 - Add more classes with operations which are often used with segment tree.
 - Possibly add a combine operation option which supports taking not lengths of segments but their borders.
