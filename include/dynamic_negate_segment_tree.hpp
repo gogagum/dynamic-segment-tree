@@ -20,8 +20,8 @@ struct Negate {
 template <std::integral KeyT,
           class ValueT,
           class GetValueT,
-          class SegCombiner = void,
-          class SegInitializer = void,
+          class SegCombiner = NoRangeGetOp,
+          class SegInitializer = NoRangeGetOp,
           class Allocator = std::allocator<ValueT>>
 using DynamicNegateSegmentTree =
     DynamicSegmentTree<

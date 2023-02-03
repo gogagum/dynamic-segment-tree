@@ -10,8 +10,8 @@ namespace dst {
 template <std::integral KeyT,
           class ValueT,
           class GetValueT = ValueT,
-          class UpdateOp = void,
-          class UpdateArgT = impl::DefaultUpdateArgT<ValueT, UpdateOp>,
+          class UpdateOp = NoUpdateOp,
+          class UpdateArgT = impl::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 using DynamicMaxSegmentTree =
     DynamicSegmentTree<

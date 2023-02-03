@@ -2,6 +2,7 @@
 #define DYNAMIC_SEGMENT_TREE_RANGE_GET_VARIATION_BASE_HPP
 
 #include <concepts.hpp>
+#include <disable_operations.hpp>
 
 namespace dst::impl {
 
@@ -9,13 +10,18 @@ template <class KeyT, class ValueT, class GetValueT, class GetInit>
 class DynamicSegmentTreeRangeGetInitVariationBase;
 
 template <class KeyT, class ValueT, class GetValueT>
-class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT, void> {};
+class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT,
+                                                  GetValueT, NoRangeGetOp> {
+protected:
+    DynamicSegmentTreeRangeGetInitVariationBase(NoRangeGetOp) {};
+};
 
 template <class KeyT,
           class ValueT,
           class GetValueT,
           dst::conc::ValueSegmentInitializer<ValueT, GetValueT> SegGetInit>
-class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT, SegGetInit> {
+class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT,
+                                                  GetValueT, SegGetInit> {
 protected:
     DynamicSegmentTreeRangeGetInitVariationBase(const SegGetInit& segInit)
         : _segInitializer(segInit) {}
@@ -32,8 +38,10 @@ protected:
 template <class KeyT,
           class ValueT,
           class GetValueT,
-          dst::conc::ValueAndLengthSegmentInitializer<ValueT, KeyT, GetValueT> SegGetInit>
-class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT, SegGetInit> {
+          dst::conc::ValueAndLengthSegmentInitializer<
+              ValueT, KeyT, GetValueT> SegGetInit>
+class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT,
+                                                  GetValueT, SegGetInit> {
 protected:
     DynamicSegmentTreeRangeGetInitVariationBase(const SegGetInit& segInit)
         : _segInitializer(segInit) {}
@@ -46,20 +54,21 @@ protected:
     const SegGetInit _segInitializer;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 template <class KeyT, class GetValueT, class GetComb>
 class DynamicSegmentTreeRangeGetCombineVariationBase;
 
 template <class KeyT, class GetValueT>
-class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT, void> {};
+class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
+                                                     NoRangeGetOp> {
+protected:
+    DynamicSegmentTreeRangeGetCombineVariationBase(NoRangeGetOp) {}
+};
 
 template <class KeyT,
           class GetValueT,
           dst::conc::ValueSegmentCombiner<GetValueT> SegGetComb>
-class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT, SegGetComb> {
+class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
+                                                     SegGetComb> {
 protected:
     DynamicSegmentTreeRangeGetCombineVariationBase(const SegGetComb& segComb)
         : _segCombiner(segComb) {}
@@ -67,9 +76,9 @@ protected:
 
     GetValueT _combineGet(const GetValueT& leftValue,
                           const GetValueT& rightValue,
-                          KeyT /*leftBegin*/,
-                          KeyT /*separation*/,
-                          KeyT /*rightEnd*/) const {
+                          [[maybe_unused]] KeyT /*leftBegin*/,
+                          [[maybe_unused]] KeyT /*separation*/,
+                          [[maybe_unused]] KeyT /*rightEnd*/) const {
         return _segCombiner(leftValue, rightValue);
     }
 protected:
@@ -79,7 +88,8 @@ protected:
 template <class KeyT,
           class GetValueT,
           dst::conc::ValueAndLengthCombiner<GetValueT, KeyT> SegGetComb>
-class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT, SegGetComb> {
+class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
+                                                     SegGetComb> {
 protected:
     DynamicSegmentTreeRangeGetCombineVariationBase(const SegGetComb& segComb)
         : _segCombiner(segComb) {}

@@ -10,15 +10,16 @@
 #include <dynamic_segment_tree_update_variation_base.hpp>
 #include <dynamic_segment_tree_range_get_variation_base.hpp>
 #include <mpimpl.hpp>
+#include <disable_operations.hpp>
 
 namespace dst{
 
 template <std::integral KeyT,
           class ValueT,
           class GetValueT,
-          class SegGetComb,
-          class SegGetInit,
-          class UpdateOp = void,
+          class SegGetComb = NoRangeGetOp,
+          class SegGetInit = NoRangeGetOp,
+          class UpdateOp = NoUpdateOp,
           class UpdateArgT = impl::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 class DynamicSegmentTree
@@ -32,6 +33,9 @@ class DynamicSegmentTree
             KeyT, ValueT, GetValueT, SegGetInit
         >{
 private:
+
+    static_assert(!std::is_same_v<UpdateArgT, NoUpdateOp>);
+
     using _UpdateVariationBase =
         impl::DynamicSegmentTreeUpdateVariationBase<
             ValueT, UpdateOp, UpdateArgT, Allocator
@@ -52,37 +56,6 @@ public:
 
     /**
      *  @param begin - beginning of a working area.
-     *  @param end - ending of a working area  (not included).
-     *  @param alloc - allocator.
-     */
-    template <class = void> requires std::is_same_v<SegGetComb, void>
-                                && std::is_same_v<SegGetInit, void>
-    DynamicSegmentTree(KeyT begin,
-                       KeyT end,
-                       const ValueT& value = ValueT{},
-                       const Allocator& alloc = Allocator());
-
-    /**
-     *  @param begin - beginning of a working area.
-     *  @param end - ending of a working area  (not included).
-     *  @param segGetComb - functor called when two segments are combined in
-     *  range get operation.
-     *  @param segGetInit - functor called for get result initialization on an
-     *  equally filled segment.
-     *  @param alloc - allocator.
-     */
-    template <class = void> requires conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-                                && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>
-                                && std::is_same_v<UpdateOp, void>
-    DynamicSegmentTree(KeyT begin,
-                       KeyT end,
-                       const ValueT& value = ValueT{},
-                       const SegGetComb& segGetComb = SegGetComb(),
-                       const SegGetInit& seGetInit = SegGetInit(),
-                       const Allocator& alloc = Allocator());
-
-    /**
-     *  @param begin - beginning of a working area.
      *  @param end - ending of a working area (not included).
      *  @param segGetComb - functor called when two segments are combined in
      *  range get operation.
@@ -91,16 +64,12 @@ public:
      *  @param updateOp - update operation.
      *  @param alloc - allocator.
      */
-    template <class _UpdateOp = UpdateOp>
-        requires conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-            && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>
-            && conc::UpdateOp<_UpdateOp, ValueT, UpdateArgT>
     DynamicSegmentTree(KeyT begin,
                        KeyT end,
                        const ValueT& value = ValueT(),
                        const SegGetComb& segGetComb = SegGetComb(),
                        const SegGetInit& segGetInit = SegGetInit(),
-                       const _UpdateOp& updateOp = UpdateOp(),
+                       const UpdateOp& updateOp = UpdateOp(),
                        const Allocator& alloc = Allocator());
 
     /**
@@ -170,9 +139,6 @@ template <std::integral KeyT,
           class UpdateOp,
           class UpdateArgT,
           class Allocator>
-template <class> requires conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-                            && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>
-                            && std::is_same_v<UpdateOp, void>
 DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                    UpdateOp, UpdateArgT, Allocator>::DynamicSegmentTree(
         KeyT begin,
@@ -180,35 +146,7 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
         const ValueT& value,
         const SegGetComb& segCombiner,
         const SegGetInit& segInitializer,
-        const Allocator& alloc)
-    : _rootNode(value),
-      _begin(begin),
-      _end(end),
-      _RangeGetCombineVariationBase(segCombiner),
-      _RangeGetInitVariationBase(segInitializer),
-      _UpdateVariationBase() {}
-
-////////////////////////////////////////////////////////////////////////////////
-template <std::integral KeyT,
-          class ValueT,
-          class GetValueT,
-          class SegGetComb,
-          class SegGetInit,
-          class UpdateOp,
-          class UpdateArgT,
-          class Allocator>
-template <class _UpdateOp>
-    requires conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-          && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>
-          && conc::UpdateOp<_UpdateOp, ValueT, UpdateArgT>
-DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                   UpdateOp, UpdateArgT, Allocator>::DynamicSegmentTree(
-        KeyT begin,
-        KeyT end,
-        const ValueT& value,
-        const SegGetComb& segCombiner,
-        const SegGetInit& segInitializer,
-        const _UpdateOp& updateOp,
+        const UpdateOp& updateOp,
         const Allocator& alloc)
     : _rootNode(value),
       _begin(begin),

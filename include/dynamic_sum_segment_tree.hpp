@@ -7,38 +7,19 @@
 
 namespace dst {
 
-namespace impl {
-
-template <class SumT>
-struct SumComb {
-    SumT operator()(const SumT& val1, const SumT& val2) const {
-        return val1 + val2;
-    };
-};
-
-template <class KeyT, class ValueT, class SumT>
-struct SumInit {
-    SumT operator()(const ValueT& val, KeyT length) const {
-        return val * length;
-    };
-};
-
-}
-
-
 template <std::integral KeyT,
           class ValueT,
           class SumT = ValueT,
-          class UpdateOp = void,
-          class UpdateArgT = impl::DefaultUpdateArgT<ValueT, UpdateOp>,
+          class UpdateOp = NoUpdateOp,
+          class UpdateArgT = impl::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 using DynamicSumSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
         SumT,
-        impl::SumComb<SumT>,
-        impl::SumInit<KeyT, ValueT, SumT>,
+        decltype([](const SumT& val1, const SumT& val2) -> SumT { return val1 + val2; }),
+        decltype([](const ValueT& val, KeyT length) -> SumT { return val * length; }),
         UpdateOp,
         UpdateArgT,
         Allocator
