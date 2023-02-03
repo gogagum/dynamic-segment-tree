@@ -7,6 +7,25 @@
 
 namespace dst {
 
+namespace impl {
+
+template <class SumT>
+struct SumComb {
+    SumT operator()(const SumT& val1, const SumT& val2) const {
+        return val1 + val2;
+    };
+};
+
+template <class KeyT, class ValueT, class SumT>
+struct SumInit {
+    SumT operator()(const ValueT& val, KeyT length) const {
+        return val * length;
+    };
+};
+
+}
+
+
 template <std::integral KeyT,
           class ValueT,
           class SumT = ValueT,
@@ -18,8 +37,8 @@ using DynamicSumSegmentTree =
         KeyT,
         ValueT,
         SumT,
-        decltype([](const SumT& left, const SumT& right) { return left + right; }),
-        decltype([](const ValueT& val, const KeyT& length) { return val * length; }),
+        impl::SumComb<SumT>,
+        impl::SumInit<KeyT, ValueT, SumT>,
         UpdateOp,
         UpdateArgT,
         Allocator

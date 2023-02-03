@@ -3,15 +3,25 @@
 
 #include <dynamic_segment_tree.hpp>
 
+#include <concepts>
 #include <memory>
 
 namespace dst {
 
+namespace impl {
+
+template <class ValueT>
+struct Negate {
+    ValueT operator()(const ValueT& x) const { return -x; };
+};
+
+}
+
 template <std::integral KeyT,
           class ValueT,
           class GetValueT,
-          conc::SegmentCombiner<GetValueT, KeyT> SegCombiner,
-          conc::SegmentInitializer<ValueT, KeyT, GetValueT> SegInitializer,
+          class SegCombiner = void,
+          class SegInitializer = void,
           class Allocator = std::allocator<ValueT>>
 using DynamicNegateSegmentTree =
     DynamicSegmentTree<
@@ -20,7 +30,7 @@ using DynamicNegateSegmentTree =
         GetValueT,
         SegCombiner,
         SegInitializer,
-        decltype([](const ValueT& x) -> ValueT { return -x; }),
+        impl::Negate<ValueT>,
         void,
         Allocator
     >;
