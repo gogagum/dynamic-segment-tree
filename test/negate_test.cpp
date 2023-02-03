@@ -5,9 +5,28 @@
 #include <dynamic_negate_segment_tree.hpp>
 #include "reference/seg_tree_reference_base.hpp"
 
+template <class ValueT>
+struct SumComb {
+    ValueT operator()(const ValueT& val1, const ValueT& val2) const {
+        return val1 + val2;
+    };
+};
+
+template <class ValueT, class KeyT>
+struct SumInit {
+    ValueT operator()(const ValueT& val, KeyT length) const {
+        return val * length;
+    };
+};
+
 template <std::integral KeyT, class ValueT, class Allocator = std::allocator<ValueT>>
 using NegateSumDynamicSegmentTree =
-    dst::DynamicNegateSegmentTree<KeyT, ValueT, ValueT, std::plus<ValueT>, std::multiplies<void>, Allocator>;
+    dst::DynamicNegateSegmentTree<KeyT,
+                                  ValueT,
+                                  ValueT,
+                                  SumComb<ValueT>,
+                                  SumInit<ValueT, KeyT>,
+                                  Allocator>;
 
 TEST(DynamicNegateSegmentTree, Construct) {
     auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
@@ -34,6 +53,16 @@ TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
     EXPECT_EQ(tree.get(3), -13);
     EXPECT_EQ(tree.get(13), -13);
 }
+
+TEST(DynamicNegateSegmentTree, SimpleRangweGet) {
+    auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
+    tree.update(2, 10);
+    tree.update(7, 21);
+    EXPECT_EQ(tree.get(8), 13);
+    EXPECT_EQ(tree.get(3), -13);
+    EXPECT_EQ(tree.get(13), -13);
+}
+
 
 TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
     auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);

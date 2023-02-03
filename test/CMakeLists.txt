@@ -20,7 +20,9 @@ add_executable(segment_tree_test
     negate_test.cpp
     sum_test.cpp
     min_test.cpp
-    max_test.cpp)
+    max_test.cpp
+    test_simple.cpp
+)
 
 enable_testing()
 

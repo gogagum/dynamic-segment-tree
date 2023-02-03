@@ -143,7 +143,7 @@ TEST(DynamicSumSegmentTree, LongLongToInt) {
 
 TEST(DynamicSumSegmentTree, IntToLong) {
     auto tree =
-        DynamicSumSegmentTree<int, long long>(-100500, 100500, 1234567890098765432);
+        DynamicSumSegmentTree<int, long long, long long>(-100500, 100500, 1234567890098765432);
 
     auto testVal = tree.get(17);
     EXPECT_EQ(testVal, 1234567890098765432);
