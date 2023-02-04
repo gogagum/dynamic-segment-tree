@@ -30,7 +30,6 @@ jobs:
             - run: |
                   sudo apt-get update
                   sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev
-            - run: /bin/bash .ci/install-vcpkg.sh
             - run: /bin/bash .ci/build-project.sh
             - run: ./build/src/show_info/show_info
             - run: ./build/src/example/example
@@ -104,7 +103,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: brew install ninja llvm@15 gcc@12
-            - run: /bin/bash .ci/install-vcpkg.sh
             - run: /bin/bash .ci/build-project.sh
             - run: ./build/src/show_info/show_info
             - run: ./build/src/example/example
@@ -115,7 +113,6 @@ jobs:
         runs-on: windows-latest
         steps:
             - uses: actions/checkout@v3
-            - run: .ci\install-vcpkg.ps1
             - run: .ci\build-project.ps1
             - run: .\build\src\show_info\Debug\show_info.exe
             - run: .\build\src\example\Debug\example.exe
