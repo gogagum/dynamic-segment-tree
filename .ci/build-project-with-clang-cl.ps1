@@ -41,6 +41,6 @@ Write-Host "CLANG_CL: $CLANG_CL"
 Write-Host "-----------------------------------------"
 
 New-Item -Name "$BUILD_DIR" -ItemType Directory
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_C_COMPILER="$CLANG_CL" -DCMAKE_CXX_COMPILER="$CLANG_CL" -DBUILD_TEST:BOOL=ON -B "$BUILD_DIR"
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER="$CLANG_CL" -DCMAKE_CXX_COMPILER="$CLANG_CL" -DBUILD_TEST:BOOL=ON -B "$BUILD_DIR"
 cmake --build "$BUILD_DIR" -j --config Debug
 
