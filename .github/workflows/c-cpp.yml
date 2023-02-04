@@ -30,8 +30,7 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/src/show_info/show_info
-            - run: ./build/src/example/example
+            - run: ./build/test/segment_tree_test
             - run: ctest --output-on-failure --test-dir build
 
     linux-clang-libstdcpp:
@@ -83,21 +82,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: brew install ninja llvm@15
-            - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
-            - run: ctest --output-on-failure --test-dir build
-
-    mac-clang-libstdcpp:
-        name: macOS Clang (libstdc++)
-        runs-on: macos-latest
-        env:
-            CC: /usr/local/opt/llvm/bin/clang
-            CXX: /usr/local/opt/llvm/bin/clang++
-            CXXFLAGS: -stdlib=libstdc++ -isystem /usr/local/opt/gcc@12/include/c++/12 -isystem /usr/local/opt/gcc@12/include/c++/12/x86_64-apple-darwin20 -Wno-stdlibcxx-not-found
-            LDFLAGS: -L/usr/local/opt/gcc@12/lib/gcc/12 -Wl,-rpath,/usr/local/opt/gcc@12/lib/gcc/12
-        steps:
-            - uses: actions/checkout@v3
-            - run: brew install ninja llvm@15 gcc@12
             - run: /bin/bash .ci/build-project.sh
             - run: ./build/test/segment_tree_test
             - run: ctest --output-on-failure --test-dir build
