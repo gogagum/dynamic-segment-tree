@@ -10,9 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-add_library(${PROJECT_NAME} STATIC src/dynamic_segment_tree.cpp)
+add_library(${PROJECT_NAME} STATIC)
 
-target_sources(${PROJECT_NAME} PRIVATE)
+target_sources(${PROJECT_NAME} PRIVATE src/dynamic_segment_tree.cpp)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -28,8 +28,12 @@ target_include_directories(${PROJECT_NAME}
 # without it public headers won't get installed
 set(public_headers
     include/dynamic_segment_tree.hpp
-    include/dynamic_max_segment_tree.hpp
-    include/dynamic_min_segment_tree.hpp
+    include/curried/dynamic_avg_segment_tree.hpp
+    include/curried/dynamic_max_segment_tree.hpp
+    include/curried/dynamic_min_segment_tree.hpp
+    include/curried/dynamic_negate_segment_tree.hpp
+    include/curried/dynamic_simple_get_set_segment_tree.hpp
+    include/curried/dynamic_sum_segment_tree.hpp
 )
 # note that ${public_headers} has to be in quotes
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")

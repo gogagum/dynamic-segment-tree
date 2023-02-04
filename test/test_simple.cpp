@@ -2,16 +2,16 @@
 #include <random>
 #include "reference/seg_tree_reference_base.hpp"
 
-#include <curried/simple_get_set_dynamic_segment_tree.hpp>
+#include <curried/dynamic_simple_get_set_segment_tree.hpp>
 
-using dst::SimpleGetSetDynamicSegmentTree;
+using dst::DynamicSimpleGetSetSegmentTree;
 
 TEST(SimpleGetSetDynamicSegmentTree, Construct) {
-    auto tree = SimpleGetSetDynamicSegmentTree<int, long long>(-5, 100, 77);
+    auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(-5, 100, 77);
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
-    auto tree = SimpleGetSetDynamicSegmentTree<int, long long>(0, 42, 77);
+    auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
 
     tree.set(13, 17, 56);
 
@@ -24,7 +24,7 @@ TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
-    auto tree = SimpleGetSetDynamicSegmentTree<int, int>(0, 1000, 0);
+    auto tree = DynamicSimpleGetSetSegmentTree<int, int>(0, 1000, 0);
     auto reference = SegTreeReferenceBase<int, int>(0, 1000, 0);
 
     std::mt19937 generator(42);
@@ -46,7 +46,7 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
-    auto tree = SimpleGetSetDynamicSegmentTree<int, int>(0, 1000, 0);
+    auto tree = DynamicSimpleGetSetSegmentTree<int, int>(0, 1000, 0);
     auto reference = SegTreeReferenceBase<int, int>(0, 1000, 0);
 
     std::mt19937 generator(42);

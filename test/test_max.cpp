@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <curried/dynamic_max_segment_tree.hpp>
-
 #include <random>
 #include "reference/max_seg_tree_reference.hpp"
+
+#include <curried/dynamic_max_segment_tree.hpp>
 
 using dst::DynamicMaxSegmentTree;
 

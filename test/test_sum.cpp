@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <curried/dynamic_sum_segment_tree.hpp>
-
 #include <random>
 #include "reference/sum_seg_tree_reference.hpp"
+
+#include <curried/dynamic_sum_segment_tree.hpp>
 
 using dst::DynamicSumSegmentTree;
 

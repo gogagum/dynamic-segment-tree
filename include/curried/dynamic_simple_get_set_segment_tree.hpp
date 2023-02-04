@@ -6,7 +6,7 @@
 namespace dst {
 
 template <class KeyT, class ValueT>
-using SimpleGetSetDynamicSegmentTree =
+using DynamicSimpleGetSetSegmentTree =
     DynamicSegmentTree<KeyT, ValueT, void>;
 
 }
