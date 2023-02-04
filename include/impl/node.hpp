@@ -5,7 +5,7 @@
 #include <optional>
 #include <cassert>
 
-#include <node_base.hpp>
+#include <impl/node_base.hpp>
 
 namespace dst::impl {
 

@@ -5,10 +5,10 @@
 #include <concepts>
 #include <functional>
 
-#include <node.hpp>
+#include <impl/node.hpp>
 #include <concepts.hpp>
-#include <dynamic_segment_tree_update_variation_base.hpp>
-#include <dynamic_segment_tree_range_get_variation_base.hpp>
+#include <impl/dynamic_segment_tree_update_variation_base.hpp>
+#include <impl/dynamic_segment_tree_range_get_variation_base.hpp>
 #include <mpimpl.hpp>
 #include <disable_operations.hpp>
 
@@ -113,8 +113,8 @@ public:
      * @return - range get operation result.
      */
     ValueT rangeGet(KeyT begin, KeyT end) const requires
-        conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-        && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>;
+        conc::GetCombiner<SegGetComb, GetValueT, KeyT>
+        && conc::GetInitializer<SegGetInit, ValueT, KeyT, GetValueT>;
 
 private:
     void _setImpl(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
@@ -236,8 +236,8 @@ template <std::integral KeyT,
 ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                           UpdateOp, UpdateArgT, Allocator>::rangeGet(
         KeyT begin, KeyT end) const requires
-            conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-            && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT> {
+            conc::GetCombiner<SegGetComb, GetValueT, KeyT>
+            && conc::GetInitializer<SegGetInit, ValueT, KeyT, GetValueT> {
     return _rangeGetImpl(begin, end, _begin, _end, &_rootNode);
 }
 
@@ -336,7 +336,10 @@ ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
     const ValueT lVal = _rangeGetImpl(begin, end, currBegin, m, leftNodePtr);
 
     return _RangeGetCombineVariationBase::_combineGet(
-                lVal, rVal, currBegin, m, currEnd);
+                lVal, rVal,
+                std::max(currBegin, begin),
+                m,
+                std::min(currEnd, end));
 }
 
 }
