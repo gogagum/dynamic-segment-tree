@@ -32,15 +32,15 @@ Push-Location .
 Pop-Location
 
 # Clang-cl
-$CLANG_CL = "$Env:VCINSTALLDIR/Tools/Llvm/x64/bin/clang-cl.exe".Replace("\" ,"/")
+$CLANG = "$Env:VCINSTALLDIR/Tools/Llvm/x64/bin/clang.exe".Replace("\" ,"/")
 
 Write-Host "---- build-project-with-clang-cl.ps1 ----"
 Write-Host "BUILD_DIR: $BUILD_DIR"
 Write-Host "VS_DIR: $VS_DIR"
-Write-Host "CLANG_CL: $CLANG_CL"
+Write-Host "CLANG: $CLANG"
 Write-Host "-----------------------------------------"
 
 New-Item -Name "$BUILD_DIR" -ItemType Directory
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER="$CLANG_CL" -DCMAKE_CXX_COMPILER="$CLANG_CL" -DBUILD_TEST:BOOL=ON -B "$BUILD_DIR"
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER="$CLANG" -DCMAKE_CXX_COMPILER="$CLANG" -DBUILD_TEST:BOOL=ON -B "$BUILD_DIR"
 cmake --build "$BUILD_DIR" -j --config Debug
 
