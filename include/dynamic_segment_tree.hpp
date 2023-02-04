@@ -1,7 +1,7 @@
 #ifndef DYNAMIC_SEGMENT_TREE_HPP
 #define DYNAMIC_SEGMENT_TREE_HPP
 
-
+#include <algorithm>
 #include <concepts>
 #include <functional>
 
