@@ -26,7 +26,7 @@ protected:
     template <class KeyT>
     void _updateImpl(
         KeyT begin, KeyT end, KeyT currStart, KeyT currEnd, _Node* currNode,
-        const UpdateArgT* toUpdate);
+        const UpdateArgT& toUpdate);
     void _optionalSiftNodeUpdate(_Node* nodePtr) const {
         nodePtr->siftOptUpdate(_updateOp);
     }
@@ -44,12 +44,12 @@ void
 DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
                                       UpdateArgT, Allocator>::_updateImpl(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-        _Node* currNode, const UpdateArgT* toUpdate) {
+        _Node* currNode, const UpdateArgT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
         return;
     }
     if (end >= currEnd && begin <= currBegin) {
-        currNode->update(this->_updateOp, *toUpdate);
+        currNode->update(this->_updateOp, toUpdate);
         return;
     }
     const auto m = (currBegin + currEnd) / 2;

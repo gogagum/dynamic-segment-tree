@@ -34,8 +34,6 @@ class DynamicSegmentTree
         >{
 private:
 
-    static_assert(!std::is_same_v<UpdateArgT, NoUpdateOp>);
-
     using _UpdateVariationBase =
         impl::DynamicSegmentTreeUpdateVariationBase<
             ValueT, UpdateOp, UpdateArgT, Allocator
@@ -57,6 +55,7 @@ public:
     /**
      *  @param begin - beginning of a working area.
      *  @param end - ending of a working area (not included).
+     *  @param value - default filling value.
      *  @param segGetComb - functor called when two segments are combined in
      *  range get operation.
      *  @param segGetInit - functor called for get result initialization on an
@@ -113,7 +112,9 @@ public:
      * @param end - ending of a range.
      * @return - range get operation result.
      */
-    ValueT rangeGet(KeyT begin, KeyT end) const;
+    ValueT rangeGet(KeyT begin, KeyT end) const requires
+        conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
+        && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>;
 
 private:
     void _setImpl(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
@@ -122,8 +123,7 @@ private:
                     _Node* currNode) const;
     ValueT _rangeGetImpl(KeyT begin, KeyT end,
                          KeyT currBegin, KeyT currEnd,
-                         _Node* currNode) const requires conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
-                                                      && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT>;
+                         _Node* currNode) const;
 private:
     mutable _Node _rootNode;
     const KeyT _begin;
@@ -171,9 +171,9 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
                         UpdateOp, UpdateArgT, Allocator>::update(
         KeyT begin,
         KeyT end,
-        const _UpdateArgT& toUpdate)  {
+        const _UpdateArgT& toUpdate) {
     this->_updateImpl(begin, end, _begin, _end, &_rootNode,
-                &static_cast<const UpdateArgT&>(toUpdate));
+                static_cast<const UpdateArgT&>(toUpdate));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -228,14 +228,16 @@ ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
 template <std::integral KeyT,
           class ValueT,
           class GetValueT,
-          class SegCombiner,
-          class SegInitializer,
+          class SegGetComb,
+          class SegGetInit,
           class UpdateOp,
           class UpdateArgT,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
+ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                           UpdateOp, UpdateArgT, Allocator>::rangeGet(
-        KeyT begin, KeyT end) const {
+        KeyT begin, KeyT end) const requires
+            conc::SegmentCombiner<SegGetComb, GetValueT, KeyT>
+            && conc::SegmentInitializer<SegGetInit, ValueT, KeyT, GetValueT> {
     return _rangeGetImpl(begin, end, _begin, _end, &_rootNode);
 }
 
@@ -259,10 +261,10 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
         currNode->setValue(toUpdate);
         return;
     }
-    const auto m = (currBegin + currEnd) / 2;
     if (currNode->isLeaf()) {
         currNode->initChildren();
     }
+    const auto m = (currBegin + currEnd) / 2;
     this->_optionalSiftNodeUpdate(currNode);
     _setImpl(begin, end, currBegin, m, currNode->getLeft(), toUpdate);
     _setImpl(begin, end, m, currEnd, currNode->getRight(), toUpdate);
@@ -279,18 +281,15 @@ template <std::integral KeyT,
           class Allocator>
 ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
                           UpdateOp, UpdateArgT, Allocator>::_getImpl(
-        KeyT key, KeyT currBegin, KeyT currEnd,
-        _Node* currNode) const {
+        KeyT key, KeyT currBegin, KeyT currEnd, _Node* currNode) const {
     if (currNode->isLeaf()) {
         return currNode->getValue();
     }
     this->_optionalSiftNodeUpdate(currNode);
     if (auto m = (currBegin + currEnd) / 2; key >= m) {
-        _Node* visitedNode = currNode->getRight();
-        return _getImpl(key, m, currEnd, visitedNode);
+        return _getImpl(key, m, currEnd, currNode->getRight());
     } else {
-        _Node* visitedNode = currNode->getLeft();
-        return _getImpl(key, currBegin, m, visitedNode);
+        return _getImpl(key, currBegin, m, currNode->getLeft());
     }
 }
 
@@ -306,8 +305,7 @@ template <std::integral KeyT,
 ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
                           UpdateOp, UpdateArgT, Allocator>::_rangeGetImpl(
         KeyT begin, KeyT end, KeyT currBegin,
-        KeyT currEnd, _Node* currNode) const requires conc::SegmentCombiner<SegCombiner, GetValueT, KeyT>
-                                                   && conc::SegmentInitializer<SegInitializer, ValueT, KeyT, GetValueT> {
+        KeyT currEnd, _Node* currNode) const {
     if (begin > currEnd || currBegin > end) {
         assert(false &&
                "_rangeGetImpl must not be called out of initial get range.");
@@ -320,20 +318,20 @@ ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegCombiner, SegInitializer,
     if (currNode->isLeaf()) {
         currNode->initChildren();
     }
+
     _UpdateVariationBase::_optionalSiftNodeUpdate(currNode);
     const auto m = (currBegin + currEnd) / 2;
 
-    _Node* rightNodePtr = currNode->getRight();
-    _Node* leftNodePtr = currNode->getLeft();
-
     if (begin >= m) { // only right
-        return _rangeGetImpl(begin, end, m, currEnd, rightNodePtr);
+        return _rangeGetImpl(begin, end, m, currEnd, currNode->getRight());
     }
 
     if (end <= m) { // only left
-        return _rangeGetImpl(begin, end, currBegin, m, leftNodePtr);
+        return _rangeGetImpl(begin, end, currBegin, m, currNode->getLeft());
     }
 
+    _Node* const rightNodePtr = currNode->getRight();
+    _Node* const leftNodePtr = currNode->getLeft();
     const ValueT rVal = _rangeGetImpl(begin, end, m, currEnd, rightNodePtr);
     const ValueT lVal = _rangeGetImpl(begin, end, currBegin, m, leftNodePtr);
 
