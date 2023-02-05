@@ -1,6 +1,8 @@
 #ifndef AVG_SEG_TREE_REFERENCE_HPP
 #define AVG_SEG_TREE_REFERENCE_HPP
 
+#include <concepts>
+
 #include "seg_tree_reference_base.hpp"
 
 template <std::integral KeyT, class ValueT>

@@ -1,7 +1,9 @@
 #ifndef DYNAMIC_AVG_SEGMENT_TREE_HPP
 #define DYNAMIC_AVG_SEGMENT_TREE_HPP
 
-#include <dynamic_segment_tree.hpp>
+#include <concepts>
+
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace dst {
 

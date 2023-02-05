@@ -1,10 +1,10 @@
 #ifndef MAX_SEG_TREE_REFERENCE_HPP
 #define MAX_SEG_TREE_REFERENCE_HPP
 
-#include "seg_tree_reference_base.hpp"
-
 #include <concepts>
 #include <algorithm>
+
+#include "seg_tree_reference_base.hpp"
 
 template<std::integral KeyT, class ValueT>
 class MaxSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {

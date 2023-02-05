@@ -2,7 +2,7 @@
 #include <random>
 #include "reference/max_seg_tree_reference.hpp"
 
-#include <curried/dynamic_max_segment_tree.hpp>
+#include <dst/curried/dynamic_max_segment_tree.hpp>
 
 using dst::DynamicMaxSegmentTree;
 

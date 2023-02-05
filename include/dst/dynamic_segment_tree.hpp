@@ -5,16 +5,19 @@
 #include <concepts>
 #include <functional>
 
-#include <impl/dynamic_segment_tree_update_variation_base.hpp>
-#include <impl/dynamic_segment_tree_range_get_variation_base.hpp>
-#include <impl/node.hpp>
+#include <dst/impl/dynamic_segment_tree_update_variation_base.hpp>
+#include <dst/impl/dynamic_segment_tree_range_get_variation_base.hpp>
+#include <dst/impl/node.hpp>
 
-#include <mp.hpp>
-#include <concepts.hpp>
-#include <disable_operations.hpp>
+#include <dst/mp.hpp>
+#include <dst/concepts.hpp>
+#include <dst/disable_operations.hpp>
 
 namespace dst{
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The DynamicSegmentTree class
+///
 template <std::integral KeyT,
           class ValueT,
           class GetValueT,
@@ -105,7 +108,7 @@ public:
      * @param key - index.
      * @return value in index.
      */
-    ValueT get(KeyT key) const;
+    const ValueT& get(KeyT key) const;
 
     /**
      * @brief rangeGet - get result on a range.
@@ -120,12 +123,13 @@ public:
 private:
     void _setImpl(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
                      _Node* currNode, const ValueT& toUpdate);
-    ValueT _getImpl(KeyT key, KeyT currBegin, KeyT currEnd,
-                    _Node* currNode) const;
+    const ValueT& _getImpl(KeyT key, KeyT currBegin, KeyT currEnd,
+                           _Node* currNode) const;
     ValueT _rangeGetImpl(KeyT begin, KeyT end,
                          KeyT currBegin, KeyT currEnd,
                          _Node* currNode) const;
 private:
+    const ValueT _outerVal;
     mutable _Node _rootNode;
     const KeyT _begin;
     const KeyT _end;
@@ -149,7 +153,8 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
         const SegGetInit& segInitializer,
         const UpdateOp& updateOp,
         const Allocator& alloc)
-    : _rootNode(value),
+    : _outerVal{},
+      _rootNode(value),
       _begin(begin),
       _end(end),
       _RangeGetInitVariationBase(segInitializer),
@@ -216,11 +221,12 @@ template <std::integral KeyT,
           class UpdateOp,
           class UpdateArgT,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                          UpdateOp, UpdateArgT, Allocator>::get(
+const ValueT&
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
+                   UpdateOp, UpdateArgT, Allocator>::get(
         KeyT key) const {
     if (key >= _end || key < _begin) {
-        return ValueT{};
+        return _outerVal;
     }
     return _getImpl(key, _begin, _end, &_rootNode);
 }
@@ -280,8 +286,9 @@ template <std::integral KeyT,
           class UpdateOp,
           class UpdateArgT,
           class Allocator>
-ValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                          UpdateOp, UpdateArgT, Allocator>::_getImpl(
+const ValueT&
+DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
+                   UpdateOp, UpdateArgT, Allocator>::_getImpl(
         KeyT key, KeyT currBegin, KeyT currEnd, _Node* currNode) const {
     if (currNode->isLeaf()) {
         return currNode->getValue();

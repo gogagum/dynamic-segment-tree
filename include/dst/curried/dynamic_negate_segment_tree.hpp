@@ -1,10 +1,10 @@
 #ifndef DYNAMIC_NEGATE_SEGMENT_TREE_HPP
 #define DYNAMIC_NEGATE_SEGMENT_TREE_HPP
 
-#include <dynamic_segment_tree.hpp>
-
 #include <concepts>
 #include <memory>
+
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace dst {
 

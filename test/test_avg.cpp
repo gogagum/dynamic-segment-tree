@@ -3,7 +3,7 @@
 
 #include "reference/avg_seg_tree_reference.hpp"
 
-#include <curried/dynamic_avg_segment_tree.hpp>
+#include <dst/curried/dynamic_avg_segment_tree.hpp>
 
 using dst::DynamicAvgSegmentTree;
 
