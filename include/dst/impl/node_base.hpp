@@ -16,18 +16,18 @@ class BaseNode {
     using _AllocatorTraits = std::allocator_traits<_Allocator>;
 
 public:
-    BaseNode() = default;
-    BaseNode(const T& value) :    _value(value) {}
-    BaseNode(T&& value) :         _value(std::move(value)) {}
+    BaseNode() :               _left{ nullptr }, _right{ nullptr } {};
+    BaseNode(const T& value) : _value(value), _left{ nullptr }, _right{ nullptr } {}
+    BaseNode(T&& value) :      _value(std::move(value)) {}
 public:
-    const T& getValue() const     { return _value.value(); }
+    const T& getValue() const  { return _value.value(); }
     void setValue(const T&);
-    bool hasValue() const         { return _value.has_value(); }
-    void setNullValue()           { _value = std::nullopt; }
-    bool isLeaf() const           { return !_left && !_right; };
+    bool hasValue() const      { return _value.has_value(); }
+    void setNullValue()        { _value = std::nullopt; }
+    bool isLeaf() const        { return !_left && !_right; };
     void initChildren();
-    Derived* getLeft() const      { return _left; }
-    Derived* getRight() const     { return _right; }
+    Derived* getLeft() const   { return _left; }
+    Derived* getRight() const  { return _right; }
     ~BaseNode();
 protected:
     _Allocator _allocator;
@@ -43,7 +43,7 @@ void BaseNode<T, Derived, Allocator>::setValue(const T& value) {
     if (!this->isLeaf()) {
         this->getLeft()->~Derived();
         this->getRight()->~Derived();
-        _allocator.deallocate(this->_left, 2);
+        _AllocatorTraits::deallocate(this->_allocator, _left, 2);
         this->_left = nullptr;
         this->_right = nullptr;
     }
@@ -67,8 +67,8 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
 template<class T, class Derived, class Allocator>
 BaseNode<T, Derived, Allocator>::~BaseNode() {
     if (!this->isLeaf()) {
-        std::destroy_at(this->_left);
-        std::destroy_at(this->_right);
+        this->getLeft()->~Derived();
+        this->getRight()->~Derived();
         _AllocatorTraits::deallocate(this->_allocator, _left, 2);
         _left = nullptr;
         _right = nullptr;
