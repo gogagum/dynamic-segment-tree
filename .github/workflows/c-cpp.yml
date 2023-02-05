@@ -1,5 +1,9 @@
 name: CI
-on: [push]
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
     linux-gcc:
@@ -89,7 +93,7 @@ jobs:
             - run: ./build/test/Debug/segment_tree_test.exe
 
     windows-clang-cl:
-        name: Windows Clang-cl
+        name: Windows Clang
         runs-on: windows-latest
         steps:
             - uses: actions/checkout@v3
