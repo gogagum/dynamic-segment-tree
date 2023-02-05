@@ -24,6 +24,7 @@ public:
     Node() = default;
     Node(const T& value) : _Base(value) {}
     Node(T&& value) : _Base(std::move(value)) {}
+    void setValue(const T& value);
     void setUpdateValue(const UpdateT& updateValue);
     template <class UpdateOp>
     void update(const UpdateOp& updateOp, const UpdateT& update);
@@ -37,6 +38,12 @@ private:
 private:
     friend class BaseNode<T, _Type, Allocator>;
 };
+
+template<class T, class UpdateT, class Allocator>
+void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
+    _Base::setValue(value);
+    _updateValue = std::nullopt;
+}
 
 template<class T, class UpdateT, class Allocator>
 template <class UpdateOp>

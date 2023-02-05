@@ -66,7 +66,4 @@ TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
         auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
         EXPECT_EQ(treeRes, refRes);
     }
-
-
-
 }

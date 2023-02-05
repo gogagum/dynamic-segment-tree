@@ -52,21 +52,16 @@ DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
         currNode->update(this->_updateOp, toUpdate);
         return;
     }
-    const auto m = (currBegin + currEnd) / 2;
     if (currNode->isLeaf()) {
         currNode->initChildren();
     }
     if constexpr (conc::UpdateOp<UpdateOp, ValueT, UpdateArgT>) {
         currNode->siftOptUpdate(this->_updateOp);
     }
-    if (m >= currBegin + 1) {
-        auto leftNodePtr = currNode->getLeft();
-        _updateImpl(begin, end, currBegin, m, leftNodePtr, toUpdate);
-    }
-    if (currEnd >= m + 1) {
-        auto rightNodePtr = currNode->getRight();
-        _updateImpl(begin, end, m, currEnd, rightNodePtr, toUpdate);
-    }
+    assert(currEnd >= currBegin + 2);
+    const auto m = (currBegin + currEnd) / 2;
+    _updateImpl(begin, end, currBegin, m, currNode->getLeft(), toUpdate);
+    _updateImpl(begin, end, m, currEnd, currNode->getRight(), toUpdate);
 }
 
 template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>

@@ -6,6 +6,9 @@
 
 namespace dst::impl {
 
+////////////////////////////////////////////////////////////////////////////////
+// Init variation                                                             //
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT, class ValueT, class GetValueT, class GetInit>
 class DynamicSegmentTreeRangeGetInitVariationBase;
 
@@ -16,6 +19,7 @@ protected:
     DynamicSegmentTreeRangeGetInitVariationBase(NoRangeGetOp) {};
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT,
           class ValueT,
           class GetValueT,
@@ -37,6 +41,7 @@ protected:
     const SegGetInit _segInitializer;
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT,
           class ValueT,
           class GetValueT,
@@ -56,9 +61,13 @@ protected:
     const SegGetInit _segInitializer;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Get variation                                                              //
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT, class GetValueT, class GetComb>
 class DynamicSegmentTreeRangeGetCombineVariationBase;
 
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT, class GetValueT>
 class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
                                                      NoRangeGetOp> {
@@ -66,6 +75,7 @@ protected:
     DynamicSegmentTreeRangeGetCombineVariationBase(NoRangeGetOp) {}
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT,
           class GetValueT,
           dst::conc::ValueGetCombiner<GetValueT> SegGetComb>
@@ -87,6 +97,7 @@ protected:
     const SegGetComb _segCombiner;
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template <class KeyT,
           class GetValueT,
           dst::conc::ValueAndBordersGetCombiner<GetValueT, KeyT> SegGetComb>
@@ -101,7 +112,8 @@ protected:
                           KeyT leftBegin,
                           KeyT separation,
                           KeyT rightEnd) const {
-        return _segCombiner(leftValue, rightValue, leftBegin, separation, rightEnd);
+        return _segCombiner(leftValue, rightValue,
+                            leftBegin, separation, rightEnd);
     }
 protected:
     const SegGetComb _segCombiner;
