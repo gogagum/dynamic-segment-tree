@@ -97,5 +97,5 @@ jobs:
         runs-on: windows-latest
         steps:
             - uses: actions/checkout@v3
-            - run: .ci\build-project-with-clang-cl.ps1
+            - run: .ci\build-project-with-clang.ps1
             - run: ./build/test/segment_tree_test.exe
