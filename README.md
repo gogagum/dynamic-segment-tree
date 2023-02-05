@@ -4,11 +4,11 @@
 
 [
 ![GitHub Actions dev build CI Status]\
-(https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg)
+(https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg)\
 ](https://github.com/gogagum/dynamic-segment-tree/actions/dev-build.yml)
 [
 ![GitHub Actions main build CI Status]\
-(https://github.com/gogagum/dynamic-segment-tree/workflows/build-main/badge.svg)
+(https://github.com/gogagum/dynamic-segment-tree/workflows/build-main/badge.svg)\
 ](https://github.com/gogagum/dynamic-segment-tree/actions/main-build.yml)
 
 ## About project structure:
