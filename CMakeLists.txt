@@ -25,6 +25,7 @@ target_include_directories(${PROJECT_NAME}
 # without it public headers won't get installed
 set(public_headers
     include/dynamic_segment_tree.hpp
+    include/impl/dynamic_segment_tree_variation_base.hpp
     include/curried/dynamic_avg_segment_tree.hpp
     include/curried/dynamic_max_segment_tree.hpp
     include/curried/dynamic_min_segment_tree.hpp
