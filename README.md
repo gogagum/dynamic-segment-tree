@@ -2,8 +2,7 @@
 
 ## Build status
 
-![dev](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/CI/badge.svg?branch=dev)
-![main](https://github.com/github/dynamic-segment-tree/actions/workflows/CI/badge.svg?branch=main)
+[![GitHub Actions CI Status](https://github.com/gogagum/dynamic-segment-tree/workflows/CI/badge.svg?branch=dev&event=push)](https://github.com/gogagum/dynamic-segment-tree/actions)
 
 ## About project structure:
 
