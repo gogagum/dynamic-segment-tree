@@ -1,5 +1,10 @@
 # `dynamic-segment-tree` - a template dynamic segment tree library.
 
+## Build status
+
+![dev](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/CI/badge.svg?branch=dev)
+![main](https://github.com/github/dynamic-segment-tree/actions/workflows/CI/badge.svg?branch=main)
+
 ## About project structure:
 
 ### `DynamicSegmentTree` class
