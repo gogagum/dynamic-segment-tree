@@ -2,7 +2,7 @@
 #include <random>
 #include "reference/seg_tree_reference_base.hpp"
 
-#include <curried/dynamic_negate_segment_tree.hpp>
+#include <dst/curried/dynamic_negate_segment_tree.hpp>
 
 template <std::integral KeyT, class ValueT, class Allocator = std::allocator<ValueT>>
 using NegateSumDynamicSegmentTree =

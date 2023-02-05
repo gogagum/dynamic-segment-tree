@@ -1,8 +1,8 @@
 #ifndef MPIMPL_HPP
 #define MPIMPL_HPP
 
-#include <disable_operations.hpp>
-#include <concepts.hpp>
+#include <dst/disable_operations.hpp>
+#include <dst/concepts.hpp>
 
 namespace dst {
 
@@ -23,6 +23,8 @@ struct DefaultUpdateArg<NoUpdateOp, ValueT> {
 };
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Default update operation argument.
 template <class UpdateOp, class ValueT>
 using DefaultUpdateArgT = typename impl::DefaultUpdateArg<UpdateOp, ValueT>::Type;
 

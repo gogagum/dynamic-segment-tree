@@ -2,7 +2,7 @@
 #include <random>
 #include "reference/min_seg_tree_reference.hpp"
 
-#include <curried/dynamic_min_segment_tree.hpp>
+#include <dst/curried/dynamic_min_segment_tree.hpp>
 
 using dst::DynamicMinSegmentTree;
 

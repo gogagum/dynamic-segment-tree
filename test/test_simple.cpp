@@ -2,7 +2,7 @@
 #include <random>
 #include "reference/seg_tree_reference_base.hpp"
 
-#include <curried/dynamic_simple_get_set_segment_tree.hpp>
+#include <dst/curried/dynamic_simple_get_set_segment_tree.hpp>
 
 using dst::DynamicSimpleGetSetSegmentTree;
 

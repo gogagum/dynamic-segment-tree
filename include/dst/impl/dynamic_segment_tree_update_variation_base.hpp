@@ -1,15 +1,19 @@
 #ifndef DYNAMIC_SEGMENT_TREE_UPDATE_VARIATION_BASE_HPP
 #define DYNAMIC_SEGMENT_TREE_UPDATE_VARIATION_BASE_HPP
 
-#include "node.hpp"
-#include "concepts.hpp"
-#include "disable_operations.hpp"
+#include <dst/impl/node.hpp>
+#include <dst/concepts.hpp>
+#include <dst/disable_operations.hpp>
 
 namespace dst::impl {
 
+////////////////////////////////////////////////////////////////////////////////
+// Update variation.                                                          //
+////////////////////////////////////////////////////////////////////////////////
 template <class ValueT, class UpdateOp, class UpdateArgT, class Allocator>
 class DynamicSegmentTreeUpdateVariationBase;
 
+////////////////////////////////////////////////////////////////////////////////
 template <class ValueT,
           class UpdateArgT,
           conc::TwoArgsUpdateOp<ValueT, UpdateArgT> UpdateOp,
@@ -23,18 +27,20 @@ protected:
 protected:
     DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
         : _updateOp(updateOp) {}
+protected:
     template <class KeyT>
     void _updateImpl(
-        KeyT begin, KeyT end, KeyT currStart, KeyT currEnd, _Node* currNode,
+        KeyT begin, KeyT end,
+        KeyT currStart, KeyT currEnd, _Node* currNode,
         const UpdateArgT& toUpdate);
     void _optionalSiftNodeUpdate(_Node* nodePtr) const {
         nodePtr->siftOptUpdate(_updateOp);
     }
-
 protected:
     UpdateOp _updateOp;
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template <class ValueT,
           class UpdateArgT,
           conc::TwoArgsUpdateOp<ValueT, UpdateArgT> UpdateOp,
@@ -64,6 +70,7 @@ DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
     _updateImpl(begin, end, m, currEnd, currNode->getRight(), toUpdate);
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
 class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, void, Allocator>{
 protected:
@@ -71,6 +78,7 @@ protected:
 protected:
     DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
         : _updateOp(updateOp) {}
+protected:
     template <class KeyT>
     void _updateImpl(
             KeyT start, KeyT end, KeyT currStart,
@@ -82,6 +90,7 @@ protected:
     UpdateOp _updateOp;
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
 template <class KeyT>
 void DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
@@ -110,6 +119,7 @@ void DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template <class ValueT, class Allocator>
 class DynamicSegmentTreeUpdateVariationBase<ValueT, NoUpdateOp,
                                             void, Allocator>{
@@ -117,7 +127,8 @@ protected:
     using _Node = Node<ValueT, void, Allocator>;
 protected:
     DynamicSegmentTreeUpdateVariationBase(NoUpdateOp) {};
-    void _optionalSiftNodeUpdate(_Node* nodePtr) const { }
+protected:
+    void _optionalSiftNodeUpdate([[maybe_unused]] _Node* nodePtr) const { }
 };
 
 

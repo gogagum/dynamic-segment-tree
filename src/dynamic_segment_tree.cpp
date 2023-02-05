@@ -1,1 +1,1 @@
-#include <dynamic_segment_tree.hpp>
+#include <dst/dynamic_segment_tree.hpp>

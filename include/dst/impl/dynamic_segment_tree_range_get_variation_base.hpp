@@ -1,8 +1,8 @@
 #ifndef DYNAMIC_SEGMENT_TREE_RANGE_GET_VARIATION_BASE_HPP
 #define DYNAMIC_SEGMENT_TREE_RANGE_GET_VARIATION_BASE_HPP
 
-#include <concepts.hpp>
-#include <disable_operations.hpp>
+#include <dst/concepts.hpp>
+#include <dst/disable_operations.hpp>
 
 namespace dst::impl {
 
