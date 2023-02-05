@@ -17,11 +17,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(segment_tree_test
-    negate_test.cpp
-    sum_test.cpp
-    min_test.cpp
-    max_test.cpp
+    test_negate.cpp
+    test_sum.cpp
+    test_min.cpp
+    test_max.cpp
     test_simple.cpp
+    test_avg.cpp
 )
 
 enable_testing()

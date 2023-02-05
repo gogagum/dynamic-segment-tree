@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <dynamic_max_segment_tree.hpp>
-
 #include <random>
 #include "reference/max_seg_tree_reference.hpp"
+
+#include <dst/curried/dynamic_max_segment_tree.hpp>
 
 using dst::DynamicMaxSegmentTree;
 
@@ -109,28 +109,6 @@ TEST(DynamicMaxSegmentTree, LadderDownLeft) {
     EXPECT_EQ(tree.rangeGet(3, 42), 0);
 }
 
-TEST(DynamicMaxSegmentTree, FuzzTestSetGet) {
-    auto tree = DynamicMaxSegmentTree<int, int>(0, 1000, 0);
-    auto reference = MaxSegTreeReference<int, int>(0, 1000, 0);
-
-    std::mt19937 generator(42);
-
-    for (std::size_t i = 0; i < 100; ++i) {
-        std::size_t rngStart = generator() % 500; // [0..500)
-        std::size_t rngLen = generator() % 500;   // [0..500)
-        int setVal = generator() % 1000; // [0..100)
-        tree.set(rngStart, rngStart + rngLen, setVal);
-        reference.set(rngStart, rngStart + rngLen, setVal);
-    }
-
-    for (std::size_t i = 0; i < 50; ++i) {
-        int idx = generator() % 100; // [0..1000)
-        auto treeRes = tree.get(idx);
-        auto refRes = reference.get(idx);
-        EXPECT_EQ(treeRes, refRes);
-    }
-}
-
 TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
     auto tree = DynamicMaxSegmentTree<int, int, int, std::plus<int>>(0, 1000, 0);
     auto reference = MaxSegTreeReference<int, int>(0, 1000, 0);
@@ -206,6 +184,38 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetRangeGet) {
         int setVal = generator() % 1000; // [0..100)
         tree.set(rngStart, rngStart + rngLen, setVal);
         reference.set(rngStart, rngStart + rngLen, setVal);
+    }
+
+    for (std::size_t i = 0; i < 50; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+        auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
+        auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
+        EXPECT_EQ(treeRes, refRes);
+    }
+}
+
+TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
+    auto tree = DynamicMaxSegmentTree<int, int, int, std::plus<int>>(0, 1000, 0);
+    auto reference = MaxSegTreeReference<int, int>(0, 1000, 0);
+
+    std::mt19937 generator(54);
+
+    for (std::size_t i = 0; i < 100; ++i) {
+        std::size_t rngStart = generator() % 500; // [0..500)
+        std::size_t rngLen = generator() % 500;   // [0..500)
+
+        int operationChoise = generator() % 2;
+
+        if (operationChoise) {
+            int setVal = generator() % 1000; // [0..1000)
+            tree.set(rngStart, rngStart + rngLen, setVal);
+            reference.set(rngStart, rngStart + rngLen, setVal);
+        } else {
+            int updateValue = generator() % 1000;  // [0..1000)
+            tree.update(rngStart, rngStart + rngLen, updateValue);
+            reference.update(rngStart, rngStart + rngLen, std::plus<int>(), updateValue);
+        }
     }
 
     for (std::size_t i = 0; i < 50; ++i) {

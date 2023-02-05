@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <dynamic_sum_segment_tree.hpp>
-
 #include <random>
 #include "reference/sum_seg_tree_reference.hpp"
+
+#include <dst/curried/dynamic_sum_segment_tree.hpp>
 
 using dst::DynamicSumSegmentTree;
 
@@ -159,7 +159,9 @@ TEST(DynamicSumSegmentTree, LongLongToLongLong) {
 
 TEST(DynamicSumSegmentTree, LongLongToLongLongLadder) {
     const auto topBorder = 1000000ll;
-    auto tree = DynamicSumSegmentTree<long long, long long, long long, std::plus<long long>>(0, topBorder, 0);
+    using SegTree = DynamicSumSegmentTree<long long, long long,
+                                          long long, std::plus<long long>>;
+    auto tree = SegTree(0ll, topBorder);
 
     tree.update(topBorder - topBorder / 2, topBorder, 1ll);
     tree.update(topBorder - topBorder / 4, topBorder, 10ll);
@@ -204,7 +206,7 @@ TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
     for (std::size_t i = 0; i < 100; ++i) {
         std::size_t rngStart = generator() % 500; // [0..500)
         std::size_t rngLen = generator() % 500;   // [0..500)
-        int setVal = generator() % 1000; // [0..100)
+        int setVal = generator() % 1000; // [0..1000)
         tree.set(rngStart, rngStart + rngLen, setVal);
         reference.set(rngStart, rngStart + rngLen, setVal);
     }

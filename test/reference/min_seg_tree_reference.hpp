@@ -1,10 +1,10 @@
 #ifndef MIN_SEG_TREE_REFERENCE_HPP
 #define MIN_SEG_TREE_REFERENCE_HPP
 
-#include "seg_tree_reference_base.hpp"
-
 #include <concepts>
 #include <algorithm>
+
+#include "seg_tree_reference_base.hpp"
 
 template<std::integral KeyT, class ValueT>
 class MinSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {

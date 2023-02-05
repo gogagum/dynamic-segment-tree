@@ -6,6 +6,9 @@
 
 namespace dst::impl {
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The BaseNode class
+///
 template <class T, class Derived, class Allocator>
 class BaseNode {
     using _Allocator =
@@ -16,6 +19,7 @@ public:
     BaseNode() = default;
     BaseNode(const T& value) :    _value(value) {}
     BaseNode(T&& value) :         _value(std::move(value)) {}
+public:
     const T& getValue() const     { return _value.value(); }
     void setValue(const T&);
     bool hasValue() const         { return _value.has_value(); }
@@ -32,6 +36,7 @@ protected:
     Derived* _right {nullptr};
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Derived, class Allocator>
 void BaseNode<T, Derived, Allocator>::setValue(const T& value) {
     this->_value = value;
@@ -44,6 +49,7 @@ void BaseNode<T, Derived, Allocator>::setValue(const T& value) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Derived, class Allocator>
 void BaseNode<T, Derived, Allocator>::initChildren() {
     assert(this->isLeaf() && "Can only init children for a leaf.");
@@ -57,7 +63,7 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
     this->_value = std::nullopt;
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Derived, class Allocator>
 BaseNode<T, Derived, Allocator>::~BaseNode() {
     if (!this->isLeaf()) {

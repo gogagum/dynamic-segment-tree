@@ -1,31 +1,16 @@
 #include <gtest/gtest.h>
-
 #include <random>
-
-#include <dynamic_negate_segment_tree.hpp>
 #include "reference/seg_tree_reference_base.hpp"
 
-template <class ValueT>
-struct SumComb {
-    ValueT operator()(const ValueT& val1, const ValueT& val2) const {
-        return val1 + val2;
-    };
-};
-
-template <class ValueT, class KeyT>
-struct SumInit {
-    ValueT operator()(const ValueT& val, KeyT length) const {
-        return val * length;
-    };
-};
+#include <dst/curried/dynamic_negate_segment_tree.hpp>
 
 template <std::integral KeyT, class ValueT, class Allocator = std::allocator<ValueT>>
 using NegateSumDynamicSegmentTree =
     dst::DynamicNegateSegmentTree<KeyT,
                                   ValueT,
                                   ValueT,
-                                  SumComb<ValueT>,
-                                  SumInit<ValueT, KeyT>,
+                                  dst::NoRangeGetOp,
+                                  dst::NoRangeGetOp,
                                   Allocator>;
 
 TEST(DynamicNegateSegmentTree, Construct) {

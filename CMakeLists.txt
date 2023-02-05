@@ -7,18 +7,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-add_library(${PROJECT_NAME} STATIC src/dynamic_segment_tree.cpp)
-
-target_sources(${PROJECT_NAME} PRIVATE)
+add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME}
-    PRIVATE
-        # where the library itself will look for its internal headers
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-    PUBLIC
+    INTERFACE
         # where top-level project will look for the library's public headers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         # where external projects will look for the library's public headers
@@ -28,11 +20,18 @@ target_include_directories(${PROJECT_NAME}
 # without it public headers won't get installed
 set(public_headers
     include/dynamic_segment_tree.hpp
-    include/dynamic_max_segment_tree.hpp
-    include/dynamic_min_segment_tree.hpp
+    include/impl/dynamic_segment_tree_variation_base.hpp
+    include/curried/dynamic_avg_segment_tree.hpp
+    include/curried/dynamic_max_segment_tree.hpp
+    include/curried/dynamic_min_segment_tree.hpp
+    include/curried/dynamic_negate_segment_tree.hpp
+    include/curried/dynamic_simple_get_set_segment_tree.hpp
+    include/curried/dynamic_sum_segment_tree.hpp
 )
+
 # note that ${public_headers} has to be in quotes
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 # where to find our CMake modules
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

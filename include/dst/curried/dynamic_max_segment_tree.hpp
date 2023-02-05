@@ -1,9 +1,9 @@
-#ifndef DYNAMIC_MIN_SEGMENT_TREE_HPP
-#define DYNAMIC_MIN_SEGMENT_TREE_HPP
+#ifndef DYNAMIC_MAX_SEGMENT_TREE_HPP
+#define DYNAMIC_MAX_SEGMENT_TREE_HPP
 
 #include <concepts>
 
-#include <dynamic_segment_tree.hpp>
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace dst {
 
@@ -11,14 +11,14 @@ template <std::integral KeyT,
           class ValueT,
           class GetValueT = ValueT,
           class UpdateOp = NoUpdateOp,
-          class UpdateArgT = impl::DefaultUpdateArgT<UpdateOp, ValueT>,
+          class UpdateArgT = DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
-using DynamicMinSegmentTree =
+using DynamicMaxSegmentTree =
     DynamicSegmentTree<
         KeyT,
         ValueT,
         GetValueT,
-        decltype([](const auto& left, const auto& right) { return std::min(left, right); }),
+        decltype([](const GetValueT& left, const GetValueT& right) { return std::max(left, right); }),
         decltype([](const ValueT& val) { return static_cast<GetValueT>(val); }),
         UpdateOp,
         UpdateArgT,
@@ -27,4 +27,4 @@ using DynamicMinSegmentTree =
 
 }
 
-#endif // DYNAMIC_MIN_SEGMENT_TREE_HPP
+#endif // DYNAMIC_MAX_SEGMENT_TREE_HPP

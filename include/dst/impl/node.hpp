@@ -5,18 +5,22 @@
 #include <optional>
 #include <cassert>
 
-#include <node_base.hpp>
+#include <dst/impl/node_base.hpp>
 
 namespace dst::impl {
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T,
          class UpdateT,
          class Allocator = std::allocator<T>>
 class Node;
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class UpdateT, class Allocator>
-class Node<T, std::optional<UpdateT>, Allocator>
-        : public BaseNode<T, Node<T, std::optional<UpdateT>, Allocator>, Allocator> {
+class Node<T, std::optional<UpdateT>, Allocator> :
+        public BaseNode<
+            T, Node<T, std::optional<UpdateT>, Allocator>, Allocator
+        > {
 private:
     using _Type = Node<T, std::optional<UpdateT>, Allocator>;
     using _Base = BaseNode<T, _Type, Allocator>;
@@ -24,6 +28,7 @@ public:
     Node() = default;
     Node(const T& value) : _Base(value) {}
     Node(T&& value) : _Base(std::move(value)) {}
+    void setValue(const T& value);
     void setUpdateValue(const UpdateT& updateValue);
     template <class UpdateOp>
     void update(const UpdateOp& updateOp, const UpdateT& update);
@@ -38,6 +43,14 @@ private:
     friend class BaseNode<T, _Type, Allocator>;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+template<class T, class UpdateT, class Allocator>
+void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
+    _Base::setValue(value);
+    _updateValue = std::nullopt;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class UpdateT, class Allocator>
 template <class UpdateOp>
 void
@@ -58,6 +71,7 @@ Node<T, std::optional<UpdateT>, Allocator>::update(const UpdateOp& updateOp,
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class UpdateT, class Allocator>
 template <class UpdateOp>
 void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
@@ -70,14 +84,15 @@ void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class UpdateT, class Allocator>
-void
-Node<T, std::optional<UpdateT>, Allocator>::setUpdateValue(
+void Node<T, std::optional<UpdateT>, Allocator>::setUpdateValue(
         const UpdateT& updateValue) {
     assert(!this->isLeaf() && "Can`t set update value for a leaf.");
     _updateValue = updateValue;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Allocator>
 class Node<T, bool, Allocator>
         : public BaseNode<T, Node<T, bool, Allocator>, Allocator> {
@@ -100,10 +115,10 @@ private:
     friend class BaseNode<T, _Type, Allocator>;
 };
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Allocator>
 template <class UpdateOp>
-void
-Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
+void Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
     if (!this->isLeaf()) {
         if (_toUpdate) {
             this->getLeft()->update(updateOp);  // update left with old update
@@ -115,6 +130,7 @@ Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Allocator>
 template <class UpdateOp>
 void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
@@ -126,6 +142,7 @@ void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<class T, class Allocator>
 class Node<T, void, Allocator>
         : public BaseNode<T, Node<T, void, Allocator>, Allocator> {
@@ -135,10 +152,10 @@ private:
 public:
     Node() = default;
     Node(const T& value) : BaseNode<T, _Type, Allocator>(value) {}
-    Node(T&& value) : BaseNode<T, _Type, Allocator>(std::move(value)) {}
-    ~Node() { _destruct(); }
+    Node(T&& value)      : BaseNode<T, _Type, Allocator>(std::move(value)) {}
+    ~Node()              { _destruct(); }
 private:
-    void _destruct()  { reinterpret_cast<_Base*>(this)->~_Base(); }
+    void _destruct()     { reinterpret_cast<_Base*>(this)->~_Base(); }
 private:
     friend class BaseNode<T, Node<T, void, Allocator>, Allocator>;
 };
