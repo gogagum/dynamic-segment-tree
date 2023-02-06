@@ -20,7 +20,7 @@ jobs:
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/segment_tree_test
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
-            - run: ./build-valgrind/test/segment_tree_test
+            - run: valgrind ./build-valgrind/test/segment_tree_test
 
     linux-clang-libcpp:
         name: Linux Clang (libc++)
