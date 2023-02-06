@@ -34,9 +34,6 @@ public:
     void update(const UpdateOp& updateOp, const UpdateT& update);
     template <class UpdateOp>
     void siftOptUpdate(const UpdateOp& updateOp);
-    ~Node() { _destruct(); }
-private:
-    void _destruct()  { reinterpret_cast<_Base*>(this)->~_Base(); }
 private:
     std::optional<UpdateT> _updateValue;
 private:
@@ -108,7 +105,6 @@ public:
     void update(const UpdateOp& updateOp);
     template <class UpdateOp>
     void siftOptUpdate(const UpdateOp& updateOp);
-    ~Node() { reinterpret_cast<_Base*>(this)->~_Base(); }
 private:
     bool _toUpdate{false};
 private:
@@ -153,9 +149,6 @@ public:
     Node() = default;
     Node(const T& value) : BaseNode<T, _Type, Allocator>(value) {}
     Node(T&& value)      : BaseNode<T, _Type, Allocator>(std::move(value)) {}
-    ~Node()              { _destruct(); }
-private:
-    void _destruct()     { reinterpret_cast<_Base*>(this)->~_Base(); }
 private:
     friend class BaseNode<T, Node<T, void, Allocator>, Allocator>;
 };
