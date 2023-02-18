@@ -24,6 +24,7 @@ add_executable(segment_tree_test
 
 enable_testing()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 target_link_libraries(segment_tree_test PRIVATE gtest_main dynamic-segment-tree)
 
 include(GoogleTest)
