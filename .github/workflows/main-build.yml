@@ -16,7 +16,7 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y ninja-build g++-12 libstdc++-12-dev
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
+            - run: ./build/test/dst-test
 
     linux-clang-libcpp:
         name: Linux Clang (libc++)
@@ -31,7 +31,7 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
+            - run: ./build/test/dst-test
 
     linux-clang-libstdcpp:
         name: Linux Clang (libstdc++)
@@ -46,7 +46,7 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev libstdc++-12-dev
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
+            - run: ./build/test/dst-test
 
     mac-apple-clang:
         name: macOS AppleClang
@@ -55,7 +55,7 @@ jobs:
             - uses: actions/checkout@v3
             - run: brew install ninja
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
+            - run: ./build/test/dst-test
 
     mac-gcc:
         name: macOS GCC
@@ -67,7 +67,7 @@ jobs:
             - uses: actions/checkout@v3
             - run: brew install ninja gcc@12
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
+            - run: ./build/test/dst-test
 
     mac-clang-libcpp:
         name: macOS Clang (libc++)
@@ -80,7 +80,7 @@ jobs:
             - uses: actions/checkout@v3
             - run: brew install ninja llvm@15
             - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/segment_tree_test
+            - run: ./build/test/dst-test
 
     windows-msvc:
         name: Windows MSVC
@@ -88,7 +88,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: .ci\build-project.ps1
-            - run: ./build/test/Debug/segment_tree_test.exe
+            - run: ./build/test/Debug/dst-test.exe
 
     windows-clang-cl:
         name: Windows Clang
@@ -96,5 +96,5 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: .ci\build-project-with-clang.ps1
-            - run: ./build/test/segment_tree_test.exe
+            - run: ./build/test/dst-test.exe
 

@@ -1,22 +1,17 @@
-project(dynamic-segment-tree-tests LANGUAGES CXX)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-
 include(FetchContent)
 FetchContent_Declare(
     googletest
-    URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
 )
 
 FetchContent_MakeAvailable(googletest)
 
-add_executable(segment_tree_test
+add_executable(dst-test
     test_negate.cpp
     test_sum.cpp
     test_min.cpp
@@ -27,8 +22,13 @@ add_executable(segment_tree_test
 
 enable_testing()
 
-target_link_libraries(segment_tree_test PRIVATE gtest_main dynamic-segment-tree)
+if (CMAKE_CROSSCOMPILING)
+    message("Cross compiling. Use static libraries for tests.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+elseif()
+    message("Not cross compiling. Use dynamic libraries.")
+endif()
+target_link_libraries(dst-test PRIVATE gtest_main dynamic-segment-tree)
 
 include(GoogleTest)
-gtest_discover_tests(segment_tree_test)
 
