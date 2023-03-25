@@ -21,7 +21,8 @@ public:
                                         right_{ nullptr } {}
     explicit BaseNode(T&& value) :      value_(std::move(value)) {}
 public:
-    const T& getValue() const  { return value_.value(); }
+    const T& getValue() const
+    { assert(value_.has_value()); return value_.value(); }
     void setValue(const T&);
     bool hasValue() const      { return value_.has_value(); }
     void setNullValue()        { value_ = std::nullopt; }
