@@ -28,7 +28,9 @@ if (CMAKE_CROSSCOMPILING)
 elseif()
     message("Not cross compiling. Use dynamic libraries.")
 endif()
-target_link_libraries(dst-test PRIVATE gtest_main dynamic-segment-tree)
 
 include(GoogleTest)
+
+target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree)
+
 

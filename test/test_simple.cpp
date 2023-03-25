@@ -24,21 +24,21 @@ TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
-    auto tree = DynamicSimpleGetSetSegmentTree<int, int>(0, 1000, 0);
-    auto reference = SegTreeReferenceBase<int, int>(0, 1000, 0);
+    auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
+    auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
 
     std::mt19937 generator(42);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        std::size_t rngStart = generator() % 500; // [0..500)
-        std::size_t rngLen = generator() % 500;   // [0..500)
-        int setVal = generator() % 1000; // [0..100)
+        const std::size_t rngStart = generator() % 500; // [0..500)
+        const std::size_t rngLen = generator() % 500;   // [0..500)
+        const int setVal = static_cast<int>(generator()) % 1000; // [0..100)
         tree.set(rngStart, rngStart + rngLen, setVal);
         reference.set(rngStart, rngStart + rngLen, setVal);
     }
 
     for (std::size_t i = 0; i < 50; ++i) {
-        int idx = generator() % 1000; // [0..1000)
+        const std::size_t idx = generator() % 1000; // [0..1000)
         auto treeRes = tree.get(idx);
         auto refRes = reference.get(idx);
         EXPECT_EQ(treeRes, refRes);
@@ -46,21 +46,22 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
-    auto tree = DynamicSimpleGetSetSegmentTree<int, int>(0, 1000, 0);
-    auto reference = SegTreeReferenceBase<int, int>(0, 1000, 0);
+    auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
+    auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
 
     std::mt19937 generator(42);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        std::size_t rngStart = generator() % 500; // [0..500)
-        std::size_t rngLen = generator() % 500;   // [0..500)
+        const std::size_t rngStart = generator() % 500; // [0..500)
+        const std::size_t rngLen = generator() % 500;   // [0..500)
 
-        if (int opType = generator() % 2; opType == 0) {
-            int setVal = generator() % 1000; // [0..1000)
+        if (const int opType = static_cast<int>(generator()) % 2; opType == 0) {
+            const int setVal = 
+                static_cast<int>(generator()) % 1000; // [0..1000)
             tree.set(rngStart, rngStart + rngLen, setVal);
             reference.set(rngStart, rngStart + rngLen, setVal);
         } else {
-            int idx = generator() % 1000; // [0..1000)
+            const std::size_t idx = generator() % 1000; // [0..1000)
             auto treeRes = tree.get(idx);
             auto refRes = reference.get(idx);
             EXPECT_EQ(treeRes, refRes);
