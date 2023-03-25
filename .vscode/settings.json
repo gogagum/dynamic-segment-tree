@@ -86,5 +86,8 @@
         "locale": "cpp",
         "queue": "cpp",
         "stack": "cpp"
-    }
+    },
+    "cmake.configureArgs": [
+        "-DDST_TESTS=1"
+    ]
 }

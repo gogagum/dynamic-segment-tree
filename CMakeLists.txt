@@ -36,6 +36,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 # where to find our CMake modules
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-if (BUILD_TEST)
+if (DST_TESTS)
     add_subdirectory(test)
-endif (BUILD_TEST)
+endif (DST_TESTS)

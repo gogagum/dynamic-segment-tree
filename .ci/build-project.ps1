@@ -29,5 +29,5 @@ Write-Host "BUILD_DIR: $BUILD_DIR"
 Write-Host "---------------------------"
 
 New-Item -Name "$BUILD_DIR" -ItemType Directory
-cmake -DCMAKE_BUILD_TYPE=Debug -B "$BUILD_DIR" -DBUILD_TEST:BOOL=ON
+cmake -DCMAKE_BUILD_TYPE=Debug -B "$BUILD_DIR" -DDST_TESTS:BOOL=ON
 cmake --build "$BUILD_DIR" -j --config Debug
