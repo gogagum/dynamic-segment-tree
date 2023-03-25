@@ -57,8 +57,8 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
     auto gen = std::mt19937(37);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        int rangeBeg = gen() % 500;  // [0..500)
-        int rangeLen = gen() % 500;  // [0..500)
+        const int rangeBeg = static_cast<int>(gen()) % 500;  // [0..500)
+        const int rangeLen = static_cast<int>(gen()) % 500;  // [0..500)
 
         tree.update(rangeBeg, rangeBeg + rangeLen);
         reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
@@ -66,7 +66,7 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
 
 
     for (std::size_t i = 0; i < 100; ++i) {
-        int idx = gen() % 1000;
+        const int idx = static_cast<int>(gen()) % 1000;
 
         const auto treeRes = tree.get(idx);
         const auto referenceRes = reference.get(idx);
@@ -76,20 +76,21 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
 }
 
 TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
-    auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
-    auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+    auto tree = NegateSumDynamicSegmentTree<std::size_t, int>(0, 1000, 42);
+    auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 42);
 
     const auto updateOp = [](int num) { return -num; };
     std::mt19937 generator(54);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        std::size_t rngStart = generator() % 500; // [0..500)
-        std::size_t rngLen = generator() % 500;   // [0..500)
+        const std::size_t rngStart = generator() % 500; // [0..500)
+        const std::size_t rngLen = generator() % 500;   // [0..500)
 
-        int operationChoise = generator() % 2;
+        const int operationChoise = static_cast<int>(generator()) % 2;
 
         if (operationChoise) {
-            int setVal = generator() % 1000; // [0..1000)
+            const int setVal =
+                static_cast<int>(generator()) % 1000; // [0..1000)
             tree.set(rngStart, rngStart + rngLen, setVal);
             reference.set(rngStart, rngStart + rngLen, setVal);
         } else {
@@ -99,7 +100,7 @@ TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
     }
 
     for (std::size_t i = 0; i < 50; ++i) {
-        int idx = generator() % 100; // [0..1000)
+        const std::size_t idx = generator() % 100; // [0..1000)
         auto treeRes = tree.get(idx);
         auto refRes = reference.get(idx);
         EXPECT_EQ(treeRes, refRes);
@@ -114,25 +115,25 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     auto gen = std::mt19937(37);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        int rangeBeg = gen() % 500;  // [0..500)
-        int rangeLen = gen() % 500;  // [0..500)
+        const int rangeBeg = static_cast<int>(gen()) % 500;  // [0..500)
+        const int rangeLen = static_cast<int>(gen()) % 500;  // [0..500)
 
         tree.update(rangeBeg, rangeBeg + rangeLen);
         reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
     }
 
     for (std::size_t i = 0; i < 100; ++i) {
-        int rangeBeg = gen() % 500;  // [0..500)
-        int rangeLen = gen() % 500;  // [0..500)
+        const int rangeBeg = static_cast<int>(gen()) % 500;  // [0..500)
+        const int rangeLen = static_cast<int>(gen()) % 500;  // [0..500)
 
-        int valueToSet = gen() % 1000;  // [0..1000)
+        const int valueToSet = static_cast<int>(gen()) % 1000;  // [0..1000)
 
         tree.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
         reference.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
     }
 
     for (std::size_t i = 0; i < 100; ++i) {
-        int idx = gen() % 1000;
+        const int idx = static_cast<int>(gen()) % 1000;
 
         const auto treeRes = tree.get(idx);
         const auto referenceRes = reference.get(idx);

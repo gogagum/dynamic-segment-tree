@@ -198,22 +198,22 @@ TEST(DynamicSumSegmentTree, SetOnTheSameRange) {
 }
 
 TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
-    auto tree = DynamicSumSegmentTree<int, int>(0, 1000, 0);
-    auto reference = SumSegTreeReference<int, int>(0, 1000, 0);
+    auto tree = DynamicSumSegmentTree<std::size_t, int>(0, 1000, 0);
+    auto reference = SumSegTreeReference<std::size_t, int>(0, 1000, 0);
 
     std::mt19937 generator(42);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        std::size_t rngStart = generator() % 500; // [0..500)
-        std::size_t rngLen = generator() % 500;   // [0..500)
-        int setVal = generator() % 1000; // [0..1000)
+        const std::size_t rngStart = generator() % 500; // [0..500)
+        const std::size_t rngLen = generator() % 500;   // [0..500)
+        const int setVal = static_cast<int>(generator()) % 1000; // [0..1000)
         tree.set(rngStart, rngStart + rngLen, setVal);
         reference.set(rngStart, rngStart + rngLen, setVal);
     }
 
     for (std::size_t i = 0; i < 50; ++i) {
-        std::size_t rngStart = generator() % 500; // [0..500)
-        std::size_t rngLen = generator() % 500;   // [0..500)
+        const std::size_t rngStart = generator() % 500; // [0..500)
+        const std::size_t rngLen = generator() % 500;   // [0..500)
         auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
         auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
         EXPECT_EQ(treeRes, refRes);
