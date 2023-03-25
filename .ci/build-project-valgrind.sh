@@ -19,5 +19,5 @@ echo "BUILD_DIR: $BUILD_DIR"
 echo "-----------------------------------"
 
 mkdir "$BUILD_DIR"
-cmake -G Ninja -DDSTTESTS:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -B "$BUILD_DIR" -DCMAKE_CXX_FLAGS="-gdwarf-4"
+cmake -G Ninja -DDST_TESTS:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -B "$BUILD_DIR" -DCMAKE_CXX_FLAGS="-gdwarf-4"
 cmake --build "$BUILD_DIR" -j
