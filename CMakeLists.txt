@@ -19,14 +19,13 @@ target_include_directories(${PROJECT_NAME}
 
 # without it public headers won't get installed
 set(public_headers
-    include/dynamic_segment_tree.hpp
-    include/impl/dynamic_segment_tree_variation_base.hpp
-    include/curried/dynamic_avg_segment_tree.hpp
-    include/curried/dynamic_max_segment_tree.hpp
-    include/curried/dynamic_min_segment_tree.hpp
-    include/curried/dynamic_negate_segment_tree.hpp
-    include/curried/dynamic_simple_get_set_segment_tree.hpp
-    include/curried/dynamic_sum_segment_tree.hpp
+    include/dst/dynamic_segment_tree.hpp
+    include/dst/curried/dynamic_avg_segment_tree.hpp
+    include/dst/curried/dynamic_max_segment_tree.hpp
+    include/dst/curried/dynamic_min_segment_tree.hpp
+    include/dst/curried/dynamic_negate_segment_tree.hpp
+    include/dst/curried/dynamic_simple_get_set_segment_tree.hpp
+    include/dst/curried/dynamic_sum_segment_tree.hpp
 )
 
 # note that ${public_headers} has to be in quotes
