@@ -23,21 +23,21 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT,
                                             UpdateArgT,
                                             Allocator>{
 protected:
-    using _Node = Node<ValueT, std::optional<UpdateArgT>, Allocator>;
+    using Node_ = Node<ValueT, std::optional<UpdateArgT>, Allocator>;
 protected:
-    DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
-        : _updateOp(updateOp) {}
+    explicit DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
+        : updateOp_(updateOp) {}
 protected:
     template <class KeyT>
-    void _updateImpl(
+    void updateImpl_(
         KeyT begin, KeyT end,
-        KeyT currStart, KeyT currEnd, _Node* currNode,
+        KeyT currStart, KeyT currEnd, Node_* currNode,
         const UpdateArgT& toUpdate);
-    void _optionalSiftNodeUpdate(_Node* nodePtr) const {
-        nodePtr->siftOptUpdate(_updateOp);
+    void optionalSiftNodeUpdate_(Node_* nodePtr) const {
+        nodePtr->siftOptUpdate(updateOp_);
     }
 protected:
-    UpdateOp _updateOp;
+    UpdateOp updateOp_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,74 +48,74 @@ template <class ValueT,
 template <class KeyT>
 void
 DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
-                                      UpdateArgT, Allocator>::_updateImpl(
+                                      UpdateArgT, Allocator>::updateImpl_(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-        _Node* currNode, const UpdateArgT& toUpdate) {
+        Node_* currNode, const UpdateArgT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
         return;
     }
     if (end >= currEnd && begin <= currBegin) {
-        currNode->update(this->_updateOp, toUpdate);
+        currNode->update(updateOp_, toUpdate);
         return;
     }
     if (currNode->isLeaf()) {
         currNode->initChildren();
     }
     if constexpr (conc::UpdateOp<UpdateOp, ValueT, UpdateArgT>) {
-        currNode->siftOptUpdate(this->_updateOp);
+        currNode->siftOptUpdate(updateOp_);
     }
     assert(currEnd >= currBegin + 2);
     const auto m = (currBegin + currEnd) / 2;
-    _updateImpl(begin, end, currBegin, m, currNode->getLeft(), toUpdate);
-    _updateImpl(begin, end, m, currEnd, currNode->getRight(), toUpdate);
+    updateImpl_(begin, end, currBegin, m, currNode->getLeft(), toUpdate);
+    updateImpl_(begin, end, m, currEnd, currNode->getRight(), toUpdate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
 class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, void, Allocator>{
 protected:
-    using _Node = Node<ValueT, bool, Allocator>;
+    using Node_ = Node<ValueT, bool, Allocator>;
 protected:
-    DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
-        : _updateOp(updateOp) {}
+    explicit DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
+        : updateOp_(updateOp) {}
 protected:
     template <class KeyT>
-    void _updateImpl(
+    void updateImpl_(
             KeyT start, KeyT end, KeyT currStart,
-            KeyT currEnd, _Node* currNode);
-    void _optionalSiftNodeUpdate(_Node* nodePtr) const {
-        nodePtr->siftOptUpdate(_updateOp);
+            KeyT currEnd, Node_* currNode);
+    void optionalSiftNodeUpdate_(Node_* nodePtr) const {
+        nodePtr->siftOptUpdate(updateOp_);
     }
 protected:
-    UpdateOp _updateOp;
+    UpdateOp updateOp_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
 template <class KeyT>
 void DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp,
-                                           void, Allocator>::_updateImpl(
+                                           void, Allocator>::updateImpl_(
         KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-        _Node* currNode) {
+        Node_* currNode) {
     if (begin >= currEnd || currBegin >= end) {
         return;
     }
     if (end >= currEnd && begin <= currBegin) {
-        currNode->update(this->_updateOp);
+        currNode->update(updateOp_);
         return;
     }
     const auto m = (currBegin + currEnd) / 2;
     if (currNode->isLeaf()) {
         currNode->initChildren();
     }
-    currNode->siftOptUpdate(this->_updateOp);
+    currNode->siftOptUpdate(updateOp_);
     if (m >= currBegin + 1) {
         auto leftNodePtr = currNode->getLeft();
-        _updateImpl(begin, end, currBegin, m, leftNodePtr);
+        updateImpl_(begin, end, currBegin, m, leftNodePtr);
     }
     if (currEnd >= m + 1) {
         auto rightNodePtr = currNode->getRight();
-        _updateImpl(begin, end, m, currEnd, rightNodePtr);
+        updateImpl_(begin, end, m, currEnd, rightNodePtr);
     }
 }
 
@@ -124,14 +124,12 @@ template <class ValueT, class Allocator>
 class DynamicSegmentTreeUpdateVariationBase<ValueT, NoUpdateOp,
                                             void, Allocator>{
 protected:
-    using _Node = Node<ValueT, void, Allocator>;
+    using Node_ = Node<ValueT, void, Allocator>;
 protected:
-    DynamicSegmentTreeUpdateVariationBase(NoUpdateOp) {};
+    explicit DynamicSegmentTreeUpdateVariationBase(NoUpdateOp) {};
 protected:
-    void _optionalSiftNodeUpdate([[maybe_unused]] _Node* nodePtr) const { }
+    void optionalSiftNodeUpdate_([[maybe_unused]] Node_* nodePtr) const { }
 };
-
-
 
 }
 

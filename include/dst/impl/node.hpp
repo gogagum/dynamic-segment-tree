@@ -22,12 +22,12 @@ class Node<T, std::optional<UpdateT>, Allocator> :
             T, Node<T, std::optional<UpdateT>, Allocator>, Allocator
         > {
 private:
-    using _Type = Node<T, std::optional<UpdateT>, Allocator>;
-    using _Base = BaseNode<T, _Type, Allocator>;
+    using Type_ = Node<T, std::optional<UpdateT>, Allocator>;
+    using Base_ = BaseNode<T, Type_, Allocator>;
 public:
     Node() = default;
-    Node(const T& value) : _Base(value) {}
-    Node(T&& value) : _Base(std::move(value)) {}
+    explicit Node(const T& value) : Base_(value) {}
+    explicit Node(T&& value) : Base_(std::move(value)) {}
     void setValue(const T& value);
     void setUpdateValue(const UpdateT& updateValue);
     template <class UpdateOp>
@@ -37,13 +37,13 @@ public:
 private:
     std::optional<UpdateT> _updateValue;
 private:
-    friend class BaseNode<T, _Type, Allocator>;
+    friend class BaseNode<T, Type_, Allocator>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template<class T, class UpdateT, class Allocator>
 void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
-    _Base::setValue(value);
+    Base_::setValue(value);
     _updateValue = std::nullopt;
 }
 
@@ -94,12 +94,12 @@ template<class T, class Allocator>
 class Node<T, bool, Allocator>
         : public BaseNode<T, Node<T, bool, Allocator>, Allocator> {
 private:
-    using _Type = Node<T, bool, Allocator>;
-    using _Base = BaseNode<T, _Type, Allocator>;
+    using Type_ = Node<T, bool, Allocator>;
+    using Base_ = BaseNode<T, Type_, Allocator>;
 public:
     Node() = default;
-    Node(const T& value) : _Base(value) {}
-    Node(T&& value) : _Base(std::move(value)) {}
+    explicit Node(const T& value) : Base_(value) {}
+    explicit Node(T&& value) : Base_(std::move(value)) {}
     void addUpdate();
     template <class UpdateOp>
     void update(const UpdateOp& updateOp);
@@ -108,7 +108,7 @@ public:
 private:
     bool _toUpdate{false};
 private:
-    friend class BaseNode<T, _Type, Allocator>;
+    friend class BaseNode<T, Type_, Allocator>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ void Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
         }
         _toUpdate = true;
     } else { // isLeaf()
-        this->_value = updateOp(this->getValue());
+        this->value_ = updateOp(this->getValue());
     }
 }
 
@@ -143,12 +143,12 @@ template<class T, class Allocator>
 class Node<T, void, Allocator>
         : public BaseNode<T, Node<T, void, Allocator>, Allocator> {
 private:
-    using _Type = Node<T, void, Allocator>;
-    using _Base = BaseNode<T, _Type, Allocator>;
+    using Type_ = Node<T, void, Allocator>;
+    using Base_ = BaseNode<T, Type_, Allocator>;
 public:
     Node() = default;
-    Node(const T& value) : BaseNode<T, _Type, Allocator>(value) {}
-    Node(T&& value)      : BaseNode<T, _Type, Allocator>(std::move(value)) {}
+    explicit Node(const T& value) : BaseNode<T, Type_, Allocator>(value) {}
+    explicit Node(T&& value)      : BaseNode<T, Type_, Allocator>(std::move(value)) {}
 private:
     friend class BaseNode<T, Node<T, void, Allocator>, Allocator>;
 };
