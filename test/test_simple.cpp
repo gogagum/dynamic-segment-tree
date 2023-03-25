@@ -38,7 +38,7 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
     }
 
     for (std::size_t i = 0; i < 50; ++i) {
-        const int idx = static_cast<int>(generator()) % 1000; // [0..1000)
+        const std::size_t idx = generator() % 1000; // [0..1000)
         auto treeRes = tree.get(idx);
         auto refRes = reference.get(idx);
         EXPECT_EQ(treeRes, refRes);
@@ -61,7 +61,7 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
             tree.set(rngStart, rngStart + rngLen, setVal);
             reference.set(rngStart, rngStart + rngLen, setVal);
         } else {
-            const int idx = static_cast<int>(generator()) % 1000; // [0..1000)
+            const std::size_t idx = generator() % 1000; // [0..1000)
             auto treeRes = tree.get(idx);
             auto refRes = reference.get(idx);
             EXPECT_EQ(treeRes, refRes);

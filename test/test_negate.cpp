@@ -57,8 +57,8 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
     auto gen = std::mt19937(37);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        const int rangeBeg = static_cast<int>(gen()) % 500;  // [0..500)
-        const int rangeLen = static_cast<int>(gen()) % 500;  // [0..500)
+        const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
+        const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
 
         tree.update(rangeBeg, rangeBeg + rangeLen);
         reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
@@ -66,7 +66,7 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
 
 
     for (std::size_t i = 0; i < 100; ++i) {
-        const int idx = static_cast<int>(gen()) % 1000;
+        const int idx = static_cast<int>(gen() % 1000);
 
         const auto treeRes = tree.get(idx);
         const auto referenceRes = reference.get(idx);
@@ -115,25 +115,25 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     auto gen = std::mt19937(37);
 
     for (std::size_t i = 0; i < 100; ++i) {
-        const int rangeBeg = static_cast<int>(gen()) % 500;  // [0..500)
-        const int rangeLen = static_cast<int>(gen()) % 500;  // [0..500)
+        const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
+        const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
 
         tree.update(rangeBeg, rangeBeg + rangeLen);
         reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
     }
 
     for (std::size_t i = 0; i < 100; ++i) {
-        const int rangeBeg = static_cast<int>(gen()) % 500;  // [0..500)
-        const int rangeLen = static_cast<int>(gen()) % 500;  // [0..500)
+        const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
+        const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
 
-        const int valueToSet = static_cast<int>(gen()) % 1000;  // [0..1000)
+        const int valueToSet = static_cast<int>(gen() % 1000);  // [0..1000)
 
         tree.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
         reference.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
     }
 
     for (std::size_t i = 0; i < 100; ++i) {
-        const int idx = static_cast<int>(gen()) % 1000;
+        const int idx = static_cast<int>(gen() % 1000);
 
         const auto treeRes = tree.get(idx);
         const auto referenceRes = reference.get(idx);

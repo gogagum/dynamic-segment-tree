@@ -118,7 +118,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
     for (std::size_t i = 0; i < 100; ++i) {
         const std::size_t rngStart = generator() % 500; // [0..500)
         const std::size_t rngLen = generator() % 500;   // [0..500)
-        const int setVal = static_cast<int>(generator()) % 1000; // [0..1000)
+        const int setVal = static_cast<int>(generator() % 1000); // [0..1000)
 
         tree.set(rngStart, rngStart + rngLen, setVal);
         reference.set(rngStart, rngStart + rngLen, setVal);
@@ -127,14 +127,14 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
     for (std::size_t i = 0; i < 100; ++i) {
         const std::size_t rngStart = generator() % 500; // [0..500)
         const std::size_t rngLen = generator() % 500;   // [0..500)
-        const int updateValue = static_cast<int>(generator()) % 1000;  // [0..1000)
+        const int updateValue = static_cast<int>(generator() % 1000);  // [0..1000)
 
         tree.update(rngStart, rngStart + rngLen, updateValue);
         reference.update(rngStart, rngStart + rngLen, std::plus<int>(), updateValue);
     }
 
     for (std::size_t i = 0; i < 50; ++i) {
-        const int idx = static_cast<int>(generator()) % 100; // [0..1000)
+        const std::size_t idx = generator() % 100; // [0..1000)
         auto treeRes = tree.get(idx);
         auto refRes = reference.get(idx);
         EXPECT_EQ(treeRes, refRes);
