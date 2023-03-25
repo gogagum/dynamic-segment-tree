@@ -59,6 +59,7 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
     right_ = nodesPtr + 1;
     std::construct_at(left_);
     std::construct_at(right_);
+    assert(value_.has_value() && "No value to set to children.");
     left_->setValue(value_.value());
     right_->setValue(value_.value());
     value_ = std::nullopt;
