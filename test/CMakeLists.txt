@@ -1,3 +1,11 @@
+################################################################################
+# Copyright Georgy Guminov 2023.
+# Distributed under the Boost Software License,
+# Version 1.0. (See accompanying file LICENSE_1_0.txt
+#  or copy at https://www.boost.org/LICENSE_1_0.txt)
+
+cmake_minimum_required(VERSION 3.15)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -32,5 +40,3 @@ endif()
 include(GoogleTest)
 
 target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree)
-
-
