@@ -24,6 +24,28 @@ namespace dst {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The DynamicSegmentTree class
 ///
+/// \tparam KeyT integral key type. Indicies of elements in a segment tree.
+/// \tparam ValueT value type of the elements in a segment tree.
+/// \tparam GetValueT type of a velue returned from get and rangeGet operations.
+/// \tparam SegGetComb two segments combiner for rangeGet operation. It has
+/// three possible forms: 1. combiner of two get-values (makes range get
+/// operation result from two results of two parts); 2. combiner of two
+/// get-values and ranges borders (makes range get operation result from two
+/// results of two parts, beginning index of a first range, separating index,
+/// and second range end index); 3. NoRangeGetOp, if rangeGet operation
+/// is turned off.
+/// \tparam SegGetInit rangeGet operation initializer. It has
+/// three possible forms: 1. initializer of a segment from one value (const
+/// ValueT& -> GetValueT); 2. initializer of a segment from one value and range
+/// borders ((const ValueT&, KeyT, KeyT) -> GetValueT); 3. NoRangeGetOp, if
+/// rangeGet operation is turned off.
+/// \tparam UpdateOp update operation functor. It has three possible forms:
+/// 1. update operation, that does not take any parameters, except for updated
+/// value; 2. update operation, that takes an additional parameter; 3.
+/// NoUpdateOp, if update operation is turned off.
+/// \tparam UpdateArgT an argument for update operation. Used only for the
+/// second form of UpdateOp functor. In other cases this parameter is ignored.
+/// \tparam Allocator allocator for nodes of a dynamic segment tree.
 template <std::integral KeyT, class ValueT, class GetValueT,
           class SegGetComb = NoRangeGetOp, class SegGetInit = NoRangeGetOp,
           class UpdateOp = NoUpdateOp,
