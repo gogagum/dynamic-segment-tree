@@ -7,12 +7,10 @@
 #ifndef MPIMPL_HPP
 #define MPIMPL_HPP
 
-#include <dst/disable_operations.hpp>
 #include <dst/concepts.hpp>
+#include <dst/disable_operations.hpp>
 
-namespace dst {
-
-namespace impl {
+namespace dst::mp {
 template <class UpdateOp, class ValueT>
 struct DefaultUpdateArg {
   using Type = ValueT;
@@ -27,14 +25,12 @@ template <class ValueT>
 struct DefaultUpdateArg<NoUpdateOp, ValueT> {
   using Type = void;
 };
-}  // namespace impl
 
 ////////////////////////////////////////////////////////////////////////////////
 // Default update operation argument.
 template <class UpdateOp, class ValueT>
-using DefaultUpdateArgT =
-    typename impl::DefaultUpdateArg<UpdateOp, ValueT>::Type;
+using DefaultUpdateArgT = typename mp::DefaultUpdateArg<UpdateOp, ValueT>::Type;
 
-}  // namespace dst
+}  // namespace dst::mp
 
 #endif  // MPIMPL_HPP

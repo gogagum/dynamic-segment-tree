@@ -7,9 +7,9 @@
 #ifndef DYNAMIC_SEGMENT_TREE_UPDATE_VARIATION_BASE_HPP
 #define DYNAMIC_SEGMENT_TREE_UPDATE_VARIATION_BASE_HPP
 
-#include <dst/impl/node.hpp>
 #include <dst/concepts.hpp>
 #include <dst/disable_operations.hpp>
+#include <dst/impl/node.hpp>
 
 namespace dst::impl {
 
@@ -34,13 +34,13 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, UpdateArgT,
 
  protected:
   template <class KeyT>
-  void updateImpl_(KeyT begin, KeyT end, KeyT currStart, KeyT currEnd,
+  void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                    Node_* currNode, const UpdateArgT& toUpdate);
   void optionalSiftNodeUpdate_(Node_* nodePtr) const {
     nodePtr->siftOptUpdate(updateOp_);
   }
 
- protected:
+ private:
   UpdateOp updateOp_;
 };
 
@@ -66,9 +66,9 @@ void DynamicSegmentTreeUpdateVariationBase<
     currNode->siftOptUpdate(updateOp_);
   }
   assert(currEnd >= currBegin + 2);
-  const auto m = (currBegin + currEnd) / 2;
-  updateImpl_(begin, end, currBegin, m, currNode->getLeft(), toUpdate);
-  updateImpl_(begin, end, m, currEnd, currNode->getRight(), toUpdate);
+  const auto mid = (currBegin + currEnd) / 2;
+  updateImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate);
+  updateImpl_(begin, end, mid, currEnd, currNode->getRight(), toUpdate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,13 +84,13 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, void, Allocator> {
 
  protected:
   template <class KeyT>
-  void updateImpl_(KeyT start, KeyT end, KeyT currStart, KeyT currEnd,
+  void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                    Node_* currNode);
   void optionalSiftNodeUpdate_(Node_* nodePtr) const {
     nodePtr->siftOptUpdate(updateOp_);
   }
 
- protected:
+ private:
   UpdateOp updateOp_;
 };
 
@@ -109,18 +109,18 @@ void DynamicSegmentTreeUpdateVariationBase<
     currNode->update(updateOp_);
     return;
   }
-  const auto m = (currBegin + currEnd) / 2;
+  const auto mid = (currBegin + currEnd) / 2;
   if (currNode->isLeaf()) {
     currNode->initChildren();
   }
   currNode->siftOptUpdate(updateOp_);
-  if (m >= currBegin + 1) {
+  if (mid >= currBegin + 1) {
     auto leftNodePtr = currNode->getLeft();
-    updateImpl_(begin, end, currBegin, m, leftNodePtr);
+    updateImpl_(begin, end, currBegin, mid, leftNodePtr);
   }
-  if (currEnd >= m + 1) {
+  if (currEnd >= mid + 1) {
     auto rightNodePtr = currNode->getRight();
-    updateImpl_(begin, end, m, currEnd, rightNodePtr);
+    updateImpl_(begin, end, mid, currEnd, rightNodePtr);
   }
 }
 

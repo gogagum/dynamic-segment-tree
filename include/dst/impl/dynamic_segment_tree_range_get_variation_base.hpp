@@ -42,7 +42,7 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
     return segInitializer_(val);
   }
 
- protected:
+ private:
   const SegGetInit segInitializer_;
 };
 
@@ -63,7 +63,7 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
     return segInitializer_(val, begin, end);
   }
 
- protected:
+ private:
   const SegGetInit segInitializer_;
 };
 
@@ -101,7 +101,7 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
     return segCombiner_(leftValue, rightValue);
   }
 
- protected:
+ private:
   const SegGetComb segCombiner_;
 };
 
@@ -122,7 +122,7 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
     return segCombiner_(leftValue, rightValue, leftBegin, separation, rightEnd);
   }
 
- protected:
+ private:
   const SegGetComb segCombiner_;
 };
 

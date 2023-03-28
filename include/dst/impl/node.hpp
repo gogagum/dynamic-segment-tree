@@ -7,11 +7,10 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
+#include <cassert>
+#include <dst/impl/node_base.hpp>
 #include <memory>
 #include <optional>
-#include <cassert>
-
-#include <dst/impl/node_base.hpp>
 
 namespace dst::impl {
 
@@ -134,7 +133,7 @@ void Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
     }
     toUpdate_ = true;
   } else {  // isLeaf()
-    this->value_ = updateOp(this->getValue());
+    this->setValue(updateOp(this->getValue()));
   }
 }
 

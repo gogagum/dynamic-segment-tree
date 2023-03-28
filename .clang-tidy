@@ -6,14 +6,17 @@ Checks: >
   google-*,
   performance-*,
   portability-*,
-  readability-identifier-naming,
-  -google-readability-namespace-comments,
-  -google-runtime-int,
-  -google-runtime-references,
-  -misc-non-private-member-variables-in-classes,
+  cppcoreguidelines-*,
+  clang-analyzer-*,
+  readability-*,
+  modernize-*,
+  clang-analyzer-*,
+  cert-*,
   -readability-named-parameter,
   -readability-braces-around-statements,
-  -readability-magic-numbers
+  -readability-redundant-access-specifiers,
+  -readability-else-after-return,
+  -modernize-use-trailing-return-type
 
 HeaderFilterRegex: '\.hpp$'
 

@@ -22,26 +22,29 @@ class BaseNode {
   using AllocatorTraits_ = std::allocator_traits<Allocator_>;
 
  public:
-  BaseNode() : left_{nullptr}, right_{nullptr} {};
-  explicit BaseNode(const T& value)
-      : value_(value), left_{nullptr}, right_{nullptr} {
+  BaseNode() = default;
+  explicit BaseNode(const T& value) : value_(value) {
   }
   explicit BaseNode(T&& value) : value_(std::move(value)) {
   }
+  BaseNode(const BaseNode&) = default;
+  BaseNode(BaseNode&&) noexcept = default;
 
  public:
+  BaseNode& operator=(const BaseNode&) = default;
+  BaseNode& operator=(BaseNode&&) noexcept = default;
   const T& getValue() const {
     assert(value_.has_value());
     return value_.value();
   }
   void setValue(const T&);
-  bool hasValue() const {
+  [[nodiscard]] bool hasValue() const {
     return value_.has_value();
   }
   void setNullValue() {
     value_ = std::nullopt;
   }
-  bool isLeaf() const {
+  [[nodiscard]] bool isLeaf() const {
     return !left_ && !right_;
   };
   void initChildren();
@@ -53,7 +56,7 @@ class BaseNode {
   }
   ~BaseNode();
 
- protected:
+ private:
   Allocator_ allocator_;
   std::optional<T> value_;
   Derived* left_{nullptr};

@@ -58,15 +58,17 @@ concept GetInitializer =
 // Update operations concepts.                                                //
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class ValueT>
-concept OneArgUpdateOp = requires(const T& op, const ValueT& val) {
-                           { op(val) } -> std::convertible_to<ValueT>;
+concept OneArgUpdateOp = requires(const T& operation, const ValueT& val) {
+                           { operation(val) } -> std::convertible_to<ValueT>;
                          };
 
 template <class T, class ValueT, class UpdateArgT>
-concept TwoArgsUpdateOp =
-    requires(const T& op, const ValueT& val, const UpdateArgT& updateArg) {
-      { op(val, updateArg) } -> std::convertible_to<ValueT>;
-    };
+concept TwoArgsUpdateOp = requires(const T& operation, const ValueT& val,
+                                   const UpdateArgT& updateArg) {
+                            {
+                              operation(val, updateArg)
+                              } -> std::convertible_to<ValueT>;
+                          };
 
 template <class T, class ValueT, class UpdateArgT>
 concept UpdateOp =

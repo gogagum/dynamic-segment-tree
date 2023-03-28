@@ -9,19 +9,17 @@
 
 #include <concepts>
 #include <dst/dynamic_segment_tree.hpp>
+#include <dst/comb.hpp>
 
 namespace dst {
 
 template <std::integral KeyT, class ValueT, class GetValueT = ValueT,
           class UpdateOp = NoUpdateOp,
-          class UpdateArgT = DefaultUpdateArgT<UpdateOp, ValueT>,
+          class UpdateArgT = mp::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 using DynamicMaxSegmentTree =
     DynamicSegmentTree<KeyT, ValueT, GetValueT,
-                       decltype([](const GetValueT& left,
-                                   const GetValueT& right) {
-                         return std::max(left, right);
-                       }),
+                       comb::Max<GetValueT>,
                        decltype([](const ValueT& val) {
                          return static_cast<GetValueT>(val);
                        }),

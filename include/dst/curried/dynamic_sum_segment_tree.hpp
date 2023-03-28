@@ -9,20 +9,19 @@
 
 #include <concepts>
 #include <dst/dynamic_segment_tree.hpp>
+#include <dst/comb.hpp>
 
 namespace dst {
 
-template <std::integral KeyT, class ValueT, class SumT = ValueT,
+template <std::integral KeyT, class ValueT, class GetValueT = ValueT,
           class UpdateOp = NoUpdateOp,
-          class UpdateArgT = DefaultUpdateArgT<UpdateOp, ValueT>,
+          class UpdateArgT = mp::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 using DynamicSumSegmentTree =
-    DynamicSegmentTree<KeyT, ValueT, SumT,
-                       decltype([](const SumT& val1, const SumT& val2) -> SumT {
-                         return val1 + val2;
-                       }),
+    DynamicSegmentTree<KeyT, ValueT, GetValueT,
+                       comb::Sum<GetValueT>,
                        decltype([](const ValueT& val, KeyT begin,
-                                   KeyT end) -> SumT {
+                                   KeyT end) -> GetValueT {
                          return val * (end - begin);
                        }),
                        UpdateOp, UpdateArgT, Allocator>;
