@@ -41,7 +41,7 @@ public:
     template <class UpdateOp>
     void siftOptUpdate(const UpdateOp& updateOp);
 private:
-    std::optional<UpdateT> _updateValue;
+    std::optional<UpdateT> updateValue_;
 private:
     friend class BaseNode<T, Type_, Allocator>;
 };
@@ -50,7 +50,7 @@ private:
 template<class T, class UpdateT, class Allocator>
 void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
     Base_::setValue(value);
-    _updateValue = std::nullopt;
+    updateValue_ = std::nullopt;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,14 +60,14 @@ void
 Node<T, std::optional<UpdateT>, Allocator>::update(const UpdateOp& updateOp,
                                                    const UpdateT& updateVal) {
     if (!this->isLeaf()) {
-        if (this->_updateValue.has_value()) {
+        if (this->updateValue_.has_value()) {
             // update left with old update
-            this->getLeft()->update(updateOp, this->_updateValue.value());
+            this->getLeft()->update(updateOp, this->updateValue_.value());
             // update right with old update
-            this->getRight()->update(updateOp, this->_updateValue.value());
+            this->getRight()->update(updateOp, this->updateValue_.value());
         }
         // _value continues to have delayed update meaning.
-        this->_updateValue = updateVal;
+        this->updateValue_ = updateVal;
     } else { // isLeaf()
         assert(this->hasValue() && "Leaf must have a value.");
         this->setValue(updateOp(this->getValue(), updateVal));
@@ -79,11 +79,11 @@ template<class T, class UpdateT, class Allocator>
 template <class UpdateOp>
 void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
         const UpdateOp& updateOp) {
-    if (this->_updateValue.has_value()) {
+    if (this->updateValue_.has_value()) {
         assert(!this->isLeaf() && "It nust not be a leaf.");
-        this->getLeft()->update(updateOp, this->_updateValue.value());
-        this->getRight()->update(updateOp, this->_updateValue.value());
-        this->_updateValue = std::nullopt;
+        this->getLeft()->update(updateOp, this->updateValue_.value());
+        this->getRight()->update(updateOp, this->updateValue_.value());
+        this->updateValue_ = std::nullopt;
     }
 }
 
@@ -92,7 +92,7 @@ template<class T, class UpdateT, class Allocator>
 void Node<T, std::optional<UpdateT>, Allocator>::setUpdateValue(
         const UpdateT& updateValue) {
     assert(!this->isLeaf() && "Can`t set update value for a leaf.");
-    _updateValue = updateValue;
+    updateValue_ = updateValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ public:
     template <class UpdateOp>
     void siftOptUpdate(const UpdateOp& updateOp);
 private:
-    bool _toUpdate{false};
+    bool toUpdate_{false};
 private:
     friend class BaseNode<T, Type_, Allocator>;
 };
@@ -122,11 +122,11 @@ template<class T, class Allocator>
 template <class UpdateOp>
 void Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
     if (!this->isLeaf()) {
-        if (_toUpdate) {
+        if (toUpdate_) {
             this->getLeft()->update(updateOp);  // update left with old update
             this->getRight()->update(updateOp); // update right with old update
         }
-        _toUpdate = true;
+        toUpdate_ = true;
     } else { // isLeaf()
         this->value_ = updateOp(this->getValue());
     }
@@ -136,11 +136,11 @@ void Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
 template<class T, class Allocator>
 template <class UpdateOp>
 void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
-    if (_toUpdate) {
+    if (toUpdate_) {
         assert(!this->isLeaf() && "It nust not be a leaf.");
         this->getLeft()->update(updateOp);
         this->getRight()->update(updateOp);
-        _toUpdate = false;
+        toUpdate_ = false;
     }
 }
 
