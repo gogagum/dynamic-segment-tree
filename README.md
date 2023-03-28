@@ -95,4 +95,6 @@ TODO list (with no priority):
 
 - Add benchmarks.
 - Custom allocators checks.
-- Add doxygen documentation.
+- Improve doxygen documentation.
+- Add tests that show the reason for separate `ValueT` and `GetValueT` 
+parameters.
