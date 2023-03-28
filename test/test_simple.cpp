@@ -13,6 +13,9 @@
 
 using dst::DynamicSimpleGetSetSegmentTree;
 
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)
+
 TEST(SimpleGetSetDynamicSegmentTree, Construct) {
   auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(-5, 100, 77);
 }
@@ -74,3 +77,6 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
     }
   }
 }
+
+// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)

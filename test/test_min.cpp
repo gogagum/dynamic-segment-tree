@@ -13,6 +13,9 @@
 
 using dst::DynamicMinSegmentTree;
 
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)
+
 TEST(DynamicMinSegmentTree, Construct) {
   [[maybe_unused]] auto tree = DynamicMinSegmentTree<int, int>(0, 42, 34);
 }
@@ -153,7 +156,7 @@ TEST(DynamicMinSegmentTree, FuzzTestMixedSetUpdateGet) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
 
-    const int operationChoise = static_cast<int>(generator()) % 2;
+    const bool operationChoise = (generator() % 2) != 0u;
 
     if (operationChoise) {
       const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
@@ -163,7 +166,7 @@ TEST(DynamicMinSegmentTree, FuzzTestMixedSetUpdateGet) {
       const int updateValue =
           static_cast<int>(generator()) % 1000;  // [0..1000)
       tree.update(rngStart, rngStart + rngLen, updateValue);
-      reference.update(rngStart, rngStart + rngLen, std::plus<int>(),
+      reference.update(rngStart, rngStart + rngLen, std::plus<>(),
                        updateValue);
     }
   }
@@ -210,7 +213,7 @@ TEST(DynamicMinSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
 
-    const int operationChoise = static_cast<int>(generator()) % 2;
+    const bool operationChoise = (generator() % 2) != 0u;
 
     if (operationChoise) {
       const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
@@ -233,3 +236,6 @@ TEST(DynamicMinSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     EXPECT_EQ(treeRes, refRes);
   }
 }
+
+// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)

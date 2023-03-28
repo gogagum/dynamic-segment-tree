@@ -17,6 +17,9 @@ using NegateSumDynamicSegmentTree =
     dst::DynamicNegateSegmentTree<KeyT, ValueT, ValueT, dst::NoRangeGetOp,
                                   dst::NoRangeGetOp, Allocator>;
 
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)
+
 TEST(DynamicNegateSegmentTree, Construct) {
   auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
 }
@@ -148,3 +151,6 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     EXPECT_EQ(treeRes, referenceRes);
   }
 }
+
+// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)

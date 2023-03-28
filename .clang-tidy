@@ -16,6 +16,7 @@ Checks: >
   -readability-braces-around-statements,
   -readability-redundant-access-specifiers,
   -readability-else-after-return,
+  -readability-uppercase-literal-suffix,
   -modernize-use-trailing-return-type
 
 HeaderFilterRegex: '\.hpp$'

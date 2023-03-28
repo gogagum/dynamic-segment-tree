@@ -8,8 +8,8 @@
 #define DYNAMIC_SUM_SEGMENT_TREE_HPP
 
 #include <concepts>
-#include <dst/dynamic_segment_tree.hpp>
 #include <dst/comb.hpp>
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace dst {
 
@@ -17,14 +17,12 @@ template <std::integral KeyT, class ValueT, class GetValueT = ValueT,
           class UpdateOp = NoUpdateOp,
           class UpdateArgT = mp::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
-using DynamicSumSegmentTree =
-    DynamicSegmentTree<KeyT, ValueT, GetValueT,
-                       comb::Sum<GetValueT>,
-                       decltype([](const ValueT& val, KeyT begin,
-                                   KeyT end) -> GetValueT {
-                         return val * (end - begin);
-                       }),
-                       UpdateOp, UpdateArgT, Allocator>;
+using DynamicSumSegmentTree = DynamicSegmentTree<
+    KeyT, ValueT, GetValueT, comb::Sum<GetValueT>,
+    decltype([](const ValueT& val, KeyT begin, KeyT end) -> GetValueT {
+      return static_cast<GetValueT>(val) * (end - begin);
+    }),
+    UpdateOp, UpdateArgT, Allocator>;
 
 }  // namespace dst
 

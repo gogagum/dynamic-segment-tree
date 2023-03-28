@@ -31,7 +31,7 @@ class AvgSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 ValueT AvgSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
-  ValueT ret = ValueT{};
+  auto ret = ValueT{};
   for (KeyT i = begin; i < end; ++i) {
     ret += this->getValue_(i);
   }

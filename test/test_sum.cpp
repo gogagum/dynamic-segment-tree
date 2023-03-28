@@ -6,12 +6,17 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <dst/curried/dynamic_sum_segment_tree.hpp>
+#include <limits>
 #include <random>
 
 #include "reference/sum_seg_tree_reference.hpp"
 
 using dst::DynamicSumSegmentTree;
+
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)
 
 TEST(DynamicSumSegmentTree, Construct) {
   auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
@@ -204,6 +209,34 @@ TEST(DynamicSumSegmentTree, SetOnTheSameRange) {
   EXPECT_EQ(tree.get(40), 21);
 }
 
+TEST(DynamicSegmentTree, IntRangesGiveInt64Sum) {
+  auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 3, 0);
+  tree.set(0, 1, std::numeric_limits<int>::max() - 13);
+  tree.set(1, 3, std::numeric_limits<int>::max() - 7);
+
+  const long long part1LL =
+      static_cast<std::int64_t>(std::numeric_limits<int>::max() - 13);
+
+  const long long part2LL =
+      static_cast<std::int64_t>(std::numeric_limits<int>::max() - 7);
+
+  EXPECT_EQ(tree.rangeGet(0, 3), part1LL + part2LL * 2);
+}
+
+TEST(DynamicSegmentTree, IntRangesGiveInt64SumLongRange) {
+  auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 100, 0);
+  tree.set(0, 42, std::numeric_limits<int>::max() / 3);
+  tree.set(42, 100, std::numeric_limits<int>::max() / 7);
+
+  const auto part1LL =
+      static_cast<std::int64_t>(std::numeric_limits<int>::max() / 3);
+
+  const auto part2LL =
+      static_cast<std::int64_t>(std::numeric_limits<int>::max() / 7);
+
+  EXPECT_EQ(tree.rangeGet(0, 100), part1LL * 42 + part2LL * 58);
+}
+
 TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
   auto tree = DynamicSumSegmentTree<std::size_t, int>(0, 1000, 0);
   auto reference = SumSegTreeReference<std::size_t, int>(0, 1000, 0);
@@ -226,3 +259,6 @@ TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
     EXPECT_EQ(treeRes, refRes);
   }
 }
+
+// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)

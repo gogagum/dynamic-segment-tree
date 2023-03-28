@@ -33,7 +33,7 @@ class BaseNode {
  public:
   BaseNode& operator=(const BaseNode&) = default;
   BaseNode& operator=(BaseNode&&) noexcept = default;
-  const T& getValue() const {
+  [[nodiscard]] const T& getValue() const {
     assert(value_.has_value());
     return value_.value();
   }
@@ -48,10 +48,10 @@ class BaseNode {
     return !left_ && !right_;
   };
   void initChildren();
-  Derived* getLeft() const {
+  [[nodiscard]] Derived* getLeft() const {
     return left_;
   }
-  Derived* getRight() const {
+  [[nodiscard]] Derived* getRight() const {
     return right_;
   }
   ~BaseNode();
