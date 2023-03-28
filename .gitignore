@@ -1,4 +1,5 @@
 *.user
 build/
 test/build/
-
+html/
+latex/

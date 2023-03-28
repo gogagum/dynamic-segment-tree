@@ -8,7 +8,6 @@
 ](
 https://github.com/gogagum/dynamic-segment-tree/workflows/build-main/badge.svg
 )](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/main-build.yml)
-
 [
 ![
 GitHub Actions dev build CI Status
@@ -16,7 +15,7 @@ GitHub Actions dev build CI Status
 https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg
 )](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/dev-build.yml)
 
-## About project structure:
+## Project structure:
 
 ### `DynamicSegmentTree` class
 
@@ -64,14 +63,24 @@ Examples of `DynamicSegmentTree` template usage can be seen in the
 - `DynamicSumSegmentTree`
 - `DynamicSimpleGetSetSegmentTree`
 - `DynamicAvgSegmentTree`
-.
+
 You can also see examples of library usage in tests or read a header of 
 DynamicSegmentTree.
 
 ### Tests
 
-To enable tests building use `BUIILD_TEST` option (see `CMakeLists.txt` in the
+To enable tests building use `DST_TESTS` option (see `CMakeLists.txt` in the
 repo root directory). 
+
+    cmake -S . -B build -DDST_TESTS=1
+
+For VSCode default project settings are set to build tests.
+
+### Doxygen
+
+Doxygen documentation is configured for this project.
+
+    doxygen Doxyfile
 
 ## Requirements:
 
@@ -80,14 +89,29 @@ repo root directory).
 
 ## Usage:
 
+### Git submodule
 To include library into your project you 
-can add it as submodule. After that you should write the following in 
+can add it as git submodule. After that you should write the following in 
 your CMakeLists.txt:
 
     ...
     add_subdirectory(path/to/submodule/dynamic-segment-tree/)
     ...
-    target_link_libraries(your_project_name dynamic-segment-tree)
+    target_link_libraries(your_target_name dynamic-segment-tree)
+
+### CMake FetchContent
+
+`FetchContent` option is also available:
+
+    ...
+    include(FetchContent)
+    FetchContentDeclare(
+        dynamic-segment-tree
+        GIT_REPOSITORY https://github.com/gogagum/dynamic-segment-tree.git
+    )
+    FetchContent_MakeAvailable(dynamic-segment-tree)
+    ...
+    target_link_libraries(your_target_name dynamic-segment-tree)
 
 ## Plans:
 
@@ -95,4 +119,6 @@ TODO list (with no priority):
 
 - Add benchmarks.
 - Custom allocators checks.
-- Add doxygen documentation.
+- Improve doxygen documentation.
+- Add tests that show the reason for separate `ValueT` and `GetValueT` 
+parameters.
