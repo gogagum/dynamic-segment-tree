@@ -8,6 +8,7 @@
 #define CONCEPTS_HPP
 
 #include <concepts>
+#include <dst/disable_operations.hpp>
 
 namespace dst::conc {
 
@@ -73,6 +74,21 @@ concept TwoArgsUpdateOp = requires(const T& operation, const ValueT& val,
 template <class T, class ValueT, class UpdateArgT>
 concept UpdateOp =
     OneArgUpdateOp<T, ValueT> || TwoArgsUpdateOp<T, ValueT, UpdateArgT>;
+
+////////////////////////////////////////////////////////////////////////////////
+// Optional parameters concepts.                                              //
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class GetValueT, class KeyT>
+concept OptGetCombiner =
+    GetCombiner<T, GetValueT, KeyT> || std::is_same_v<T, NoRangeGetOp>;
+
+template <class T, class ValueT, class KeyT, class GetValueT>
+concept OptGetInitializer =
+    GetInitializer<T, ValueT, KeyT, GetValueT> || std::is_same_v<T, NoRangeGetOp>;
+
+template <class T, class ValueT, class UpdateArgT>
+concept OptUpdateOp =
+    UpdateOp<T, ValueT, UpdateArgT> || std::is_same_v<T, NoUpdateOp>;
 
 }  // namespace dst::conc
 

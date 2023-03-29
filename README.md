@@ -118,4 +118,3 @@ your CMakeLists.txt:
 TODO list (with no priority):
 
 - Add benchmarks.
-- Add top-level concepts for combiners and initializers.
