@@ -209,7 +209,7 @@ TEST(DynamicSumSegmentTree, SetOnTheSameRange) {
   EXPECT_EQ(tree.get(40), 21);
 }
 
-TEST(DynamicSegmentTree, IntRangesGiveInt64Sum) {
+TEST(DynamicSumSegmentTree, IntRangesGiveInt64Sum) {
   auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 3, 0);
   tree.set(0, 1, std::numeric_limits<int>::max() - 13);
   tree.set(1, 3, std::numeric_limits<int>::max() - 7);
@@ -223,7 +223,7 @@ TEST(DynamicSegmentTree, IntRangesGiveInt64Sum) {
   EXPECT_EQ(tree.rangeGet(0, 3), part1LL + part2LL * 2);
 }
 
-TEST(DynamicSegmentTree, IntRangesGiveInt64SumLongRange) {
+TEST(DynamicSumSegmentTree, IntRangesGiveInt64SumLongRange) {
   auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 100, 0);
   tree.set(0, 42, std::numeric_limits<int>::max() / 3);
   tree.set(42, 100, std::numeric_limits<int>::max() / 7);
@@ -257,6 +257,34 @@ TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
     auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
     auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
     EXPECT_EQ(treeRes, refRes);
+  }
+}
+
+TEST(DynamicSumSementTree, IntRangeGivesInt64SumFuzzTest) {
+  std::mt19937 generator(37);
+
+  for (std::size_t i = 0; i < 20; ++i) {
+    auto tree =
+        DynamicSumSegmentTree<int, int, std::int64_t>(0, 1 << 29, 0);
+
+    const int rng1Start = generator() % (1 << 28);   // [0..2**28)
+    const int rng1Length = generator() % (1 << 27);  // [0..2**27)
+    const int rng2Length = generator() % (1 << 27);  // [0..2**27)
+
+    const int setVal1 = generator() % (1 << 30);  // [0..2**30)
+    const int setVal2 = generator() % (1 << 30);  // [0..2**30)
+
+    tree.set(rng1Start, rng1Start + rng1Length, setVal1);
+    tree.set(rng1Start + rng1Length, rng1Start + rng1Length + rng2Length,
+             setVal2);
+
+    const auto expectedSum = static_cast<std::int64_t>(setVal1) * rng1Length +
+                             static_cast<std::int64_t>(setVal2) * rng2Length;
+
+    const auto rangeGetRes =
+        tree.rangeGet(rng1Start, rng1Start + rng1Length + rng2Length);
+
+    EXPECT_EQ(rangeGetRes, expectedSum);
   }
 }
 

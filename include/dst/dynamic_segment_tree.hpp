@@ -92,18 +92,18 @@ class DynamicSegmentTree
                      const Allocator& /*alloc*/ = Allocator{});
 
   /**
-   * @brief update - apply one argument operation on a range.
+   * @brief Apply one argument operation on a range.
    *
    * @param begin beginning of an updated segment.
    * @param end ending of an updated segment (not included).
    * @param toUpdate argument for update operation.
    */
-
   template <class UpdateArg_>
     requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
   void update(KeyT begin, KeyT end, const UpdateArg_& toUpdate);
+
   /**
-   * @brief update apply no arguments update operation on a range.
+   * @brief Apply no arguments update operation on a range.
    *
    * @param begin beginning of an updated segment.
    * @param end ending of an updated segment (not included).
@@ -112,7 +112,7 @@ class DynamicSegmentTree
     requires conc::OneArgUpdateOp<UpdateOp, ValueT>;
 
   /**
-   * @brief set - set value on a range.
+   * @brief Set value on a range.
    *
    * @param begin beginning of an updated segment.
    * @param end ending of an updated segment (not included).
@@ -121,7 +121,7 @@ class DynamicSegmentTree
   void set(KeyT begin, KeyT end, const ValueT& toSet);
 
   /**
-   * @brief get - get value by index.
+   * @brief Get value by index.
    *
    * @param key index.
    * @return value in index.
@@ -129,7 +129,7 @@ class DynamicSegmentTree
   const ValueT& get(KeyT key) const;
 
   /**
-   * @brief rangeGet - get result on a range.
+   * @brief Get result on a range.
    *
    * @param begin beginning of a range.
    * @param end ending of a range.

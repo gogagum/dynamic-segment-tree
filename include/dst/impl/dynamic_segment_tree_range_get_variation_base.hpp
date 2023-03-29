@@ -60,7 +60,8 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
   }
 
  protected:
-  GetValueT initGet_(KeyT begin, KeyT end, const ValueT& val) const {
+  [[nodiscard]] GetValueT initGet_(KeyT begin, KeyT end,
+                                   const ValueT& val) const {
     return segInitializer_(val, begin, end);
   }
 

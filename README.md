@@ -118,7 +118,4 @@ your CMakeLists.txt:
 TODO list (with no priority):
 
 - Add benchmarks.
-- Custom allocators checks.
-- Improve doxygen documentation.
-- Add tests that show the reason for separate `ValueT` and `GetValueT` 
-parameters.
+- Add top-level concepts for combiners and initializers.
