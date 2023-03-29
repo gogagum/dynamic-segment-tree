@@ -39,6 +39,9 @@ REFERENCES_RELATION = YES
 # Generate class diagrams for base class
 CLASS_DIAGRAMS = YES
 
+# Not to generate documentation for private members.
+EXTRACT_PRIVATE = NO
+
 # Input path
 INPUT = include
 

@@ -13,6 +13,9 @@
 
 using dst::DynamicMaxSegmentTree;
 
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)
+
 TEST(DynamicMaxSegmentTree, Construct) {
   auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 34);
 }
@@ -240,3 +243,6 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     EXPECT_EQ(treeRes, refRes);
   }
 }
+
+// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)

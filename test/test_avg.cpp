@@ -13,6 +13,9 @@
 
 using dst::DynamicAvgSegmentTree;
 
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)
+
 TEST(DynamicAvgSegmentTree, Construct) {
   [[maybe_unused]] auto tree = DynamicAvgSegmentTree<int, float>(2, 57);
 }
@@ -109,3 +112,6 @@ TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     EXPECT_FLOAT_EQ(treeRes, refRes);
   }
 }
+
+// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
+// cert-err58-cpp)

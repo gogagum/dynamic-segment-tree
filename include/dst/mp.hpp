@@ -11,6 +11,17 @@
 #include <dst/disable_operations.hpp>
 
 namespace dst::mp {
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The DefaultUpdateArg<UpdateOp, ValueT> class.
+///
+/// \tparam UpdateOp update operation
+/// \tparam ValueT value type in segment tree.
+///
+/// If UpdateOp is one argument update operation or NoUpdateOp then
+/// DefaultUpdateArg::Type is void. In other case, if UpdateOp if one argument
+/// update operation, then DefaultUpdateArg::Type is ValueT.
+///
 template <class UpdateOp, class ValueT>
 struct DefaultUpdateArg {
   using Type = ValueT;
@@ -27,7 +38,7 @@ struct DefaultUpdateArg<NoUpdateOp, ValueT> {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Default update operation argument.
+/// \brief Default update operation argument.
 template <class UpdateOp, class ValueT>
 using DefaultUpdateArgT = typename mp::DefaultUpdateArg<UpdateOp, ValueT>::Type;
 

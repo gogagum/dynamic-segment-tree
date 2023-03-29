@@ -84,7 +84,7 @@ Doxygen documentation is configured for this project.
 
 ## Requirements:
 
-- `C++20`
+- `C++20` (`clang 15+` or `gcc 12+`)
 - `CMake 3.15+`
 
 ## Usage:
@@ -118,7 +118,3 @@ your CMakeLists.txt:
 TODO list (with no priority):
 
 - Add benchmarks.
-- Custom allocators checks.
-- Improve doxygen documentation.
-- Add tests that show the reason for separate `ValueT` and `GetValueT` 
-parameters.

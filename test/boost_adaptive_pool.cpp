@@ -2,10 +2,11 @@
 // Copyright Georgy Guminov 2023.
 // Distributed under the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
-//  or copy at https://www.boost.org/LICENSE_1_0.txt)
+// or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include <gtest/gtest.h>
 
+#include <boost/container/adaptive_pool.hpp>
 #include <dst/curried/dynamic_simple_get_set_segment_tree.hpp>
 #include <random>
 
@@ -16,12 +17,18 @@ using dst::DynamicSimpleGetSetSegmentTree;
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
 
-TEST(SimpleGetSetDynamicSegmentTree, Construct) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(-5, 100, 77);
+TEST(BoostAdaptivePoolSimpleTree, Construct) {
+  auto tree =
+      DynamicSimpleGetSetSegmentTree<int, int,
+                                     boost::container::adaptive_pool<int>>(
+          0, 100, 0);
 }
 
-TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
+TEST(BoostAdaptivePoolSimpleTree, RangeSet) {
+  auto tree =
+      DynamicSimpleGetSetSegmentTree<int, long long,
+                                     boost::container::adaptive_pool<int>>(
+          0, 42, 77);
 
   tree.set(13, 17, 56);
 
@@ -33,8 +40,11 @@ TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
   EXPECT_EQ(tree.get(37), 77);
 }
 
-TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
-  auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
+TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
+  auto tree =
+      DynamicSimpleGetSetSegmentTree<std::size_t, int,
+                                     boost::container::adaptive_pool<int>>(
+          0, 1000, 0);
   auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
 
   std::mt19937 generator(42);
@@ -55,8 +65,11 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
   }
 }
 
-TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
-  auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
+TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGetMixed) {
+  auto tree =
+      DynamicSimpleGetSetSegmentTree<std::size_t, int,
+                                     boost::container::adaptive_pool<int>>(
+          0, 1000, 0);
   auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
 
   std::mt19937 generator(42);

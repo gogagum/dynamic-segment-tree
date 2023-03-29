@@ -22,14 +22,17 @@ jobs:
         name: Linux Clang (libc++)
         runs-on: ubuntu-22.04
         env:
-            CC: clang-14
-            CXX: clang++-14
+            CC: clang-15
+            CXX: clang++-15
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
             - run: |
                   sudo apt-get update
-                  sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev
+                  sudo apt-get install -y ninja-build clang-15 libc++-15-dev libc++abi-15-dev
+                  wget https://apt.llvm.org/llvm.sh
+                  chmod +x llvm.sh
+                  sudo ./llvm.sh 15
             - run: /bin/bash .ci/build-project.sh
             - run: ./build/test/dst-test
 
@@ -37,14 +40,17 @@ jobs:
         name: Linux Clang (libstdc++)
         runs-on: ubuntu-22.04
         env:
-            CC: clang-14
-            CXX: clang++-14
+            CC: clang-15
+            CXX: clang++-15
             CXXFLAGS: -stdlib=libstdc++
         steps:
             - uses: actions/checkout@v3
             - run: |
                   sudo apt-get update
-                  sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev libstdc++-12-dev
+                  sudo apt-get install -y ninja-build libstdc++-12-dev
+                  wget https://apt.llvm.org/llvm.sh
+                  chmod +x llvm.sh
+                  sudo ./llvm.sh 15
             - run: /bin/bash .ci/build-project.sh
             - run: ./build/test/dst-test
 

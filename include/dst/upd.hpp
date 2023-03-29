@@ -8,6 +8,9 @@ namespace dst::upd {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The Negate<ValueT> class. Default negate update operation.
+///
+/// \tparam ValueT value type
+///
 template <class ValueT>
 struct Negate {
   ValueT operator()(const ValueT& val) const {

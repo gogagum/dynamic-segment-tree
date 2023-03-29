@@ -19,7 +19,11 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
+add_subdirectory(boost)
+
 add_executable(dst-test
+    boost_allocator.cpp
+    boost_adaptive_pool.cpp
     test_negate.cpp
     test_sum.cpp
     test_min.cpp
@@ -39,4 +43,4 @@ endif()
 
 include(GoogleTest)
 
-target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree)
+target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree Boost::container)

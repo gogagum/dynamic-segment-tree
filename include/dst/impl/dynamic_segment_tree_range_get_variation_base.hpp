@@ -37,8 +37,9 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
   }
 
  protected:
-  GetValueT initGet_([[maybe_unused]] KeyT /*begin*/,
-                     [[maybe_unused]] KeyT /*end*/, const ValueT& val) const {
+  [[nodiscard]] GetValueT initGet_([[maybe_unused]] KeyT /*begin*/,
+                                   [[maybe_unused]] KeyT /*end*/,
+                                   const ValueT& val) const {
     return segInitializer_(val);
   }
 
@@ -59,7 +60,8 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
   }
 
  protected:
-  GetValueT initGet_(KeyT begin, KeyT end, const ValueT& val) const {
+  [[nodiscard]] GetValueT initGet_(KeyT begin, KeyT end,
+                                   const ValueT& val) const {
     return segInitializer_(val, begin, end);
   }
 
@@ -94,10 +96,10 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  protected:
-  GetValueT combineGet_(const GetValueT& leftValue, const GetValueT& rightValue,
-                        [[maybe_unused]] KeyT /*leftBegin*/,
-                        [[maybe_unused]] KeyT /*separation*/,
-                        [[maybe_unused]] KeyT /*rightEnd*/) const {
+  [[nodiscard]] GetValueT combineGet_(
+      const GetValueT& leftValue, const GetValueT& rightValue,
+      [[maybe_unused]] KeyT /*leftBegin*/, [[maybe_unused]] KeyT /*separation*/,
+      [[maybe_unused]] KeyT /*rightEnd*/) const {
     return segCombiner_(leftValue, rightValue);
   }
 
@@ -117,8 +119,10 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  protected:
-  GetValueT combineGet_(const GetValueT& leftValue, const GetValueT& rightValue,
-                        KeyT leftBegin, KeyT separation, KeyT rightEnd) const {
+  [[nodiscard]] GetValueT combineGet_(const GetValueT& leftValue,
+                                      const GetValueT& rightValue,
+                                      KeyT leftBegin, KeyT separation,
+                                      KeyT rightEnd) const {
     return segCombiner_(leftValue, rightValue, leftBegin, separation, rightEnd);
   }
 

@@ -8,6 +8,11 @@
 
 namespace dst::comb {
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The Min<GetValueT> class. Default min combiner.
+///
+/// \tparam GetValueT rangeGet operation return type.
+///
 template <class GetValueT>
 struct Min {
   GetValueT operator()(const GetValueT& left, const GetValueT& right) const {
@@ -15,6 +20,11 @@ struct Min {
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The Max<GetValueT> class. Default max combiner.
+///
+/// \tparam GetValueT rangeGet operation return type.
+///
 template <class GetValueT>
 struct Max {
   GetValueT operator()(const GetValueT& left, const GetValueT& right) const {
@@ -22,6 +32,11 @@ struct Max {
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The Sum<GetValueT> class. Default sum combiner.
+///
+/// \tparam GetValueT rangeGet operation return type.
+///
 template <class GetValueT>
 struct Sum {
   GetValueT operator()(const GetValueT& left, const GetValueT& right) const {
@@ -29,6 +44,12 @@ struct Sum {
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The Avg<GetValueT, KeyT> class. Default average counting combiner.
+///
+/// \tparam GetValueT rangeGet operation return type.
+/// \tparam KeyT key type of a segment tree.
+///
 template <class GetValueT, class KeyT>
 struct Avg {
   GetValueT operator()(const GetValueT& left, const GetValueT& right,
