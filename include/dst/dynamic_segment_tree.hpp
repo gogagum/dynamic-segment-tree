@@ -151,10 +151,10 @@ class DynamicSegmentTree
                           Node_* currNode) const;
 
  private:
-  const ValueT outerVal_{};
+  ValueT outerVal_{};
   mutable Node_ rootNode_;
-  const KeyT begin_;
-  const KeyT end_;
+  KeyT begin_;
+  KeyT end_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

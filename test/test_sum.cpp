@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
-#include <dst/curried/dynamic_sum_segment_tree.hpp>
+#include <dst/partial/dynamic_sum_segment_tree.hpp>
 #include <limits>
 #include <random>
 

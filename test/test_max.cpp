@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include <dst/curried/dynamic_max_segment_tree.hpp>
+#include <dst/partial/dynamic_max_segment_tree.hpp>
 #include <random>
 
 #include "reference/max_seg_tree_reference.hpp"

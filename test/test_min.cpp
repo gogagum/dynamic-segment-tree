@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include <dst/curried/dynamic_min_segment_tree.hpp>
+#include <dst/partial/dynamic_min_segment_tree.hpp>
 #include <random>
 
 #include "reference/min_seg_tree_reference.hpp"

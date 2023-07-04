@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include <dst/curried/dynamic_negate_segment_tree.hpp>
+#include <dst/partial/dynamic_negate_segment_tree.hpp>
 #include <random>
 
 #include "reference/seg_tree_reference_base.hpp"

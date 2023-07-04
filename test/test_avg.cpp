@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include <dst/curried/dynamic_avg_segment_tree.hpp>
+#include <dst/partial/dynamic_avg_segment_tree.hpp>
 #include <random>
 
 #include "reference/avg_seg_tree_reference.hpp"
