@@ -39,6 +39,7 @@ jobs:
                   wget https://apt.llvm.org/llvm.sh
                   chmod +x llvm.sh
                   sudo ./llvm.sh 15
+                  apt-get install libc++-15-dev libc++abi-15-dev
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
