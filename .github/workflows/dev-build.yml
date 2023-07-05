@@ -66,15 +66,6 @@ jobs:
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
             - run: valgrind ./build-valgrind/test/dst-test
 
-    mac-apple-clang:
-        name: macOS AppleClang
-        runs-on: macos-latest
-        steps:
-            - uses: actions/checkout@v3
-            - run: brew install ninja
-            - run: /bin/bash .ci/build-project.sh build-simple
-            - run: ./build-simple/test/dst-test
-
     mac-gcc:
         name: macOS GCC
         runs-on: macos-latest
@@ -97,7 +88,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: brew install ninja llvm@16
-            - run: export PATH=/usr/local/bin:$PATH 
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
 
