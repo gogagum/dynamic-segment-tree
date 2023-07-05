@@ -45,8 +45,8 @@ jobs:
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
             - run: valgrind ./build-valgrind/test/dst-test
 
-    linux-clang-libstdcpp:
-        name: Linux Clang (libstdc++)
+    linux-clang-15-libstdcpp:
+        name: Linux Clang 15 (libstdc++)
         runs-on: ubuntu-22.04
         env:
             CC: clang-15
@@ -66,6 +66,26 @@ jobs:
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
             - run: valgrind ./build-valgrind/test/dst-test
 
+    linux-clang-16-libstdcpp:
+        name: Linux Clang 16 (libstdc++)
+        runs-on: ubuntu-22.04
+        env:
+            CC: clang-16
+            CXX: clang++-16
+            CXXFLAGS: -stdlib=libstdc++
+        steps:
+            - uses: actions/checkout@v3
+            - run: |
+                  sudo apt-get update
+                  sudo apt-get install -y ninja-build libstdc++-12-dev libc6-dbg
+                  sudo snap install valgrind --classic
+                  wget https://apt.llvm.org/llvm.sh
+                  chmod +x llvm.sh
+                  sudo ./llvm.sh 16
+            - run: /bin/bash .ci/build-project.sh build-simple
+            - run: ./build-simple/test/dst-test
+            - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
+            - run: valgrind ./build-valgrind/test/dst-test
 
     mac-apple-clang:
         name: macOS AppleClang
