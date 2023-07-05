@@ -18,7 +18,7 @@ namespace dst::impl {
 template <class T, class Derived, class Allocator>
 class BaseNode {
   using Allocator_ =
-      typename std::allocator_traits<Allocator>::template rebind_alloc<Derived>;
+    std::allocator_traits<Allocator>::template rebind_alloc<Derived>;
   using AllocatorTraits_ = std::allocator_traits<Allocator_>;
 
  public:

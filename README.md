@@ -84,7 +84,7 @@ Doxygen documentation is configured for this project.
 
 ## Requirements:
 
-- `C++20` (`clang 15+` or `gcc 13+`)
+- `C++20` (`clang 16+` or `gcc 13+`)
 - `CMake 3.15+`
 
 ## Usage:

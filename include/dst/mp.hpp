@@ -41,7 +41,7 @@ struct DefaultUpdateArg<NoUpdateOp, ValueT> {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Default update operation argument.
 template <class UpdateOp, class ValueT>
-using DefaultUpdateArgT = typename mp::DefaultUpdateArg<UpdateOp, ValueT>::Type;
+using DefaultUpdateArgT = mp::DefaultUpdateArg<UpdateOp, ValueT>::Type;
 
 }  // namespace dst::mp
 

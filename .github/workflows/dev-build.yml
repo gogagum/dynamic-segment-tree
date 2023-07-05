@@ -23,12 +23,12 @@ jobs:
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
             - run: valgrind ./build-valgrind/test/dst-test
 
-    linux-clang-libcpp:
-        name: Linux Clang (libc++)
+    linux-clang-16-libcpp:
+        name: Linux Clang 16 (libc++)
         runs-on: ubuntu-22.04
         env:
-            CC: clang-15
-            CXX: clang++-15
+            CC: clang-16
+            CXX: clang++-16
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
@@ -38,29 +38,8 @@ jobs:
                   sudo snap install valgrind --classic
                   wget https://apt.llvm.org/llvm.sh
                   chmod +x llvm.sh
-                  sudo ./llvm.sh 15
-                  sudo apt-get install -y libc++-15-dev libc++abi-15-dev
-            - run: /bin/bash .ci/build-project.sh build-simple
-            - run: ./build-simple/test/dst-test
-            - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
-            - run: valgrind ./build-valgrind/test/dst-test
-
-    linux-clang-15-libstdcpp:
-        name: Linux Clang 15 (libstdc++)
-        runs-on: ubuntu-22.04
-        env:
-            CC: clang-15
-            CXX: clang++-15
-            CXXFLAGS: -stdlib=libstdc++
-        steps:
-            - uses: actions/checkout@v3
-            - run: |
-                  sudo apt-get update
-                  sudo apt-get install -y ninja-build libstdc++-12-dev libc6-dbg
-                  sudo snap install valgrind --classic
-                  wget https://apt.llvm.org/llvm.sh
-                  chmod +x llvm.sh
-                  sudo ./llvm.sh 15
+                  sudo ./llvm.sh 16
+                  sudo apt-get install -y libc++-16-dev libc++abi-16-dev
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
@@ -100,11 +79,11 @@ jobs:
         name: macOS GCC
         runs-on: macos-latest
         env:
-            CC: gcc-12
-            CXX: g++-12
+            CC: gcc-13
+            CXX: g++-13
         steps:
             - uses: actions/checkout@v3
-            - run: brew install ninja gcc@12
+            - run: brew install ninja gcc@13
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
 
@@ -117,7 +96,7 @@ jobs:
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
-            - run: brew install ninja llvm@15
+            - run: brew install ninja llvm@16
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
 

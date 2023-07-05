@@ -33,7 +33,7 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, UpdateArgT,
   }
 
  protected:
-  // TODO: separate definition and implementation
+  // TODO(gogagum): separate definition and implementation
   template <class KeyT>
   void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                    Node_* currNode, const UpdateArgT& toUpdate) {

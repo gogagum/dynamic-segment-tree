@@ -72,7 +72,7 @@ class DynamicSegmentTree
       impl::DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
                                                         SegGetInit>;
 
-  using Node_ = typename UpdateVariationBase_::Node_;
+  using Node_ = UpdateVariationBase_::Node_;
 
  public:
   /**
