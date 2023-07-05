@@ -16,13 +16,15 @@ namespace dst::impl {
 ////////////////////////////////////////////////////////////////////////////////
 // Update variation.                                                          //
 ////////////////////////////////////////////////////////////////////////////////
-template <class ValueT, class UpdateOp, class UpdateArgT, class Allocator>
+template <class KeyT, class ValueT, class UpdateOp, class UpdateArgT,
+          class Allocator>
 class DynamicSegmentTreeUpdateVariationBase;
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class ValueT, class UpdateOp, class UpdateArgT, class Allocator>
+template <class KeyT, class ValueT, class UpdateOp, class UpdateArgT,
+          class Allocator>
   requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
-class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, UpdateArgT,
+class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
                                             Allocator> {
  protected:
   using Node_ = Node<ValueT, std::optional<UpdateArgT>, Allocator>;
@@ -33,8 +35,11 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, UpdateArgT,
   }
 
  protected:
+
   // TODO(gogagum): separate definition and implementation
-  template <class KeyT>
+  // Out-of-line definitions don't work on clang 15, 16.
+  // This bug will be fixed in clang 17, and when this version will be released,
+  // code here should be edited.
   void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                    Node_* currNode, const UpdateArgT& toUpdate) {
     if (begin >= currEnd || currBegin >= end) {
@@ -65,8 +70,10 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, UpdateArgT,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
-class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, void, Allocator> {
+template <class KeyT, class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp,
+          class Allocator>
+class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, void,
+                                            Allocator> {
  protected:
   using Node_ = Node<ValueT, bool, Allocator>;
 
@@ -76,7 +83,6 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, void, Allocator> {
   }
 
  protected:
-  template <class KeyT>
   void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                    Node_* currNode);
   void optionalSiftNodeUpdate_(Node_* nodePtr) const {
@@ -88,13 +94,13 @@ class DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, void, Allocator> {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
-template <class KeyT>
+template <class KeyT, class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp,
+          class Allocator>
 void DynamicSegmentTreeUpdateVariationBase<
-    ValueT, UpdateOp, void, Allocator>::updateImpl_(KeyT begin, KeyT end,
-                                                    KeyT currBegin,
-                                                    KeyT currEnd,
-                                                    Node_* currNode) {
+    KeyT, ValueT, UpdateOp, void, Allocator>::updateImpl_(KeyT begin, KeyT end,
+                                                          KeyT currBegin,
+                                                          KeyT currEnd,
+                                                          Node_* currNode) {
   if (begin >= currEnd || currBegin >= end) {
     return;
   }
@@ -118,8 +124,8 @@ void DynamicSegmentTreeUpdateVariationBase<
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class ValueT, class Allocator>
-class DynamicSegmentTreeUpdateVariationBase<ValueT, NoUpdateOp, void,
+template <class KeyT, class ValueT, class Allocator>
+class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, NoUpdateOp, void,
                                             Allocator> {
  protected:
   using Node_ = Node<ValueT, void, Allocator>;

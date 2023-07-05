@@ -54,14 +54,14 @@ template <std::integral KeyT, class ValueT, class GetValueT,
   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
 class DynamicSegmentTree
     : protected impl::DynamicSegmentTreeUpdateVariationBase<
-          ValueT, UpdateOp, UpdateArgT, Allocator>,
+          KeyT, ValueT, UpdateOp, UpdateArgT, Allocator>,
       protected impl::DynamicSegmentTreeRangeGetCombineVariationBase<
           KeyT, GetValueT, SegGetComb>,
       protected impl::DynamicSegmentTreeRangeGetInitVariationBase<
           KeyT, ValueT, GetValueT, SegGetInit> {
  private:
   using UpdateVariationBase_ =
-      impl::DynamicSegmentTreeUpdateVariationBase<ValueT, UpdateOp, UpdateArgT,
+      impl::DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
                                                   Allocator>;
 
   using RangeGetCombineVariationBase_ =
