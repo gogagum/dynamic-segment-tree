@@ -27,7 +27,8 @@ struct DefaultUpdateArg {
   using Type = ValueT;
 };
 
-template <class ValueT, dst::conc::OneArgUpdateOp<ValueT> UpdateOp>
+template <class UpdateOp, class ValueT>
+  requires dst::conc::OneArgUpdateOp<UpdateOp, ValueT>
 struct DefaultUpdateArg<UpdateOp, ValueT> {
   using Type = void;
 };
