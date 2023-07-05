@@ -32,7 +32,7 @@ Push-Location .
 Pop-Location
 
 # Clang-cl
-$CLANG = "$Env:VCINSTALLDIR/Tools/Llvm/x64/bin/clang.exe".Replace("\" ,"/")
+$CLANG = "$Env:VCINSTALLDIR/Tools/Llvm/x64/bin/clang-16.exe".Replace("\" ,"/")
 
 Write-Host "---- build-project-with-clang-cl.ps1 ----"
 Write-Host "BUILD_DIR: $BUILD_DIR"
