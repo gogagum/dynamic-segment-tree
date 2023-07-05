@@ -92,11 +92,12 @@ jobs:
         runs-on: macos-latest
         env:
             CC: clang-16
-            CXX: clang-16
+            CXX: clang++-16
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
             - run: brew install ninja llvm@16
+            - run: export PATH=/usr/local/bin:$PATH 
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
 
