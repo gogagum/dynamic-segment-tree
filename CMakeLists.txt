@@ -13,6 +13,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# TODO: remove this flag when Clang 17 is out.
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(STATUS "set -fexperimental-library flag")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexperimental-library")
+endif()
+
 add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
