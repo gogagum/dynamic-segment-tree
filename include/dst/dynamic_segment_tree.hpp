@@ -15,7 +15,9 @@
 #include <dst/impl/dynamic_segment_tree_update_variation_base.hpp>
 #include <dst/impl/node.hpp>
 #include <dst/mp.hpp>
+#include <format>
 #include <functional>
+#include <stdexcept>
 
 namespace dst {
 
@@ -61,8 +63,8 @@ class DynamicSegmentTree
           KeyT, ValueT, GetValueT, SegGetInit> {
  private:
   using UpdateVariationBase_ =
-      impl::DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
-                                                  Allocator>;
+      impl::DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp,
+                                                  UpdateArgT, Allocator>;
 
   using RangeGetCombineVariationBase_ =
       impl::DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
@@ -151,7 +153,6 @@ class DynamicSegmentTree
                           Node_* currNode) const;
 
  private:
-  ValueT outerVal_{};
   mutable Node_ rootNode_;
   KeyT begin_;
   KeyT end_;
@@ -232,7 +233,8 @@ const ValueT&
 DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
                    UpdateArgT, Allocator>::get(KeyT key) const {
   if (key >= end_ || key < begin_) {
-    return outerVal_;
+    throw std::out_of_range(
+        std::format("Get operation for {}, which is out of range.", key));
   }
   return getImpl_(key, begin_, end_, &rootNode_);
 }
@@ -264,7 +266,7 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                                              KeyT currBegin, KeyT currEnd,
                                              Node_* currNode,
                                              const ValueT& toUpdate) {
-  if (begin >= currEnd || currBegin >= end) {
+  if (begin >= currEnd || currBegin >= end || begin == end) {
     return;
   }
   if (end >= currEnd && begin <= currBegin) {

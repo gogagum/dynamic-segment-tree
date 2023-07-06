@@ -29,12 +29,12 @@ TEST(DynamicSumSegmentTree, QueryMiddle) {
 
 TEST(DynamicSumSegmentTree, QueryEnd) {
   auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
-  EXPECT_EQ(tree.get(42), 0);
+  EXPECT_THROW(tree.get(42), std::out_of_range);
 }
 
 TEST(DynamicSumSegmentTree, QueryAfterEnd) {
   auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
-  EXPECT_EQ(tree.get(73), 0);
+  EXPECT_THROW(tree.get(73), std::out_of_range);
 }
 
 TEST(DynamicSumSegmentTree, QueryBegin) {
@@ -44,7 +44,7 @@ TEST(DynamicSumSegmentTree, QueryBegin) {
 
 TEST(DynamicSumSegmentTree, QueryBeforeBegin) {
   auto tree = DynamicSumSegmentTree<int, int>(0, 42, 54);
-  EXPECT_EQ(tree.get(-5), 0);
+  EXPECT_THROW(tree.get(-5), std::out_of_range);
 }
 
 TEST(DynamicSumSegmentTree, OneUpdate) {
@@ -88,7 +88,7 @@ TEST(DynamicSumSegmentTree, TwoIntersectingUpdates) {
   EXPECT_EQ(tree.get(39), 54 + 14);
   EXPECT_EQ(tree.get(40), 54 + 14);
   EXPECT_EQ(tree.get(41), 54);
-  EXPECT_EQ(tree.get(42), 0);
+  EXPECT_THROW(tree.get(42), std::out_of_range);
 }
 
 TEST(DynamicSumSegmentTree, TwoNonIntersectingUpdates) {
@@ -105,7 +105,7 @@ TEST(DynamicSumSegmentTree, TwoNonIntersectingUpdates) {
   EXPECT_EQ(tree.get(23), 54 + 14);
   EXPECT_EQ(tree.get(38), 54);
   EXPECT_EQ(tree.get(40), 54);
-  EXPECT_EQ(tree.get(42), 0);
+  EXPECT_THROW(tree.get(42), std::out_of_range);
 }
 
 TEST(DynamicSumSegmentTree, SimpleRangeGetAll) {

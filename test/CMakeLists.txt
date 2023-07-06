@@ -30,6 +30,9 @@ add_executable(dst-test
     test_max.cpp
     test_simple.cpp
     test_avg.cpp
+    test_copy_counter.cpp
+    copy_counter/copy_counter.cpp
+    test_copy_count.cpp
 )
 
 enable_testing()
