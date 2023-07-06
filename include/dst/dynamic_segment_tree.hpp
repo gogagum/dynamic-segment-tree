@@ -15,7 +15,6 @@
 #include <dst/impl/dynamic_segment_tree_update_variation_base.hpp>
 #include <dst/impl/node.hpp>
 #include <dst/mp.hpp>
-#include <format>
 #include <functional>
 #include <stdexcept>
 #include <sstream>
