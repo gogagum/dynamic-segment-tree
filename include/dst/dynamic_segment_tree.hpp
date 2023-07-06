@@ -18,6 +18,7 @@
 #include <format>
 #include <functional>
 #include <stdexcept>
+#include <sstream>
 
 namespace dst {
 
@@ -233,8 +234,9 @@ const ValueT&
 DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
                    UpdateArgT, Allocator>::get(KeyT key) const {
   if (key >= end_ || key < begin_) {
-    throw std::out_of_range(
-        std::format("Get operation for {}, which is out of range.", key));
+    std::stringstream messageStream;
+    messageStream << "Get operation for " << key << ", which is out of range.";
+    throw std::out_of_range(messageStream.str());
   }
   return getImpl_(key, begin_, end_, &rootNode_);
 }
