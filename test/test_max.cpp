@@ -8,9 +8,11 @@
 
 #include <dst/partial/dynamic_max_segment_tree.hpp>
 #include <random>
+#include <ranges>
 
 #include "reference/max_seg_tree_reference.hpp"
 
+namespace rng = std::ranges;
 using dst::DynamicMaxSegmentTree;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
@@ -126,7 +128,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
 
   std::mt19937 generator(42);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;           // [0..500)
     const std::size_t rngLen = generator() % 500;             // [0..500)
     const int setVal = static_cast<int>(generator() % 1000);  // [0..1000)
@@ -135,7 +137,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
     reference.set(rngStart, rngStart + rngLen, setVal);
   }
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;                // [0..500)
     const std::size_t rngLen = generator() % 500;                  // [0..500)
     const int updateValue = static_cast<int>(generator() % 1000);  // [0..1000)
@@ -145,7 +147,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
                      updateValue);
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t idx = generator() % 100;  // [0..1000)
     auto treeRes = tree.get(idx);
     auto refRes = reference.get(idx);
@@ -160,7 +162,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateGet) {
 
   std::mt19937 generator(54);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;                 // [0..500)
     const std::size_t rngLen = generator() % 500;                   // [0..500)
     const int operationChoise = static_cast<int>(generator()) % 2;  // [0..2)
@@ -178,7 +180,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateGet) {
     }
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t idx = generator() % 100;  // [0..1000)
     auto treeRes = tree.get(idx);
     auto refRes = reference.get(idx);
@@ -192,7 +194,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetRangeGet) {
 
   std::mt19937 generator(42);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;           // [0..500)
     const std::size_t rngLen = generator() % 500;             // [0..500)
     const int setVal = static_cast<int>(generator()) % 1000;  // [0..100)
@@ -200,7 +202,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetRangeGet) {
     reference.set(rngStart, rngStart + rngLen, setVal);
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
     auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
@@ -216,7 +218,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
 
   std::mt19937 generator(54);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
 
@@ -235,7 +237,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     }
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
     const auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);

@@ -8,8 +8,11 @@
 
 #include <dst/partial/dynamic_negate_segment_tree.hpp>
 #include <random>
+#include <ranges>
 
 #include "reference/seg_tree_reference_base.hpp"
+
+namespace rng = std::ranges;
 
 template <std::integral KeyT, class ValueT,
           class Allocator = std::allocator<ValueT>>
@@ -64,7 +67,7 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
   };
   auto gen = std::mt19937(37);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
     const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
 
@@ -72,7 +75,7 @@ TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
     reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
   }
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const int idx = static_cast<int>(gen() % 1000);
 
     const auto treeRes = tree.get(idx);
@@ -91,7 +94,7 @@ TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
   };
   std::mt19937 generator(54);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
 
@@ -107,7 +110,7 @@ TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
     }
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t idx = generator() % 100;  // [0..1000)
     auto treeRes = tree.get(idx);
     auto refRes = reference.get(idx);
@@ -124,7 +127,7 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
   };
   auto gen = std::mt19937(37);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
     const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
 
@@ -132,7 +135,7 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
   }
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
     const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
 
@@ -142,7 +145,7 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     reference.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
   }
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const int idx = static_cast<int>(gen() % 1000);
 
     const auto treeRes = tree.get(idx);

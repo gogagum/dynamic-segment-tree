@@ -6,14 +6,17 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <dst/partial/dynamic_sum_segment_tree.hpp>
 #include <limits>
 #include <random>
+#include <ranges>
 
 #include "reference/sum_seg_tree_reference.hpp"
 
 using dst::DynamicSumSegmentTree;
+namespace rng = std::ranges;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
@@ -243,7 +246,7 @@ TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
 
   std::mt19937 generator(42);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;           // [0..500)
     const std::size_t rngLen = generator() % 500;             // [0..500)
     const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
@@ -251,7 +254,7 @@ TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
     reference.set(rngStart, rngStart + rngLen, setVal);
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
     auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
@@ -263,9 +266,8 @@ TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
 TEST(DynamicSumSementTree, IntRangeGivesInt64SumFuzzTest) {
   std::mt19937 generator(37);
 
-  for (std::size_t i = 0; i < 20; ++i) {
-    auto tree =
-        DynamicSumSegmentTree<int, int, std::int64_t>(0, 1 << 29, 0);
+  for (std::size_t i : rng::iota_view(0, 20)) {
+    auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 1 << 29, 0);
 
     const int rng1Start = generator() % (1 << 28);   // [0..2**28)
     const int rng1Length = generator() % (1 << 27);  // [0..2**27)
