@@ -7,9 +7,14 @@
 #ifndef SEG_TREE_REFERENCE_BASE_HPP
 #define SEG_TREE_REFERENCE_BASE_HPP
 
+#include <algorithm>
 #include <concepts>
 #include <functional>
+#include <ranges>
 #include <vector>
+
+namespace rng = std::ranges;
+namespace rngv = std::ranges::views;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The SegTreeReferenceBase class - base segment tree mock class.
@@ -52,7 +57,9 @@ class SegTreeReferenceBase {
    * @param end ending of a range (not included).
    * @param toSet value to set.
    */
-  void set(KeyT begin, KeyT end, const ValueT& toSet);
+  void set(KeyT begin, KeyT end, const ValueT& toSet) {
+    rng::fill(getValuesRng_(begin, end), toSet);
+  }
 
   /**
    * @brief get - get value by key.
@@ -70,6 +77,10 @@ class SegTreeReferenceBase {
   [[nodiscard]] const ValueT& getValue_(KeyT key) const {
     return values_[key - begin_];
   }
+
+  [[nodiscard]] auto getValuesRng_(KeyT begin, KeyT end) const;
+
+  [[nodiscard]] auto getValuesRng_(KeyT begin, KeyT end);
 
  private:
   KeyT begin_;
@@ -89,8 +100,8 @@ template <class UpdateOp, class UpdateArgT>
 void SegTreeReferenceBase<KeyT, ValueT>::update(KeyT begin, KeyT end,
                                                 const UpdateOp& updateOp,
                                                 const UpdateArgT& toUpdate) {
-  for (KeyT i = begin; i < end; ++i) {
-    getValue_(i) = updateOp(getValue_(i), toUpdate);
+  for (auto& val : getValuesRng_(begin, end)) {
+    val = updateOp(val, toUpdate);
   }
 }
 
@@ -99,18 +110,28 @@ template <std::integral KeyT, class ValueT>
 template <class UpdateOp>
 void SegTreeReferenceBase<KeyT, ValueT>::update(KeyT begin, KeyT end,
                                                 const UpdateOp& updateOp) {
-  for (KeyT i = begin; i < end; ++i) {
-    getValue_(i) = updateOp(getValue_(i));
+  for (auto& val : getValuesRng_(begin, end)) {
+    val = updateOp(val);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
-void SegTreeReferenceBase<KeyT, ValueT>::set(KeyT begin, KeyT end,
-                                             const ValueT& toSet) {
-  for (KeyT key = begin; key < end; ++key) {
-    getValue_(key) = toSet;
-  }
+auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin, KeyT end) {
+  return rng::iota_view(begin, end) |
+         rngv::transform([this](KeyT key) -> ValueT& {
+           return getValue_(key);
+         });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <std::integral KeyT, class ValueT>
+auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin,
+                                                       KeyT end) const {
+  return rng::iota_view(begin, end) |
+         rngv::transform([this](KeyT key) -> const ValueT& {
+           return getValue_(key);
+         });
 }
 
 #endif  // SEG_TREE_REFERENCE_BASE_HPP

@@ -7,10 +7,11 @@
 #ifndef SUM_SEG_TREE_REFERENCE_HPP
 #define SUM_SEG_TREE_REFERENCE_HPP
 
-#include "seg_tree_reference_base.hpp"
-
-#include <concepts>
 #include <algorithm>
+#include <concepts>
+#include <numeric>
+
+#include "seg_tree_reference_base.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The SumSegTreeReference<KeyT, ValueT> class.
@@ -25,17 +26,14 @@ class SumSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
    * @param end ending index (not included).
    * @return sum on a range from begin to end, not including end.
    */
-  ValueT rangeGet(KeyT begin, KeyT end) const;
+  [[nodiscard]] ValueT rangeGet(KeyT begin, KeyT end) const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 ValueT SumSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
-  auto ret = 0;
-  for (KeyT i = begin; i < end; ++i) {
-    ret += this->getValue_(i);
-  }
-  return ret;
+  auto values = this->getValuesRng_(begin, end);
+  return std::accumulate(values.begin(), values.end(), ValueT{0});
 }
 
 #endif  // SUM_SEG_TREE_REFERENCE_HPP
