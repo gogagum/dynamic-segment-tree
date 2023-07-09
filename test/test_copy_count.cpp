@@ -10,6 +10,10 @@
 
 #include "copy_counter/copy_counter.hpp"
 
+auto& infoStream() {
+  return std::cerr << "[          ] INFO: ";
+}
+
 // NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-magic-numbers)
 
 TEST(DSTCopyCount, Construct) {
@@ -34,6 +38,11 @@ TEST(DSTCopyCount, SetOneValueInSmallTree) {
 
   segTree.set(4, 5, copyCounter);
   EXPECT_TRUE(stats->getCopyCount() <= 10);
+
+  if (stats->getCopyCount() < 10) {
+    infoStream() << "Copy count is smaller than expected: "
+                 << stats->getCopyCount() << std::endl;
+  }
 }
 
 TEST(DSTCopyCount, SetOneValueInBigTree) {
@@ -49,10 +58,15 @@ TEST(DSTCopyCount, SetOneValueInBigTree) {
 
   segTree.set(1004, 1005, copyCounter);
   EXPECT_TRUE(stats->getCopyCount() <= 42);
+
+  if (stats->getCopyCount() < 42) {
+    infoStream() << "Copy count is smaller than expected: "
+                 << stats->getCopyCount() << std::endl;
+  }
 }
 
 TEST(DSTCopyCount, SetSomeNumbersInSmallTree) {
-    auto [stats, copyCounter] = CopyCounter::init();
+  auto [stats, copyCounter] = CopyCounter::init();
 
   auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyCounter>(
       0, 16, copyCounter);
@@ -64,6 +78,11 @@ TEST(DSTCopyCount, SetSomeNumbersInSmallTree) {
 
   segTree.set(4, 10, copyCounter);
   EXPECT_TRUE(stats->getCopyCount() <= 11);
+
+  if (stats->getCopyCount() < 11) {
+    infoStream() << "Copy count is smaller than expected: "
+                 << stats->getCopyCount() << std::endl;
+  }
 }
 
 TEST(DSTCopyCount, SetSomeNumbersInBigTree) {
@@ -79,6 +98,11 @@ TEST(DSTCopyCount, SetSomeNumbersInBigTree) {
 
   segTree.set(1004, 2005, copyCounter);
   EXPECT_TRUE(stats->getCopyCount() <= 66);
+
+  if (stats->getCopyCount() < 66) {
+    infoStream() << "Copy count is smaller than expected: "
+                 << stats->getCopyCount() << std::endl;
+  }
 }
 
 TEST(DSTCopyCount, SetManyNumbersInBigTree) {
@@ -94,6 +118,11 @@ TEST(DSTCopyCount, SetManyNumbersInBigTree) {
 
   segTree.set(1004, 1024ul * 512, copyCounter);
   EXPECT_TRUE(stats->getCopyCount() <= 48);
+
+  if (stats->getCopyCount() < 48) {
+    infoStream() << "Copy count is smaller than expected: "
+                 << stats->getCopyCount() << std::endl;
+  }
 }
 
 // NOLINTEND(cppcoreguidelines-*, cert-err58-*, readability-magic-numbers)
