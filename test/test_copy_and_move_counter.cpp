@@ -25,9 +25,20 @@ TEST(CopyAndMoveCounter, InitialCounts) {
 TEST(CopyAndMoveCounter, MakeOneCopy) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
-  auto onlyCopy = copyAndMoveCounter;
+  [[maybe_unused]] auto onlyCopy = copyAndMoveCounter;
 
   EXPECT_EQ(stats->getCopyCount(), 1);
+  EXPECT_EQ(stats->getMoveCount(), 0);
+}
+
+TEST(CopyAndMoveCounter, MakeOneCopyAndReset) {
+  auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
+
+  [[maybe_unused]] auto onlyCopy = copyAndMoveCounter;
+
+  stats->reset();
+
+  EXPECT_EQ(stats->getCopyCount(), 0);
   EXPECT_EQ(stats->getMoveCount(), 0);
 }
 
@@ -48,6 +59,19 @@ TEST(CopyAndMoveCounter, Make42Copies) {
   }
 
   EXPECT_EQ(stats->getCopyCount(), 42);
+  EXPECT_EQ(stats->getMoveCount(), 0);
+}
+
+TEST(CopyAndMoveCounter, Make42CopiesAndReset) {
+  auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
+
+  for ([[maybe_unused]] auto i : std::ranges::iota_view(0, 42)) {
+    [[maybe_unused]] auto copy = copyAndMoveCounter;
+  }
+
+  stats->reset();
+
+  EXPECT_EQ(stats->getCopyCount(), 0);
   EXPECT_EQ(stats->getMoveCount(), 0);
 }
 

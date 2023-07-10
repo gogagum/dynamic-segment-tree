@@ -53,6 +53,10 @@ class CopyAndMoveCounter::Stats {
   [[nodiscard]] std::size_t getMoveCount() const {
     return moveCount_;
   }
+  void reset() {
+    copyCount_ = 0;
+    moveCount_ = 0;
+  }
   ~Stats() = default;
 
  private:

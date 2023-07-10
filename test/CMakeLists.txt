@@ -36,6 +36,7 @@ add_executable(dst-test
     counters/copy_and_move_counter.cpp
     test_copy_count.cpp
     test_copy_and_move_counts.cpp
+    tools/info_stream.cpp
 )
 
 enable_testing()

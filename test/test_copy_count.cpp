@@ -9,18 +9,16 @@
 #include <dst/partial/dynamic_simple_get_set_segment_tree.hpp>
 
 #include "counters/copy_only_copy_counter.hpp"
-
-auto& infoStream() {
-  return std::cerr << "[          ] INFO: ";
-}
+#include "tools/info_stream.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-magic-numbers)
 
 TEST(DSTCopyCount, Construct) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
-      0, 42, copyCounter);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 42, copyCounter);
 
   EXPECT_EQ(stats->getCopyCount(), 1);
 }
@@ -28,12 +26,10 @@ TEST(DSTCopyCount, Construct) {
 TEST(DSTCopyCount, SetOneValueInSmallTree) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
-      0, 16, copyCounter);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 16, copyCounter);
 
-  EXPECT_EQ(stats->getCopyCount(), 1);
-
-  segTree.set(4, 4, copyCounter);
   EXPECT_EQ(stats->getCopyCount(), 1);
 
   segTree.set(4, 5, copyCounter);
@@ -46,82 +42,139 @@ TEST(DSTCopyCount, SetOneValueInSmallTree) {
 }
 
 TEST(DSTCopyCount, SetOneValueInBigTree) {
-  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
+  auto [initStats, initCounter] = CopyOnlyCopyCounter::init();
 
-  auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
-      0, 1024ul * 1024, copyCounter);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 1024ul * 1024, initCounter);
 
-  EXPECT_EQ(stats->getCopyCount(), 1);
+  initStats->reset();
+  {
+    auto [setStats, setCounter] = CopyOnlyCopyCounter::init();
 
-  segTree.set(1000, 1000, copyCounter);
-  EXPECT_EQ(stats->getCopyCount(), 1);
+    segTree.set(1004, 1005, setCounter);
+    EXPECT_TRUE(setStats->getCopyCount() <= 1);
 
-  segTree.set(1004, 1005, copyCounter);
-  EXPECT_TRUE(stats->getCopyCount() <= 42);
+    if (setStats->getCopyCount() < 1) {
+      infoStream() << "Copy count is smaller than expected: "
+                   << setStats->getCopyCount() << std::endl;
+    }
+  }
 
-  if (stats->getCopyCount() < 42) {
-    infoStream() << "Copy count is smaller than expected: "
-                 << stats->getCopyCount() << std::endl;
+  EXPECT_TRUE(initStats->getCopyCount() <= 40);
+  if (initStats->getCopyCount() < 40) {
+    infoStream() << "Copy count of initial value is smaller than expected: "
+                 << initStats->getCopyCount() << std::endl;
   }
 }
 
-TEST(DSTCopyCount, SetSomeNumbersInSmallTree) {
-  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
+TEST(DSTCopyCount, EmptyRangeSetOperation) {
+  auto [initStats, initCounter] = CopyOnlyCopyCounter::init();
 
-  auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
-      0, 16, copyCounter);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 16, initCounter);
 
-  EXPECT_EQ(stats->getCopyCount(), 1);
+  initStats->reset();
+  {
+    auto [setStats, setCounter] = CopyOnlyCopyCounter::init();
+    segTree.set(4, 4, setCounter);
+    EXPECT_EQ(setStats->getCopyCount(), 0);
+  }
 
-  segTree.set(4, 4, copyCounter);
-  EXPECT_EQ(stats->getCopyCount(), 1);
+  EXPECT_EQ(initStats->getCopyCount(), 0);
+}
 
-  segTree.set(4, 10, copyCounter);
-  EXPECT_TRUE(stats->getCopyCount() <= 11);
+TEST(DSTCopyCount, SetSomeValuesInSmallTree) {
+  auto [initStats, initCounter] = CopyOnlyCopyCounter::init();
 
-  if (stats->getCopyCount() < 11) {
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 16, initCounter);
+
+  initStats->reset();
+  {
+    auto [setStats, setCounter] = CopyOnlyCopyCounter::init();
+
+    segTree.set(4, 10, setCounter);
+    EXPECT_TRUE(setStats->getCopyCount() <= 2);
+
+    if (setStats->getCopyCount() < 2) {
+      infoStream() << "Copy count is smaller than expected: "
+                   << setStats->getCopyCount() << std::endl;
+    }
+  }
+
+  EXPECT_TRUE(initStats->getCopyCount() <= 8);
+
+  if (initStats->getCopyCount() < 8) {
     infoStream() << "Copy count is smaller than expected: "
-                 << stats->getCopyCount() << std::endl;
+                 << initStats->getCopyCount() << std::endl;
   }
 }
 
-TEST(DSTCopyCount, SetSomeNumbersInBigTree) {
+TEST(DSTCopyCount, EmptyRangeSetOperationOnBigTree) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
-      0, 1024ul * 1024, copyCounter);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 1024ul * 1024, copyCounter);
 
+  segTree.set(785, 785, copyCounter);
   EXPECT_EQ(stats->getCopyCount(), 1);
+}
 
-  segTree.set(1000, 1000, copyCounter);
-  EXPECT_EQ(stats->getCopyCount(), 1);
+TEST(DSTCopyCount, SetSomeValuesInBigTree) {
+  auto [initStats, initCounter] = CopyOnlyCopyCounter::init();
 
-  segTree.set(1004, 2005, copyCounter);
-  EXPECT_TRUE(stats->getCopyCount() <= 66);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 1024ul * 1024, initCounter);
 
-  if (stats->getCopyCount() < 66) {
-    infoStream() << "Copy count is smaller than expected: "
-                 << stats->getCopyCount() << std::endl;
+  initStats->reset();
+  {
+    auto [setStats, setCounter] = CopyOnlyCopyCounter::init();
+
+    segTree.set(1004, 2005, setCounter);
+    EXPECT_TRUE(setStats->getCopyCount() <= 9);
+
+    if (setStats->getCopyCount() < 9) {
+      infoStream() << "Copy count is smaller than expected: "
+                   << setStats->getCopyCount() << std::endl;
+    }
+  }
+
+  EXPECT_TRUE(initStats->getCopyCount() <= 56);
+  if (initStats->getCopyCount() < 56) {
+    infoStream() << "Copy count of initial value is smaller than expected: "
+                 << initStats->getCopyCount() << std::endl;
   }
 }
 
 TEST(DSTCopyCount, SetManyNumbersInBigTree) {
-  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
+  auto [initStats, initCounter] = CopyOnlyCopyCounter::init();
 
-  auto segTree = dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
-      0, 1024ul * 1024, copyCounter);
+  auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyOnlyCopyCounter>(
+          0, 1024ul * 1024, initCounter);
 
-  EXPECT_EQ(stats->getCopyCount(), 1);
+  initStats->reset();
+  {
+    auto [setStats, setCounter] = CopyOnlyCopyCounter::init();
 
-  segTree.set(1000, 1000, copyCounter);
-  EXPECT_EQ(stats->getCopyCount(), 1);
+    segTree.set(1004, 1024ul * 512, setCounter);
+    EXPECT_TRUE(setStats->getCopyCount() <= 11);
 
-  segTree.set(1004, 1024ul * 512, copyCounter);
-  EXPECT_TRUE(stats->getCopyCount() <= 48);
+    if (setStats->getCopyCount() < 11) {
+      infoStream() << "Copy count is smaller than expected: "
+                   << setStats->getCopyCount() << std::endl;
+    }
+  }
 
-  if (stats->getCopyCount() < 48) {
-    infoStream() << "Copy count is smaller than expected: "
-                 << stats->getCopyCount() << std::endl;
+  EXPECT_TRUE(initStats->getCopyCount() <= 36);
+  if (initStats->getCopyCount() < 36) {
+    infoStream() << "Copy count of initial value is smaller than expected: "
+                 << initStats->getCopyCount() << std::endl;
   }
 }
 

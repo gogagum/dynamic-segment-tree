@@ -72,9 +72,13 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
   if (!this->isLeaf()) {
     if (this->updateValue_.has_value()) {
       // update left with old update
-      this->getLeft()->update(updateOp, this->updateValue_.value());
+      this->getLeft()->update(updateOp, *this->updateValue_);
       // update right with old update
-      this->getRight()->update(updateOp, this->updateValue_.value());
+      if (std::movable<T>) {
+        this->getRight()->update(updateOp, std::move(*this->updateValue_));
+      } else {
+        this->getRight()->update(updateOp, *this->updateValue_);
+      }
     }
     // _value continues to have delayed update meaning.
     this->updateValue_ = updateVal;
@@ -92,12 +96,12 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
   if (!this->isLeaf()) {
     if (this->updateValue_.has_value()) {
       // update left with old update
-      this->getLeft()->update(updateOp, this->updateValue_.value());
+      this->getLeft()->update(updateOp, *this->updateValue_);
       // update right with old update
-      this->getRight()->update(updateOp, std::forward(this->updateValue_.value()));
+      this->getRight()->update(updateOp, std::move(*this->updateValue_));
     }
     // _value continues to have delayed update meaning.
-    this->updateValue_ = std::forward<UpdateT>(updateVal);
+    this->updateValue_ = std::move(updateVal);
   } else {  // isLeaf()
     assert(this->hasValue() && "Leaf must have a value.");
     this->setValue(updateOp(this->getValue(), updateVal));
@@ -111,8 +115,8 @@ void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
     const UpdateOp& updateOp) {
   if (this->updateValue_.has_value()) {
     assert(!this->isLeaf() && "It must not be a leaf.");
-    this->getLeft()->update(updateOp, this->updateValue_.value());
-    this->getRight()->update(updateOp, this->updateValue_.value());
+    this->getLeft()->update(updateOp, *this->updateValue_);
+    this->getRight()->update(updateOp, std::move(*this->updateValue_));
     this->updateValue_ = std::nullopt;
   }
 }

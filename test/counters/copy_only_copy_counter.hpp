@@ -51,6 +51,9 @@ class CopyOnlyCopyCounter::Stats {
   [[nodiscard]] std::size_t getCopyCount() const {
     return copyCount_;
   }
+  void reset() {
+    copyCount_ = 0;
+  }
   ~Stats() = default;
 
  private:

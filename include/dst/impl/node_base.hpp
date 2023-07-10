@@ -107,7 +107,11 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
   std::construct_at(right_);
   assert(value_.has_value() && "No value to set to children.");
   left_->setValue(value_.value());
-  right_->setValue(value_.value());
+  if constexpr (std::movable<T>) {
+    right_->setValue(std::move(value_.value()));
+  } else {
+    right_->setValue(value_.value());
+  }
   value_ = std::nullopt;
 }
 

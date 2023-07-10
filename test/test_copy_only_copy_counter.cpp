@@ -26,6 +26,15 @@ TEST(CopyOnlyCopyCounter, PerformOneCopy) {
   EXPECT_EQ(stats->getCopyCount(), 1);
 }
 
+TEST(CopyOnlyCopyCounter, OneCopyAndReset) {
+  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
+
+  auto copy = copyCounter;
+
+  stats->reset();
+  EXPECT_EQ(stats->getCopyCount(), 0);
+}
+
 TEST(CopyOnlyCopyCounter, Loop) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
@@ -34,6 +43,17 @@ TEST(CopyOnlyCopyCounter, Loop) {
   }
 
   EXPECT_EQ(stats->getCopyCount(), 42);
+}
+
+TEST(CopyOnlyCopyCounter, CopiesAndReset) {
+  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
+
+  for ([[maybe_unused]] std::size_t _: rng::iota_view(0, 42)) {
+    [[maybe_unused]] auto copy = copyCounter;
+  }
+
+  stats->reset();
+  EXPECT_EQ(stats->getCopyCount(), 0);
 }
 
 // NOLINTEND(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
