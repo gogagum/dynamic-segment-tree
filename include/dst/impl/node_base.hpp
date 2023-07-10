@@ -37,7 +37,19 @@ class BaseNode {
     assert(value_.has_value());
     return value_.value();
   }
+  
+  /**
+   * @brief Set value to node making a copy.
+   * @param value value reference.
+   */
   void setValue(const T&);
+  
+  /**
+   * @brief Set the value to node moving it.
+   * @param value moved value.
+   */
+  void setValue(T&&);
+  
   [[nodiscard]] bool hasValue() const {
     return value_.has_value();
   }
@@ -57,6 +69,9 @@ class BaseNode {
   ~BaseNode();
 
  private:
+  void clearChildren_();
+
+ private:
   Allocator_ allocator_;
   std::optional<T> value_;
   Derived* left_{nullptr};
@@ -68,11 +83,16 @@ template <class T, class Derived, class Allocator>
 void BaseNode<T, Derived, Allocator>::setValue(const T& value) {
   value_ = value;
   if (!this->isLeaf()) {
-    this->getLeft()->~Derived();
-    this->getRight()->~Derived();
-    AllocatorTraits_::deallocate(this->allocator_, left_, 2);
-    this->left_ = nullptr;
-    this->right_ = nullptr;
+    clearChildren_();
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Derived, class Allocator>
+void BaseNode<T, Derived, Allocator>::setValue(T&& value) {
+  value_ = std::move(value);
+  if (!this->isLeaf()) {
+    clearChildren_();
   }
 }
 
@@ -95,12 +115,18 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
 template <class T, class Derived, class Allocator>
 BaseNode<T, Derived, Allocator>::~BaseNode() {
   if (!isLeaf()) {
-    getLeft()->~Derived();
-    getRight()->~Derived();
-    AllocatorTraits_::deallocate(allocator_, left_, 2);
-    left_ = nullptr;
-    right_ = nullptr;
+    clearChildren_();
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Derived, class Allocator>
+inline void BaseNode<T, Derived, Allocator>::clearChildren_() {
+  getLeft()->~Derived();
+  getRight()->~Derived();
+  AllocatorTraits_::deallocate(allocator_, left_, 2);
+  left_ = nullptr;
+  right_ = nullptr;
 }
 
 }  // namespace dst::impl

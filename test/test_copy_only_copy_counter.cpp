@@ -6,28 +6,28 @@
 
 #include <ranges>
 #include <gtest/gtest.h>
-#include "copy_counter/copy_counter.hpp"
+#include "counters/copy_only_copy_counter.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
 
 namespace rng = std::ranges;
 
-TEST(CopyCounter, Construct) {
-  auto [stats, copyCounter] = CopyCounter::init();
+TEST(CopyOnlyCopyCounter, Construct) {
+  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
   EXPECT_EQ(stats->getCopyCount(), 0);
 }
 
-TEST(CopyCounter, PerformOneCopy) {
-  auto [stats, copyCounter] = CopyCounter::init();
+TEST(CopyOnlyCopyCounter, PerformOneCopy) {
+  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
   auto copy = copyCounter;
 
   EXPECT_EQ(stats->getCopyCount(), 1);
 }
 
-TEST(CopyCounter, Loop) {
-  auto [stats, copyCounter] = CopyCounter::init();
+TEST(CopyOnlyCopyCounter, Loop) {
+  auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
   for ([[maybe_unused]] std::size_t _: rng::iota_view(0, 42)) {
     [[maybe_unused]] auto copy = copyCounter;

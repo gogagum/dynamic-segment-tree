@@ -34,9 +34,12 @@ class Node<T, std::optional<UpdateT>, Allocator>
   explicit Node(T&& value) : Base_(std::move(value)) {
   }
   void setValue(const T& value);
+  void setValue(T&& value);
   void setUpdateValue(const UpdateT& updateValue);
   template <class UpdateOp>
   void update(const UpdateOp& updateOp, const UpdateT& update);
+  template <class UpdateOp>
+  void update(const UpdateOp& updateOp, UpdateT&& update);
   template <class UpdateOp>
   void siftOptUpdate(const UpdateOp& updateOp);
 
@@ -51,6 +54,13 @@ class Node<T, std::optional<UpdateT>, Allocator>
 template <class T, class UpdateT, class Allocator>
 void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
   Base_::setValue(value);
+  updateValue_ = std::nullopt;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class UpdateT, class Allocator>
+void Node<T, std::optional<UpdateT>, Allocator>::setValue(T&& value) {
+  Base_::setValue(std::move(value));
   updateValue_ = std::nullopt;
 }
 
@@ -77,10 +87,30 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
 template <class UpdateOp>
+void Node<T, std::optional<UpdateT>, Allocator>::update(
+    const UpdateOp& updateOp, UpdateT&& updateVal) {
+  if (!this->isLeaf()) {
+    if (this->updateValue_.has_value()) {
+      // update left with old update
+      this->getLeft()->update(updateOp, this->updateValue_.value());
+      // update right with old update
+      this->getRight()->update(updateOp, std::forward(this->updateValue_.value()));
+    }
+    // _value continues to have delayed update meaning.
+    this->updateValue_ = std::forward<UpdateT>(updateVal);
+  } else {  // isLeaf()
+    assert(this->hasValue() && "Leaf must have a value.");
+    this->setValue(updateOp(this->getValue(), updateVal));
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class UpdateT, class Allocator>
+template <class UpdateOp>
 void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
     const UpdateOp& updateOp) {
   if (this->updateValue_.has_value()) {
-    assert(!this->isLeaf() && "It nust not be a leaf.");
+    assert(!this->isLeaf() && "It must not be a leaf.");
     this->getLeft()->update(updateOp, this->updateValue_.value());
     this->getRight()->update(updateOp, this->updateValue_.value());
     this->updateValue_ = std::nullopt;
