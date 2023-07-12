@@ -7,11 +7,13 @@
 #include <gtest/gtest.h>
 
 #include <boost/container/adaptive_pool.hpp>
-#include <dst/curried/dynamic_simple_get_set_segment_tree.hpp>
+#include <dst/partial/dynamic_simple_get_set_segment_tree.hpp>
 #include <random>
+#include <ranges>
 
 #include "reference/seg_tree_reference_base.hpp"
 
+namespace rng = std::ranges;
 using dst::DynamicSimpleGetSetSegmentTree;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
@@ -49,7 +51,7 @@ TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
 
   std::mt19937 generator(42);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;           // [0..500)
     const std::size_t rngLen = generator() % 500;             // [0..500)
     const int setVal = static_cast<int>(generator()) % 1000;  // [0..100)
@@ -57,7 +59,7 @@ TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
     reference.set(rngStart, rngStart + rngLen, setVal);
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t idx = generator() % 1000;  // [0..1000)
     auto treeRes = tree.get(idx);
     auto refRes = reference.get(idx);
@@ -74,7 +76,7 @@ TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGetMixed) {
 
   std::mt19937 generator(42);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
 

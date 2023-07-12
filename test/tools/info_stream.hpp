@@ -4,4 +4,11 @@
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dst/partial/dynamic_sum_segment_tree.hpp>
+#ifndef INFO_STREAM_HPP
+#define INFO_STREAM_HPP
+
+#include <iostream>
+
+std::ostream& infoStream();
+
+#endif

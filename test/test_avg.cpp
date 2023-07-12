@@ -6,11 +6,13 @@
 
 #include <gtest/gtest.h>
 
-#include <dst/curried/dynamic_avg_segment_tree.hpp>
+#include <dst/partial/dynamic_avg_segment_tree.hpp>
 #include <random>
+#include <ranges>
 
 #include "reference/avg_seg_tree_reference.hpp"
 
+namespace rng = std::ranges;
 using dst::DynamicAvgSegmentTree;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
@@ -60,7 +62,7 @@ TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
 
   std::mt19937 generator(42);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;               // [0..500)
     const std::size_t rngLen = generator() % 500;                 // [0..500)
     const float setVal = static_cast<float>(generator() % 1000);  // [0..1000)
@@ -68,7 +70,7 @@ TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
     reference.set(rngStart, rngStart + rngLen, setVal);
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
     auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
@@ -85,7 +87,7 @@ TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
 
   std::mt19937 generator(54);
 
-  for (std::size_t i = 0; i < 100; ++i) {
+  for (std::size_t i : rng::iota_view(0, 100)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
 
@@ -104,7 +106,7 @@ TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     }
   }
 
-  for (std::size_t i = 0; i < 50; ++i) {
+  for (std::size_t i : rng::iota_view(0, 50)) {
     const std::size_t rngStart = generator() % 500;  // [0..500)
     const std::size_t rngLen = generator() % 500;    // [0..500)
     auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);

@@ -8,6 +8,7 @@
 #define AVG_SEG_TREE_REFERENCE_HPP
 
 #include <concepts>
+#include <numeric>
 
 #include "seg_tree_reference_base.hpp"
 
@@ -31,11 +32,9 @@ class AvgSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 ValueT AvgSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
-  auto ret = ValueT{};
-  for (KeyT i = begin; i < end; ++i) {
-    ret += this->getValue_(i);
-  }
-  return ret / (end - begin);
+  auto values = this->getValuesRng_(begin, end);
+  return std::accumulate(values.begin(), values.end(), ValueT{0}) /
+         (end - begin);
 }
 
 #endif  // AVG_SEG_TREE_REFERENCE_HPP

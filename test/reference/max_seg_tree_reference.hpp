@@ -7,8 +7,9 @@
 #ifndef MAX_SEG_TREE_REFERENCE_HPP
 #define MAX_SEG_TREE_REFERENCE_HPP
 
-#include <concepts>
 #include <algorithm>
+#include <concepts>
+#include <ranges>
 
 #include "seg_tree_reference_base.hpp"
 
@@ -26,17 +27,9 @@ class MaxSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
    * @return maximal value on a range from begin to end, not including
    * end.
    */
-  [[nodiscard]] ValueT rangeGet(KeyT begin, KeyT end) const;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-template <std::integral KeyT, class ValueT>
-ValueT MaxSegTreeReference<KeyT, ValueT>::rangeGet(KeyT begin, KeyT end) const {
-  auto ret = this->getValue_(begin);
-  for (KeyT i = begin + 1; i < end; ++i) {
-    ret = std::max(ret, this->getValue_(i));
+  [[nodiscard]] ValueT rangeGet(KeyT begin, KeyT end) const {
+    return rng::max(this->getValuesRng_(begin, end));
   }
-  return ret;
-}
+};
 
 #endif  // MAX_SEG_TREE_REFERENCE_HPP

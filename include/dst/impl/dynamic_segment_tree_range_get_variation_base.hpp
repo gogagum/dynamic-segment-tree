@@ -44,7 +44,7 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
   }
 
  private:
-  const SegGetInit segInitializer_;
+  SegGetInit segInitializer_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ class DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
   }
 
  private:
-  const SegGetInit segInitializer_;
+  SegGetInit segInitializer_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  private:
-  const SegGetComb segCombiner_;
+  SegGetComb segCombiner_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  private:
-  const SegGetComb segCombiner_;
+  SegGetComb segCombiner_;
 };
 
 }  // namespace dst::impl

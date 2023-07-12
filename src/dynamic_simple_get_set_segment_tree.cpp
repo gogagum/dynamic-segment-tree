@@ -4,4 +4,4 @@
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dst/curried/dynamic_simple_get_set_segment_tree.hpp>
+#include <dst/partial/dynamic_simple_get_set_segment_tree.hpp>

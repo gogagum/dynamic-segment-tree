@@ -28,15 +28,29 @@ class Node<T, std::optional<UpdateT>, Allocator>
   using Base_ = BaseNode<T, Type_, Allocator>;
 
  public:
-  Node() = default;
   explicit Node(const T& value) : Base_(value) {
   }
   explicit Node(T&& value) : Base_(std::move(value)) {
   }
+
+  /**
+   * @brief Set the value to node. Clears children if they exist.
+   * 
+   * @param value value to set.
+   */
   void setValue(const T& value);
+
+  /**
+   * @brief Set the value to node. Clears children if they exist.
+   * 
+   * @param value value to set.
+   */
+  void setValue(T&& value);
   void setUpdateValue(const UpdateT& updateValue);
   template <class UpdateOp>
   void update(const UpdateOp& updateOp, const UpdateT& update);
+  template <class UpdateOp>
+  void update(const UpdateOp& updateOp, UpdateT&& update);
   template <class UpdateOp>
   void siftOptUpdate(const UpdateOp& updateOp);
 
@@ -56,15 +70,26 @@ void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
+void Node<T, std::optional<UpdateT>, Allocator>::setValue(T&& value) {
+  Base_::setValue(std::move(value));
+  updateValue_ = std::nullopt;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class UpdateT, class Allocator>
 template <class UpdateOp>
 void Node<T, std::optional<UpdateT>, Allocator>::update(
     const UpdateOp& updateOp, const UpdateT& updateVal) {
   if (!this->isLeaf()) {
     if (this->updateValue_.has_value()) {
       // update left with old update
-      this->getLeft()->update(updateOp, this->updateValue_.value());
+      this->getLeft()->update(updateOp, *this->updateValue_);
       // update right with old update
-      this->getRight()->update(updateOp, this->updateValue_.value());
+      if (std::movable<T>) {
+        this->getRight()->update(updateOp, std::move(*this->updateValue_));
+      } else {
+        this->getRight()->update(updateOp, *this->updateValue_);
+      }
     }
     // _value continues to have delayed update meaning.
     this->updateValue_ = updateVal;
@@ -77,12 +102,32 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
 template <class UpdateOp>
+void Node<T, std::optional<UpdateT>, Allocator>::update(
+    const UpdateOp& updateOp, UpdateT&& updateVal) {
+  if (!this->isLeaf()) {
+    if (this->updateValue_.has_value()) {
+      // update left with old update
+      this->getLeft()->update(updateOp, *this->updateValue_);
+      // update right with old update
+      this->getRight()->update(updateOp, std::move(*this->updateValue_));
+    }
+    // _value continues to have delayed update meaning.
+    this->updateValue_ = std::move(updateVal);
+  } else {  // isLeaf()
+    assert(this->hasValue() && "Leaf must have a value.");
+    this->setValue(updateOp(this->getValue(), updateVal));
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class UpdateT, class Allocator>
+template <class UpdateOp>
 void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
     const UpdateOp& updateOp) {
   if (this->updateValue_.has_value()) {
-    assert(!this->isLeaf() && "It nust not be a leaf.");
-    this->getLeft()->update(updateOp, this->updateValue_.value());
-    this->getRight()->update(updateOp, this->updateValue_.value());
+    assert(!this->isLeaf() && "It must not be a leaf.");
+    this->getLeft()->update(updateOp, *this->updateValue_);
+    this->getRight()->update(updateOp, std::move(*this->updateValue_));
     this->updateValue_ = std::nullopt;
   }
 }
@@ -142,7 +187,7 @@ template <class T, class Allocator>
 template <class UpdateOp>
 void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
   if (toUpdate_) {
-    assert(!this->isLeaf() && "It nust not be a leaf.");
+    assert(!this->isLeaf() && "It must not be a leaf.");
     this->getLeft()->update(updateOp);
     this->getRight()->update(updateOp);
     toUpdate_ = false;
