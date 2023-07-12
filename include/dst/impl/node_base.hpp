@@ -34,7 +34,7 @@ class BaseNode {
   BaseNode& operator=(BaseNode&&) noexcept = default;
   [[nodiscard]] const T& getValue() const {
     assert(value_.has_value());
-    return value_.value();
+    return *value_;
   }
   
   /**
