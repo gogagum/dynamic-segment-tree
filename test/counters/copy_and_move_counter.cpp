@@ -6,8 +6,6 @@
 
 #include "copy_and_move_counter.hpp"
 
-#include <stdexcept>
-
 ////////////////////////////////////////////////////////////////////////////////
 auto CopyAndMoveCounter::init() -> Init {
   return {};

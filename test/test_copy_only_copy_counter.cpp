@@ -12,6 +12,8 @@
 
 namespace rng = std::ranges;
 
+static_assert(!std::movable<CopyOnlyCopyCounter>);
+
 TEST(CopyOnlyCopyCounter, Construct) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 

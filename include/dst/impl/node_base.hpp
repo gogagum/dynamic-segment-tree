@@ -22,7 +22,6 @@ class BaseNode {
   using AllocatorTraits_ = std::allocator_traits<Allocator_>;
 
  public:
-  BaseNode() = default;
   explicit BaseNode(const T& value) : value_(value) {
   }
   explicit BaseNode(T&& value) : value_(std::move(value)) {
@@ -103,14 +102,13 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
   auto nodesPtr = AllocatorTraits_::allocate(allocator_, 2);
   left_ = nodesPtr;
   right_ = nodesPtr + 1;  //NOLINT
-  std::construct_at(left_);
-  std::construct_at(right_);
+  
   assert(value_.has_value() && "No value to set to children.");
-  left_->setValue(value_.value());
+  std::construct_at(left_, *value_);
   if constexpr (std::movable<T>) {
-    right_->setValue(std::move(value_.value()));
+    std::construct_at(right_, std::move(*value_));
   } else {
-    right_->setValue(value_.value());
+    std::construct_at(right_, *value_);
   }
   value_ = std::nullopt;
 }

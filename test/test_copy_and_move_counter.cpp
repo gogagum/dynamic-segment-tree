@@ -11,6 +11,8 @@
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
 
+static_assert(std::copyable<CopyAndMoveCounter>);
+
 TEST(CopyAndMoveCounter, Init) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 }

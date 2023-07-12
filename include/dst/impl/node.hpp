@@ -28,12 +28,23 @@ class Node<T, std::optional<UpdateT>, Allocator>
   using Base_ = BaseNode<T, Type_, Allocator>;
 
  public:
-  Node() = default;
   explicit Node(const T& value) : Base_(value) {
   }
   explicit Node(T&& value) : Base_(std::move(value)) {
   }
+
+  /**
+   * @brief Set the value to node. Clears children if they exist.
+   * 
+   * @param value value to set.
+   */
   void setValue(const T& value);
+
+  /**
+   * @brief Set the value to node. Clears children if they exist.
+   * 
+   * @param value value to set.
+   */
   void setValue(T&& value);
   void setUpdateValue(const UpdateT& updateValue);
   template <class UpdateOp>
@@ -176,7 +187,7 @@ template <class T, class Allocator>
 template <class UpdateOp>
 void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
   if (toUpdate_) {
-    assert(!this->isLeaf() && "It nust not be a leaf.");
+    assert(!this->isLeaf() && "It must not be a leaf.");
     this->getLeft()->update(updateOp);
     this->getRight()->update(updateOp);
     toUpdate_ = false;

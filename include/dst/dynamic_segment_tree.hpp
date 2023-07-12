@@ -138,7 +138,7 @@ class DynamicSegmentTree
   /**
    * @brief Set value on a range.
    *
-   * If `begin` >= `end`, then set operation range is perceived as empty and no 
+   * If `begin` >= `end`, then set operation range is perceived as empty and no
    * changes happen.
    *
    * @param begin beginning of an updated segment.
@@ -150,7 +150,7 @@ class DynamicSegmentTree
   /**
    * @brief Set value on a range.
    *
-   * If `begin` >= `end`, then set operation range is perceived as empty and no 
+   * If `begin` >= `end`, then set operation range is perceived as empty and no
    * changes happen.
    *
    * @param begin beginning of an updated segment.
