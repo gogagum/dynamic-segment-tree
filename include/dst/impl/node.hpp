@@ -85,11 +85,7 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
       // update left with old update
       this->getLeft()->update(updateOp, *this->updateValue_);
       // update right with old update
-      if (std::movable<T>) {
-        this->getRight()->update(updateOp, std::move(*this->updateValue_));
-      } else {
-        this->getRight()->update(updateOp, *this->updateValue_);
-      }
+      this->getRight()->update(updateOp, std::move(*this->updateValue_));
     }
     // _value continues to have delayed update meaning.
     this->updateValue_ = updateVal;
@@ -152,7 +148,7 @@ class Node<T, bool, Allocator>
   Node() = default;
   explicit Node(const T& value) : Base_(value) {
   }
-  explicit Node(T&& value) : Base_(std::move(value)) {
+  explicit Node(T&& value) noexcept : Base_(std::move(value)) {
   }
   void addUpdate();
   template <class UpdateOp>

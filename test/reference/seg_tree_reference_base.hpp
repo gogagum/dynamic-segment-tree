@@ -118,20 +118,14 @@ void SegTreeReferenceBase<KeyT, ValueT>::update(KeyT begin, KeyT end,
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin, KeyT end) {
-  return rng::iota_view(begin, end) |
-         rngv::transform([this](KeyT key) -> ValueT& {
-           return getValue_(key);
-         });
+  return values_ | rngv::drop(begin - begin_) | rngv::take(end - begin);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin,
                                                        KeyT end) const {
-  return rng::iota_view(begin, end) |
-         rngv::transform([this](KeyT key) -> const ValueT& {
-           return getValue_(key);
-         });
+  return values_ | rngv::drop(begin - begin_) | rngv::take(end - begin);
 }
 
 #endif  // SEG_TREE_REFERENCE_BASE_HPP

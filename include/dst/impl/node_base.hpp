@@ -7,6 +7,7 @@
 #ifndef NODE_BASE_HPP
 #define NODE_BASE_HPP
 
+#include <concepts>
 #include <memory>
 #include <optional>
 
@@ -18,13 +19,15 @@ namespace dst::impl {
 template <class T, class Derived, class Allocator>
 class BaseNode {
   using Allocator_ =
-    std::allocator_traits<Allocator>::template rebind_alloc<Derived>;
+      std::allocator_traits<Allocator>::template rebind_alloc<Derived>;
   using AllocatorTraits_ = std::allocator_traits<Allocator_>;
 
  public:
   explicit BaseNode(const T& value) : value_(value) {
   }
-  explicit BaseNode(T&& value) : value_(std::move(value)) {
+  explicit BaseNode(T&& value) noexcept
+    requires std::move_constructible<T>
+      : value_(std::move(value)) {
   }
   BaseNode(const BaseNode&) = default;
   BaseNode(BaseNode&&) noexcept = default;
@@ -36,19 +39,19 @@ class BaseNode {
     assert(value_.has_value());
     return *value_;
   }
-  
+
   /**
    * @brief Set value to node making a copy.
    * @param value value reference.
    */
   void setValue(const T&);
-  
+
   /**
    * @brief Set the value to node moving it.
    * @param value moved value.
    */
   void setValue(T&&);
-  
+
   [[nodiscard]] bool hasValue() const {
     return value_.has_value();
   }
@@ -101,15 +104,11 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
   assert(isLeaf() && "Can only init children for a leaf.");
   auto nodesPtr = AllocatorTraits_::allocate(allocator_, 2);
   left_ = nodesPtr;
-  right_ = nodesPtr + 1;  //NOLINT
-  
+  right_ = nodesPtr + 1;  // NOLINT
+
   assert(value_.has_value() && "No value to set to children.");
   std::construct_at(left_, *value_);
-  if constexpr (std::movable<T>) {
-    std::construct_at(right_, std::move(*value_));
-  } else {
-    std::construct_at(right_, *value_);
-  }
+  std::construct_at(right_, std::move(*value_));
   value_ = std::nullopt;
 }
 
