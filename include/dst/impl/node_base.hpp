@@ -103,12 +103,26 @@ template <class T, class Derived, class Allocator>
 void BaseNode<T, Derived, Allocator>::initChildren() {
   assert(isLeaf() && "Can only init children for a leaf.");
   auto nodesPtr = AllocatorTraits_::allocate(allocator_, 2);
-  left_ = nodesPtr;
-  right_ = nodesPtr + 1;  // NOLINT
 
   assert(value_.has_value() && "No value to set to children.");
-  std::construct_at(left_, *value_);
-  std::construct_at(right_, std::move(*value_));
+  try {
+    left_ = nodesPtr;
+    std::construct_at(left_, *value_);
+  } catch (const std::exception& e) {
+    AllocatorTraits_::deallocate(allocator_, left_, 2);
+    left_ = nullptr;
+    throw;
+  }
+  try {
+    right_ = nodesPtr + 1;  // NOLINT
+    std::construct_at(right_, std::move(*value_));
+  } catch (const std::exception& e) {
+    getLeft()->~Derived();
+    AllocatorTraits_::deallocate(allocator_, left_, 2);
+    left_ = nullptr;
+    right_ = nullptr;
+    throw;
+  }
   value_ = std::nullopt;
 }
 

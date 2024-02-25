@@ -24,6 +24,7 @@ add_subdirectory(boost)
 add_executable(dst-test
     boost_allocator.cpp
     boost_adaptive_pool.cpp
+    node.cpp
     test_negate.cpp
     test_sum.cpp
     test_min.cpp
@@ -37,6 +38,7 @@ add_executable(dst-test
     test_copy_count.cpp
     test_copy_and_move_counts.cpp
     tools/info_stream.cpp
+    tools/copy_n_times_then_throw.cpp
 )
 
 enable_testing()

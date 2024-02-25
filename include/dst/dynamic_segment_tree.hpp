@@ -26,7 +26,7 @@ namespace dst {
 ///
 /// \tparam KeyT integral key type. Indicies of elements in a segment tree.
 /// \tparam ValueT value type of the elements in a segment tree.
-/// \tparam GetValueT type of a velue returned from get and rangeGet operations.
+/// \tparam GetValueT type of a value returned from get and rangeGet operations.
 /// \tparam SegGetComb two segments combiner for rangeGet operation. It has
 /// three possible forms: 1. combiner of two get-values (makes range get
 /// operation result from two results of two parts); 2. combiner of two

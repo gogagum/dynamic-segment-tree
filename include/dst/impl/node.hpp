@@ -11,6 +11,7 @@
 #include <dst/impl/node_base.hpp>
 #include <memory>
 #include <optional>
+#include <type_traits>
 
 namespace dst::impl {
 
@@ -30,27 +31,28 @@ class Node<T, std::optional<UpdateT>, Allocator>
  public:
   explicit Node(const T& value) : Base_(value) {
   }
-  explicit Node(T&& value) : Base_(std::move(value)) {
+  explicit Node(T&& value) noexcept
+    requires std::move_constructible<T>
+      : Base_(std::move(value)) {
   }
 
   /**
    * @brief Set the value to node. Clears children if they exist.
-   * 
+   *
    * @param value value to set.
    */
   void setValue(const T& value);
 
   /**
    * @brief Set the value to node. Clears children if they exist.
-   * 
+   *
    * @param value value to set.
    */
   void setValue(T&& value);
   void setUpdateValue(const UpdateT& updateValue);
-  template <class UpdateOp>
-  void update(const UpdateOp& updateOp, const UpdateT& update);
-  template <class UpdateOp>
-  void update(const UpdateOp& updateOp, UpdateT&& update);
+  template <class UpdateOp, class UpdateT1>
+    requires std::is_same_v<std::remove_cvref_t<UpdateT1>, UpdateT>
+  void update(const UpdateOp& updateOp, UpdateT1&& update);
   template <class UpdateOp>
   void siftOptUpdate(const UpdateOp& updateOp);
 
@@ -77,9 +79,10 @@ void Node<T, std::optional<UpdateT>, Allocator>::setValue(T&& value) {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
-template <class UpdateOp>
+template <class UpdateOp, class UpdateT1>
+  requires std::is_same_v<std::remove_cvref_t<UpdateT1>, UpdateT>
 void Node<T, std::optional<UpdateT>, Allocator>::update(
-    const UpdateOp& updateOp, const UpdateT& updateVal) {
+    const UpdateOp& updateOp, UpdateT1&& updateVal) {
   if (!this->isLeaf()) {
     if (this->updateValue_.has_value()) {
       // update left with old update
@@ -91,27 +94,8 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
     this->updateValue_ = updateVal;
   } else {  // isLeaf()
     assert(this->hasValue() && "Leaf must have a value.");
-    this->setValue(updateOp(this->getValue(), updateVal));
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-template <class T, class UpdateT, class Allocator>
-template <class UpdateOp>
-void Node<T, std::optional<UpdateT>, Allocator>::update(
-    const UpdateOp& updateOp, UpdateT&& updateVal) {
-  if (!this->isLeaf()) {
-    if (this->updateValue_.has_value()) {
-      // update left with old update
-      this->getLeft()->update(updateOp, *this->updateValue_);
-      // update right with old update
-      this->getRight()->update(updateOp, std::move(*this->updateValue_));
-    }
-    // _value continues to have delayed update meaning.
-    this->updateValue_ = std::move(updateVal);
-  } else {  // isLeaf()
-    assert(this->hasValue() && "Leaf must have a value.");
-    this->setValue(updateOp(this->getValue(), updateVal));
+    this->setValue(
+        updateOp(this->getValue(), std::forward<UpdateT1>(updateVal)));
   }
 }
 
@@ -148,7 +132,9 @@ class Node<T, bool, Allocator>
   Node() = default;
   explicit Node(const T& value) : Base_(value) {
   }
-  explicit Node(T&& value) noexcept : Base_(std::move(value)) {
+  explicit Node(T&& value) noexcept
+    requires std::move_constructible<T>
+      : Base_(std::move(value)) {
   }
   void addUpdate();
   template <class UpdateOp>
@@ -202,7 +188,9 @@ class Node<T, void, Allocator>
   Node() = default;
   explicit Node(const T& value) : BaseNode<T, Type_, Allocator>(value) {
   }
-  explicit Node(T&& value) : BaseNode<T, Type_, Allocator>(std::move(value)) {
+  explicit Node(T&& value) noexcept
+    requires std::move_constructible<T>
+      : BaseNode<T, Type_, Allocator>(std::move(value)) {
   }
 
  private:
