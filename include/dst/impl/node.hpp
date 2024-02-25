@@ -42,14 +42,10 @@ class Node<T, std::optional<UpdateT>, Allocator>
    *
    * @param value value to set.
    */
-  void setValue(const T& value, Allocator_& allocator);
+  template <class ValueT>
+    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+  void setValue(ValueT&& value, Allocator_& allocator);
 
-  /**
-   * @brief Set the value to node. Clears children if they exist.
-   *
-   * @param value value to set.
-   */
-  void setValue(T&& value, Allocator_& allocator);
   void setUpdateValue(const UpdateT& updateValue);
   template <class UpdateOp, class UpdateT1>
     requires std::is_same_v<std::remove_cvref_t<UpdateT1>, UpdateT>
@@ -67,17 +63,11 @@ class Node<T, std::optional<UpdateT>, Allocator>
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
+template <class ValueT>
+  requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
 void Node<T, std::optional<UpdateT>, Allocator>::setValue(
-    const T& value, Allocator_& allocator) {
-  Base_::setValue(value, allocator);
-  updateValue_ = std::nullopt;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-template <class T, class UpdateT, class Allocator>
-void Node<T, std::optional<UpdateT>, Allocator>::setValue(
-    T&& value, Allocator_& allocator) {
-  Base_::setValue(std::move(value), allocator);
+    ValueT&& value, Allocator_& allocator) {
+  Base_::setValue(std::forward<ValueT>(value), allocator);
   updateValue_ = std::nullopt;
 }
 

@@ -2,6 +2,7 @@
 #define ALLOCATE_N_TIMES_THEN_THROW
 
 #include <memory>
+#include <stdexcept>
 
 template <class T>
 class AllocateNTimesThenThrow : std::allocator<T> {

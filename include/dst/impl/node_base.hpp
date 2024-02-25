@@ -46,13 +46,9 @@ class BaseNode {
    * @brief Set value to node making a copy.
    * @param value value reference.
    */
-  void setValue(const T&, Allocator_& allocator);
-
-  /**
-   * @brief Set the value to node moving it.
-   * @param value moved value.
-   */
-  void setValue(T&&, Allocator_& allocator);
+  template <class ValueT>
+    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+  void setValue(ValueT&&, Allocator_& allocator);
 
   [[nodiscard]] bool hasValue() const {
     return value_.has_value();
@@ -75,7 +71,6 @@ class BaseNode {
   void clearChildren(Allocator_& allocator);
 
  private:
-
   void destructChildrenRecursive_();
 
  private:
@@ -86,19 +81,11 @@ class BaseNode {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-void BaseNode<T, Derived, Allocator>::setValue(const T& value,
+template <class ValueT>
+  requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+void BaseNode<T, Derived, Allocator>::setValue(ValueT&& value,
                                                Allocator_& allocator) {
-  value_ = value;
-  if (!this->isLeaf()) {
-    clearChildren(allocator);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-template <class T, class Derived, class Allocator>
-void BaseNode<T, Derived, Allocator>::setValue(T&& value,
-                                               Allocator_& allocator) {
-  value_ = std::move(value);
+  value_ = std::forward<ValueT>(value);
   if (!this->isLeaf()) {
     clearChildren(allocator);
   }
