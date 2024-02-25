@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright Georgy Guminov 2023.
+// Copyright Georgy Guminov 2023-2024.
 // Distributed under the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
@@ -96,10 +96,10 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  protected:
-  [[nodiscard]] GetValueT combineGet_(
-      const GetValueT& leftValue, const GetValueT& rightValue,
-      [[maybe_unused]] KeyT /*leftBegin*/, [[maybe_unused]] KeyT /*separation*/,
-      [[maybe_unused]] KeyT /*rightEnd*/) const {
+  [[nodiscard]] GetValueT combineGet_(const GetValueT& leftValue,
+                                      const GetValueT& rightValue,
+                                      KeyT /*leftBegin*/, KeyT /*separation*/,
+                                      KeyT /*rightEnd*/) const {
     return segCombiner_(leftValue, rightValue);
   }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright Georgy Guminov 2023.
+// Copyright Georgy Guminov 2023-2024.
 // Distributed under the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
@@ -9,7 +9,6 @@
 
 #include <algorithm>
 #include <concepts>
-#include <functional>
 #include <ranges>
 #include <vector>
 
@@ -118,20 +117,14 @@ void SegTreeReferenceBase<KeyT, ValueT>::update(KeyT begin, KeyT end,
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin, KeyT end) {
-  return rng::iota_view(begin, end) |
-         rngv::transform([this](KeyT key) -> ValueT& {
-           return getValue_(key);
-         });
+  return values_ | rngv::drop(begin - begin_) | rngv::take(end - begin);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin,
                                                        KeyT end) const {
-  return rng::iota_view(begin, end) |
-         rngv::transform([this](KeyT key) -> const ValueT& {
-           return getValue_(key);
-         });
+  return values_ | rngv::drop(begin - begin_) | rngv::take(end - begin);
 }
 
 #endif  // SEG_TREE_REFERENCE_BASE_HPP

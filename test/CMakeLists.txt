@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright Georgy Guminov 2023.
+# Copyright Georgy Guminov 2023-2024.
 # Distributed under the Boost Software License,
 # Version 1.0. (See accompanying file LICENSE_1_0.txt
 #  or copy at https://www.boost.org/LICENSE_1_0.txt)
@@ -24,6 +24,7 @@ add_subdirectory(boost)
 add_executable(dst-test
     boost_allocator.cpp
     boost_adaptive_pool.cpp
+    node.cpp
     test_negate.cpp
     test_sum.cpp
     test_min.cpp
@@ -37,6 +38,7 @@ add_executable(dst-test
     test_copy_count.cpp
     test_copy_and_move_counts.cpp
     tools/info_stream.cpp
+    tools/copy_n_times_then_throw.cpp
 )
 
 enable_testing()

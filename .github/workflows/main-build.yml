@@ -73,8 +73,8 @@ jobs:
         name: macOS Clang (libc++)
         runs-on: macos-latest
         env:
-            CC: /usr/local/opt/llvm/bin/clang
-            CXX: /usr/local/opt/llvm/bin/clang++
+            CC: /usr/local/opt/llvm@16/bin/clang
+            CXX: /usr/local/opt/llvm@16/bin/clang++
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3

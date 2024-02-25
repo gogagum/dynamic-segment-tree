@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright Georgy Guminov 2023.
+// Copyright Georgy Guminov 2023-2024.
 // Distributed under the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
@@ -16,6 +16,7 @@
 #include <dst/impl/node.hpp>
 #include <dst/mp.hpp>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 
@@ -26,7 +27,7 @@ namespace dst {
 ///
 /// \tparam KeyT integral key type. Indicies of elements in a segment tree.
 /// \tparam ValueT value type of the elements in a segment tree.
-/// \tparam GetValueT type of a velue returned from get and rangeGet operations.
+/// \tparam GetValueT type of a value returned from get and rangeGet operations.
 /// \tparam SegGetComb two segments combiner for rangeGet operation. It has
 /// three possible forms: 1. combiner of two get-values (makes range get
 /// operation result from two results of two parts); 2. combiner of two
@@ -75,6 +76,9 @@ class DynamicSegmentTree
                                                         SegGetInit>;
 
   using Node_ = UpdateVariationBase_::Node_;
+
+  using NodeAlloc_ =
+      std::allocator_traits<Allocator>::template rebind_alloc<Node_>;
 
  public:
   /**
@@ -178,6 +182,12 @@ class DynamicSegmentTree
     requires conc::GetCombiner<SegGetComb, GetValueT, KeyT> &&
              conc::GetInitializer<SegGetInit, ValueT, KeyT, GetValueT>;
 
+  ~DynamicSegmentTree() {
+    if (!rootNode_.isLeaf()) {
+      rootNode_.clearChildren(nodeAllocator_);
+    }
+  }
+
  private:
   void setImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                 Node_* currNode, const ValueT& toUpdate);
@@ -189,6 +199,7 @@ class DynamicSegmentTree
                           Node_* currNode) const;
 
  private:
+  mutable NodeAlloc_ nodeAllocator_;
   mutable Node_ rootNode_;
   KeyT begin_;
   KeyT end_;
@@ -251,7 +262,8 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                         Allocator>::update(KeyT begin, KeyT end,
                                            const UpdateArgT_& toUpdate) {
   UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_,
-                                    static_cast<const UpdateArgT&>(toUpdate));
+                                    static_cast<const UpdateArgT&>(toUpdate),
+                                    nodeAllocator_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +277,8 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                                                                  KeyT end)
   requires conc::OneArgUpdateOp<UpdateOp, ValueT>
 {
-  UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_);
+  UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_,
+                                    nodeAllocator_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -346,14 +359,14 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   assert(currEnd > begin && "currEnd must be checked before call.");
   assert(begin < end && "Function must not be called on empty range");
   if (end >= currEnd && begin <= currBegin) {
-    currNode->setValue(toUpdate);
+    currNode->setValue(toUpdate, nodeAllocator_);
     return;
   }
   if (currNode->isLeaf()) {
-    currNode->initChildren();
+    currNode->initChildren(nodeAllocator_);
   }
   const auto mid = (currBegin + currEnd) / 2;
-  this->optionalSiftNodeUpdate_(currNode);
+  this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
   if (mid > begin) {
     setImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate);
   }
@@ -378,14 +391,14 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   assert(currEnd > begin && "currEnd must be checked before call.");
   assert(begin < end && "Function must not be called on empty range");
   if (end >= currEnd && begin <= currBegin) {
-    currNode->setValue(std::move(toUpdate));
+    currNode->setValue(std::move(toUpdate), nodeAllocator_);
     return;
   }
   if (currNode->isLeaf()) {
-    currNode->initChildren();
+    currNode->initChildren(nodeAllocator_);
   }
   const auto mid = (currBegin + currEnd) / 2;
-  this->optionalSiftNodeUpdate_(currNode);
+  this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
   if (mid >= end) {
     // Only move to left as right is out of range.
     setImpl_(begin, end, currBegin, mid, currNode->getLeft(),
@@ -417,7 +430,7 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
   if (currNode->isLeaf()) {
     return currNode->getValue();
   }
-  this->optionalSiftNodeUpdate_(currNode);
+  this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
   if (auto mid = (currBegin + currEnd) / 2; key >= mid) {
     return getImpl_(key, mid, currEnd, currNode->getRight());
   } else {
@@ -447,10 +460,10 @@ GetValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                                                 currNode->getValue());
   }
   if (currNode->isLeaf()) {
-    currNode->initChildren();
+    currNode->initChildren(nodeAllocator_);
   }
 
-  UpdateVariationBase_::optionalSiftNodeUpdate_(currNode);
+  UpdateVariationBase_::optionalSiftNodeUpdate_(currNode, nodeAllocator_);
   const auto mid = (currBegin + currEnd) / 2;
 
   if (begin >= mid) {  // only right
