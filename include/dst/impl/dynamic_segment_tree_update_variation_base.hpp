@@ -59,8 +59,10 @@ class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
     }
     assert(currEnd >= currBegin + 2);
     const auto mid = (currBegin + currEnd) / 2;
-    updateImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate, allocator);
-    updateImpl_(begin, end, mid, currEnd, currNode->getRight(), toUpdate, allocator);
+    updateImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate,
+                allocator);
+    updateImpl_(begin, end, mid, currEnd, currNode->getRight(), toUpdate,
+                allocator);
   }
 
   void optionalSiftNodeUpdate_(Node_* nodePtr,

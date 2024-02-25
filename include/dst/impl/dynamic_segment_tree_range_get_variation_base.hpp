@@ -96,10 +96,10 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  protected:
-  [[nodiscard]] GetValueT combineGet_(
-      const GetValueT& leftValue, const GetValueT& rightValue,
-      [[maybe_unused]] KeyT /*leftBegin*/, [[maybe_unused]] KeyT /*separation*/,
-      [[maybe_unused]] KeyT /*rightEnd*/) const {
+  [[nodiscard]] GetValueT combineGet_(const GetValueT& leftValue,
+                                      const GetValueT& rightValue,
+                                      KeyT /*leftBegin*/, KeyT /*separation*/,
+                                      KeyT /*rightEnd*/) const {
     return segCombiner_(leftValue, rightValue);
   }
 
