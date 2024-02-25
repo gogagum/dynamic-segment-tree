@@ -27,7 +27,8 @@ TEST(Node, UpdateBool) {
   using UpdateOp = decltype([](int n) {
     return n + 1;
   });
-  node.update(UpdateOp{});
+  auto alloc = std::allocator<dst::impl::Node<int, bool>>();
+  node.update(UpdateOp{}, alloc);
 
   EXPECT_TRUE(node.isLeaf());
 }
@@ -39,7 +40,8 @@ TEST(Node, UpdateInt) {
   using UpdateOp = decltype([](int n, int toAdd) {
     return n + toAdd;
   });
-  node.update(UpdateOp{}, 3);
+  auto alloc = std::allocator<dst::impl::Node<int, std::optional<int>>>();
+  node.update(UpdateOp{}, 3, alloc);
 
   EXPECT_TRUE(node.isLeaf());
   EXPECT_EQ(node.getValue(), 5);
@@ -49,11 +51,14 @@ TEST(Node, UpdateInt) {
 TEST(Node, InitChildren) {
   auto node = dst::impl::Node<int, bool>{2};
 
-  node.initChildren();
+  auto alloc = std::allocator<dst::impl::Node<int, bool>>();
+  node.initChildren(alloc);
 
   EXPECT_FALSE(node.isLeaf());
   EXPECT_EQ(node.getLeft()->getValue(), 2);
   EXPECT_EQ(node.getRight()->getValue(), 2);
+
+  node.clearChildren(alloc);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +66,8 @@ TEST(Node, ThrowOnFirstCopy) {
   auto node =
       dst::impl::Node<CopyNTimesThenThrow, bool>{CopyNTimesThenThrow{1}};
 
-  EXPECT_THROW(node.initChildren(), CopyNTimesThenThrow::Exception);
+  auto alloc = std::allocator<dst::impl::Node<CopyNTimesThenThrow, bool>>();
+  EXPECT_THROW(node.initChildren(alloc), CopyNTimesThenThrow::Exception);
   EXPECT_TRUE(node.isLeaf());
 }
 
@@ -70,7 +76,18 @@ TEST(Node, ThrowOnSecondCopy) {
   auto node =
       dst::impl::Node<CopyNTimesThenThrow, bool>{CopyNTimesThenThrow{2}};
 
-  EXPECT_THROW(node.initChildren(), CopyNTimesThenThrow::Exception);
+  auto alloc = std::allocator<dst::impl::Node<CopyNTimesThenThrow, bool>>();
+  EXPECT_THROW(node.initChildren(alloc), CopyNTimesThenThrow::Exception);
+  EXPECT_TRUE(node.isLeaf());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+TEST(Node, ThrowOnAllocation) {
+  auto node =
+      dst::impl::Node<CopyNTimesThenThrow, bool>{CopyNTimesThenThrow{1}};
+
+  auto alloc = std::allocator<dst::impl::Node<CopyNTimesThenThrow, bool>>();
+  EXPECT_THROW(node.initChildren(alloc), CopyNTimesThenThrow::Exception);
   EXPECT_TRUE(node.isLeaf());
 }
 

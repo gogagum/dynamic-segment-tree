@@ -27,6 +27,7 @@ class Node<T, std::optional<UpdateT>, Allocator>
  private:
   using Type_ = Node<T, std::optional<UpdateT>, Allocator>;
   using Base_ = BaseNode<T, Type_, Allocator>;
+  using Allocator_ = Base_::Allocator_;
 
  public:
   explicit Node(const T& value) : Base_(value) {
@@ -41,20 +42,21 @@ class Node<T, std::optional<UpdateT>, Allocator>
    *
    * @param value value to set.
    */
-  void setValue(const T& value);
+  void setValue(const T& value, Allocator_& allocator);
 
   /**
    * @brief Set the value to node. Clears children if they exist.
    *
    * @param value value to set.
    */
-  void setValue(T&& value);
+  void setValue(T&& value, Allocator_& allocator);
   void setUpdateValue(const UpdateT& updateValue);
   template <class UpdateOp, class UpdateT1>
     requires std::is_same_v<std::remove_cvref_t<UpdateT1>, UpdateT>
-  void update(const UpdateOp& updateOp, UpdateT1&& update);
+  void update(const UpdateOp& updateOp, UpdateT1&& update,
+              Allocator_& allocator);
   template <class UpdateOp>
-  void siftOptUpdate(const UpdateOp& updateOp);
+  void siftOptUpdate(const UpdateOp& updateOp, Allocator_& allocator);
 
  private:
   std::optional<UpdateT> updateValue_;
@@ -65,15 +67,17 @@ class Node<T, std::optional<UpdateT>, Allocator>
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
-void Node<T, std::optional<UpdateT>, Allocator>::setValue(const T& value) {
-  Base_::setValue(value);
+void Node<T, std::optional<UpdateT>, Allocator>::setValue(
+    const T& value, Allocator_& allocator) {
+  Base_::setValue(value, allocator);
   updateValue_ = std::nullopt;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
-void Node<T, std::optional<UpdateT>, Allocator>::setValue(T&& value) {
-  Base_::setValue(std::move(value));
+void Node<T, std::optional<UpdateT>, Allocator>::setValue(
+    T&& value, Allocator_& allocator) {
+  Base_::setValue(std::move(value), allocator);
   updateValue_ = std::nullopt;
 }
 
@@ -82,20 +86,22 @@ template <class T, class UpdateT, class Allocator>
 template <class UpdateOp, class UpdateT1>
   requires std::is_same_v<std::remove_cvref_t<UpdateT1>, UpdateT>
 void Node<T, std::optional<UpdateT>, Allocator>::update(
-    const UpdateOp& updateOp, UpdateT1&& updateVal) {
+    const UpdateOp& updateOp, UpdateT1&& updateVal, Allocator_& allocator) {
   if (!this->isLeaf()) {
     if (this->updateValue_.has_value()) {
       // update left with old update
-      this->getLeft()->update(updateOp, *this->updateValue_);
+      this->getLeft()->update(updateOp, *this->updateValue_, allocator);
       // update right with old update
-      this->getRight()->update(updateOp, std::move(*this->updateValue_));
+      this->getRight()->update(updateOp, std::move(*this->updateValue_),
+                               allocator);
     }
     // _value continues to have delayed update meaning.
     this->updateValue_ = updateVal;
   } else {  // isLeaf()
     assert(this->hasValue() && "Leaf must have a value.");
     this->setValue(
-        updateOp(this->getValue(), std::forward<UpdateT1>(updateVal)));
+        updateOp(this->getValue(), std::forward<UpdateT1>(updateVal)),
+        allocator);
   }
 }
 
@@ -103,11 +109,12 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
 template <class T, class UpdateT, class Allocator>
 template <class UpdateOp>
 void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
-    const UpdateOp& updateOp) {
+    const UpdateOp& updateOp, Allocator_& allocator) {
   if (this->updateValue_.has_value()) {
     assert(!this->isLeaf() && "It must not be a leaf.");
-    this->getLeft()->update(updateOp, *this->updateValue_);
-    this->getRight()->update(updateOp, std::move(*this->updateValue_));
+    this->getLeft()->update(updateOp, *this->updateValue_, allocator);
+    this->getRight()->update(updateOp, std::move(*this->updateValue_),
+                             allocator);
     this->updateValue_ = std::nullopt;
   }
 }
@@ -127,6 +134,7 @@ class Node<T, bool, Allocator>
  private:
   using Type_ = Node<T, bool, Allocator>;
   using Base_ = BaseNode<T, Type_, Allocator>;
+  using Allocator_ = Base_::Allocator_;
 
  public:
   Node() = default;
@@ -138,9 +146,9 @@ class Node<T, bool, Allocator>
   }
   void addUpdate();
   template <class UpdateOp>
-  void update(const UpdateOp& updateOp);
+  void update(const UpdateOp& updateOp, Allocator_& allocator);
   template <class UpdateOp>
-  void siftOptUpdate(const UpdateOp& updateOp);
+  void siftOptUpdate(const UpdateOp& updateOp, Allocator_& allocator);
 
  private:
   bool toUpdate_{false};
@@ -152,26 +160,30 @@ class Node<T, bool, Allocator>
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
 template <class UpdateOp>
-void Node<T, bool, Allocator>::update(const UpdateOp& updateOp) {
+void Node<T, bool, Allocator>::update(const UpdateOp& updateOp,
+                                      Allocator_& allocator) {
   if (!this->isLeaf()) {
     if (toUpdate_) {
-      this->getLeft()->update(updateOp);   // update left with old update
-      this->getRight()->update(updateOp);  // update right with old update
+      this->getLeft()->update(updateOp,
+                              allocator);  // update left with old update
+      this->getRight()->update(updateOp,
+                               allocator);  // update right with old update
     }
     toUpdate_ = true;
   } else {  // isLeaf()
-    this->setValue(updateOp(this->getValue()));
+    this->setValue(updateOp(this->getValue()), allocator);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
 template <class UpdateOp>
-void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp) {
+void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp,
+                                             Allocator_& allocator) {
   if (toUpdate_) {
     assert(!this->isLeaf() && "It must not be a leaf.");
-    this->getLeft()->update(updateOp);
-    this->getRight()->update(updateOp);
+    this->getLeft()->update(updateOp, allocator);
+    this->getRight()->update(updateOp, allocator);
     toUpdate_ = false;
   }
 }

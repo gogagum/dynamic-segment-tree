@@ -37,6 +37,7 @@ add_executable(dst-test
     counters/copy_and_move_counter.cpp
     test_copy_count.cpp
     test_copy_and_move_counts.cpp
+    tools/allocate_n_times_then_throw.cpp
     tools/info_stream.cpp
     tools/copy_n_times_then_throw.cpp
 )

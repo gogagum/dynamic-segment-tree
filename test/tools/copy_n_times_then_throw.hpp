@@ -7,7 +7,6 @@
 #ifndef COPY_N_TIMES_THEN_THROW
 #define COPY_N_TIMES_THEN_THROW
 
-#include <exception>
 #include <memory>
 #include <stdexcept>
 

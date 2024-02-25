@@ -18,6 +18,8 @@ namespace dst::impl {
 ///
 template <class T, class Derived, class Allocator>
 class BaseNode {
+ protected:
+  using This_ = BaseNode<T, Derived, Allocator>;
   using Allocator_ =
       std::allocator_traits<Allocator>::template rebind_alloc<Derived>;
   using AllocatorTraits_ = std::allocator_traits<Allocator_>;
@@ -44,13 +46,13 @@ class BaseNode {
    * @brief Set value to node making a copy.
    * @param value value reference.
    */
-  void setValue(const T&);
+  void setValue(const T&, Allocator_& allocator);
 
   /**
    * @brief Set the value to node moving it.
    * @param value moved value.
    */
-  void setValue(T&&);
+  void setValue(T&&, Allocator_& allocator);
 
   [[nodiscard]] bool hasValue() const {
     return value_.has_value();
@@ -61,7 +63,7 @@ class BaseNode {
   [[nodiscard]] bool isLeaf() const {
     return !left_ && !right_;
   };
-  void initChildren();
+  void initChildren(Allocator_& allocator);
   [[nodiscard]] Derived* getLeft() const {
     return left_;
   }
@@ -70,11 +72,13 @@ class BaseNode {
   }
   ~BaseNode();
 
- private:
-  void clearChildren_();
+  void clearChildren(Allocator_& allocator);
 
  private:
-  Allocator_ allocator_;
+
+  void destructChildrenRecursive_();
+
+ private:
   std::optional<T> value_;
   Derived* left_{nullptr};
   Derived* right_{nullptr};
@@ -82,34 +86,36 @@ class BaseNode {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-void BaseNode<T, Derived, Allocator>::setValue(const T& value) {
+void BaseNode<T, Derived, Allocator>::setValue(const T& value,
+                                               Allocator_& allocator) {
   value_ = value;
   if (!this->isLeaf()) {
-    clearChildren_();
+    clearChildren(allocator);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-void BaseNode<T, Derived, Allocator>::setValue(T&& value) {
+void BaseNode<T, Derived, Allocator>::setValue(T&& value,
+                                               Allocator_& allocator) {
   value_ = std::move(value);
   if (!this->isLeaf()) {
-    clearChildren_();
+    clearChildren(allocator);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-void BaseNode<T, Derived, Allocator>::initChildren() {
+void BaseNode<T, Derived, Allocator>::initChildren(Allocator_& allocator) {
   assert(isLeaf() && "Can only init children for a leaf.");
-  auto nodesPtr = AllocatorTraits_::allocate(allocator_, 2);
+  auto nodesPtr = AllocatorTraits_::allocate(allocator, 2);
 
   assert(value_.has_value() && "No value to set to children.");
   try {
     left_ = nodesPtr;
     std::construct_at(left_, *value_);
   } catch (const std::exception& e) {
-    AllocatorTraits_::deallocate(allocator_, left_, 2);
+    AllocatorTraits_::deallocate(allocator, left_, 2);
     left_ = nullptr;
     throw;
   }
@@ -118,7 +124,7 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
     std::construct_at(right_, std::move(*value_));
   } catch (const std::exception& e) {
     getLeft()->~Derived();
-    AllocatorTraits_::deallocate(allocator_, left_, 2);
+    AllocatorTraits_::deallocate(allocator, left_, 2);
     left_ = nullptr;
     right_ = nullptr;
     throw;
@@ -129,17 +135,20 @@ void BaseNode<T, Derived, Allocator>::initChildren() {
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
 BaseNode<T, Derived, Allocator>::~BaseNode() {
-  if (!isLeaf()) {
-    clearChildren_();
-  }
+  assert(isLeaf());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-inline void BaseNode<T, Derived, Allocator>::clearChildren_() {
-  getLeft()->~Derived();
-  getRight()->~Derived();
-  AllocatorTraits_::deallocate(allocator_, left_, 2);
+inline void BaseNode<T, Derived, Allocator>::clearChildren(
+    Allocator_& allocator) {
+  if (!getLeft()->isLeaf()) {
+    left_->clearChildren(allocator);
+  }
+  if (!getRight()->isLeaf()) {
+    right_->clearChildren(allocator);
+  }
+  AllocatorTraits_::deallocate(allocator, left_, 2);
   left_ = nullptr;
   right_ = nullptr;
 }
