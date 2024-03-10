@@ -31,8 +31,16 @@ CheckOptions:
       value: CamelCase
     }
   - {
+      key: readability-identifier-naming.ClassIgnoredRegexp,
+      value: "^([A-Z][a-z]*)+_$"
+    }
+  - {
       key: readability-identifier-naming.StructCase,
       value: CamelCase
+    }
+  - {
+      key: readability-identifier-naming.StructIgnoredRegexp,
+      value: "^([A-Z][a-z]*)+_$"
     }
   - {
       key: readability-identifier-naming.TemplateParameterCase,

@@ -11,15 +11,18 @@
 #include "counters/copy_and_move_counter.hpp"
 #include "tools/info_stream.hpp"
 
+using std::size_t;
+
 // NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-*)
 
 TEST(DSTCopyAndMoveCount, ConstructCopying) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 42, copyAndMoveCounter);
 
+  EXPECT_EQ(stats->getMoveCount(), 0);
   EXPECT_EQ(stats->getCopyCount(), 1);
 }
 
@@ -27,17 +30,31 @@ TEST(DSTCopyAndMoveCount, ConstructAndMoving) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 42, std::move(copyAndMoveCounter));
 
   EXPECT_EQ(stats->getMoveCount(), 1);
+  EXPECT_EQ(stats->getCopyCount(), 0);
+}
+
+TEST(DSTCopyAndMoveCount, CopyTree) {
+  auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
+
+  const auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, 42, copyAndMoveCounter);
+
+  [[maybe_unused]] const auto copy = segTree;
+
+  EXPECT_EQ(stats->getMoveCount(), 0);
+  EXPECT_EQ(stats->getCopyCount(), 2);
 }
 
 TEST(DSTCopyAndMoveCount, ConstructAndSet) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 42, std::move(copyAndMoveCounter));
 
   auto [setStats, setCopyAndMoveCounter] = CopyAndMoveCounter::init();
@@ -50,11 +67,11 @@ TEST(DSTCopyAndMoveCount, ConstructAndSet) {
   }
 }
 
-TEST(DSTCopyAndMoveCount, EmptyRangeSetOpreation) {
+TEST(DSTCopyAndMoveCount, EmptyRangeSetOperation) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 32, std::move(initCounter));
 
   initStats->reset();
@@ -70,11 +87,11 @@ TEST(DSTCopyAndMoveCount, EmptyRangeSetOpreation) {
   EXPECT_EQ(initStats->getMoveCount(), 0);
 }
 
-TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheEnd) {
+TEST(DSTCopyAndMoveCount, SetToAlignedQuarterRangeInTheEnd) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 32, std::move(initCounter));
 
   EXPECT_EQ(initStats->getCopyCount(), 0);
@@ -94,11 +111,11 @@ TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheEnd) {
   EXPECT_EQ(initStats->getCopyCount(), 2);
 }
 
-TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheBeginning) {
+TEST(DSTCopyAndMoveCount, SetToAlignedQuarterRangeInTheBeginning) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 32, std::move(initCounter));
 
   EXPECT_EQ(initStats->getCopyCount(), 0);
@@ -118,11 +135,11 @@ TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheBeginning) {
   EXPECT_EQ(initStats->getCopyCount(), 2);
 }
 
-TEST(DSTCopyAndMoveCount, SetToNonAlignedQuaterRange) {
+TEST(DSTCopyAndMoveCount, SetToNonAlignedQuarterRange) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 32, std::move(initCounter));
 
   EXPECT_EQ(initStats->getCopyCount(), 0);
@@ -146,7 +163,7 @@ TEST(DSTCopyAndMoveCount, SetOneValueInSmallTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 16, initCounter);
 
   initStats->reset();

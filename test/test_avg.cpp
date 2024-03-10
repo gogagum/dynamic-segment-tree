@@ -56,6 +56,24 @@ TEST(DynamicAvgSegmentTree, SimpleRangeGetAfterSetTwoToOne) {
   EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
 }
 
+TEST(DynamicAvgSegmentTree, Copy) {
+  auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
+  tree.set(0, 2, 37.f);
+  auto copy = tree;
+
+  auto avg = copy.rangeGet(0, 6);
+  EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
+}
+
+TEST(DynamicAvgSegmentTree, Move) {
+  auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
+  tree.set(0, 2, 37.f);
+  auto moved = std::move(tree);
+
+  auto avg = moved.rangeGet(0, 6);
+  EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
+}
+
 TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
   auto tree = DynamicAvgSegmentTree<std::size_t, float>(0, 1000, 0.f);
   auto reference = AvgSegTreeReference<std::size_t, float>(0, 1000, 0.f);

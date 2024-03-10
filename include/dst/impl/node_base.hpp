@@ -31,14 +31,48 @@ class BaseNode {
     requires std::move_constructible<T>
       : value_(std::move(value)) {
   }
-  BaseNode(const BaseNode&) = default;
-  BaseNode(BaseNode&&) noexcept = default;
+
+  BaseNode(const BaseNode&) = delete;
+
+  BaseNode(const BaseNode& other, Allocator_& allocator);
+
+  BaseNode(BaseNode&& other) noexcept
+      : value_(std::move(other.value_)), ptr_{other.ptr_} {
+    other.ptr_ = nullptr;
+  }
 
  public:
-  BaseNode& operator=(const BaseNode&) = default;
-  BaseNode& operator=(BaseNode&&) noexcept = default;
+  /**
+   * @brief Deleted copy assign operator, as allocator is needed to allocate
+   * subtree. (See `assign(const BaseNode& other, Allocator_& allocator)`).
+   */
+  BaseNode& operator=(const BaseNode&) = delete;
+
+  /**
+   * @brief Copy assign a Node, using a specified allocator, to allocate memory
+   * for a subtree.
+   *
+   * @param other node to copy from.
+   * @param allocator stl compatible allocator.
+   * @return BaseNode& reference to itself.
+   */
+  BaseNode& assign(const BaseNode& other, Allocator_& allocator);
+
+  /**
+   * @brief Move assign operator.
+   *
+   * @param other node to move from.
+   * @param allocator std compatible allocator.
+   * @return BaseNode& reference to itself.
+   */
+  BaseNode& operator=(BaseNode&&) noexcept;
+
+  /**
+   * @brief Get const value reference.
+   * @return value reference.
+   */
   [[nodiscard]] const T& getValue() const {
-    assert(value_.has_value());
+    assert(hasValue());
     return *value_;
   }
 
@@ -53,31 +87,78 @@ class BaseNode {
   [[nodiscard]] bool hasValue() const {
     return value_.has_value();
   }
+
   void setNullValue() {
     value_ = std::nullopt;
   }
+
   [[nodiscard]] bool isLeaf() const {
-    return !left_ && !right_;
-  };
+    return !ptr_;
+  }
+
   void initChildren(Allocator_& allocator);
+
   [[nodiscard]] Derived* getLeft() const {
-    return left_;
+    return ptr_;
   }
+
   [[nodiscard]] Derived* getRight() const {
-    return right_;
+    return ptr_ + 1;  // NOLINT
   }
-  ~BaseNode();
 
   void clearChildren(Allocator_& allocator);
+
+  ~BaseNode();
 
  private:
   void destructChildrenRecursive_();
 
  private:
   std::optional<T> value_;
-  Derived* left_{nullptr};
-  Derived* right_{nullptr};
+  Derived* ptr_{nullptr};
 };
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Derived, class Allocator>
+BaseNode<T, Derived, Allocator>::BaseNode(const BaseNode& other,
+                                          Allocator_& allocator)
+    : value_(other.value_),
+      ptr_(other.isLeaf() ? nullptr
+                          : AllocatorTraits_::allocate(allocator, 2)) {
+  if (!isLeaf()) {
+    std::construct_at(getLeft(), *other.getLeft(), allocator);
+    std::construct_at(getRight(), *other.getRight(), allocator);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Derived, class Allocator>
+auto BaseNode<T, Derived, Allocator>::assign(const BaseNode& other,
+                                             Allocator_& allocator) -> This_& {
+  assert(&other != this && "Assign operator must not be called on itself.");
+  value_ = other.value_;
+  if (nullptr != ptr_) {
+    clearChildren(allocator);
+  }
+  if (other.isLeaf()) {
+    ptr_ = nullptr;
+  } else {
+    ptr_ = AllocatorTraits_::allocate(allocator, 2);
+    std::construct_at(getLeft(), *other.getLeft(), allocator);
+    std::construct_at(getRight(), *other.getRight(), allocator);
+  }
+  return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Derived, class Allocator>
+auto BaseNode<T, Derived, Allocator>::operator=(BaseNode&& other) noexcept
+    -> This_& {
+  assert(&other != this && "Assign operator must not be called on itself.");
+  std::swap(value_, other.value_);
+  std::swap(ptr_, other.ptr_);
+  return *this;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
@@ -99,21 +180,19 @@ void BaseNode<T, Derived, Allocator>::initChildren(Allocator_& allocator) {
 
   assert(value_.has_value() && "No value to set to children.");
   try {
-    left_ = nodesPtr;
-    std::construct_at(left_, *value_);
-  } catch (const std::exception& e) {
-    AllocatorTraits_::deallocate(allocator, left_, 2);
-    left_ = nullptr;
+    ptr_ = nodesPtr;
+    std::construct_at(getLeft(), *value_);
+  } catch (...) {
+    AllocatorTraits_::deallocate(allocator, ptr_, 2);
+    ptr_ = nullptr;
     throw;
   }
   try {
-    right_ = nodesPtr + 1;  // NOLINT
-    std::construct_at(right_, std::move(*value_));
-  } catch (const std::exception& e) {
+    std::construct_at(getRight(), std::move(*value_));
+  } catch (...) {
     getLeft()->~Derived();
-    AllocatorTraits_::deallocate(allocator, left_, 2);
-    left_ = nullptr;
-    right_ = nullptr;
+    AllocatorTraits_::deallocate(allocator, ptr_, 2);
+    ptr_ = nullptr;
     throw;
   }
   value_ = std::nullopt;
@@ -121,23 +200,22 @@ void BaseNode<T, Derived, Allocator>::initChildren(Allocator_& allocator) {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-BaseNode<T, Derived, Allocator>::~BaseNode() {
-  assert(isLeaf());
+inline void BaseNode<T, Derived, Allocator>::clearChildren(
+    Allocator_& allocator) {
+  if (!getLeft()->isLeaf()) {
+    getLeft()->clearChildren(allocator);
+  }
+  if (!getRight()->isLeaf()) {
+    getRight()->clearChildren(allocator);
+  }
+  AllocatorTraits_::deallocate(allocator, ptr_, 2);
+  ptr_ = nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Derived, class Allocator>
-inline void BaseNode<T, Derived, Allocator>::clearChildren(
-    Allocator_& allocator) {
-  if (!getLeft()->isLeaf()) {
-    left_->clearChildren(allocator);
-  }
-  if (!getRight()->isLeaf()) {
-    right_->clearChildren(allocator);
-  }
-  AllocatorTraits_::deallocate(allocator, left_, 2);
-  left_ = nullptr;
-  right_ = nullptr;
+BaseNode<T, Derived, Allocator>::~BaseNode() {
+  assert(isLeaf());
 }
 
 }  // namespace dst::impl

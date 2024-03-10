@@ -11,8 +11,15 @@
 #include <ranges>
 
 #include "reference/seg_tree_reference_base.hpp"
+#include "tools/generate_index_range.hpp"
 
-namespace rng = std::ranges;
+using std::size_t;
+using std::views::iota;
+using GenerateIndRng = GenerateIndexRange<std::size_t>;
+
+constexpr auto knegateOp = [](int num) {
+  return -num;
+};
 
 template <std::integral KeyT, class ValueT,
           class Allocator = std::allocator<ValueT>>
@@ -40,6 +47,34 @@ TEST(DynamicNegateSegmentTree, DoubleUpdate) {
   EXPECT_EQ(tree.get(4), 13);
 }
 
+TEST(DynamicNegateSegmentTree, UpdateAndSet) {
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 43, 5);
+  tree.update(4, 7);
+  tree.set(5, 11, 3);
+  EXPECT_EQ(tree.get(7), 3);
+  EXPECT_EQ(tree.get(4), -5);
+  EXPECT_EQ(tree.get(41), 5);
+  EXPECT_EQ(tree.get(3), 5);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateSetAndCopy) {
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 43, 5);
+  tree.update(4, 7);
+  tree.set(5, 11, 3);
+
+  const auto copy = tree;
+
+  EXPECT_EQ(tree.get(7), 3);
+  EXPECT_EQ(tree.get(4), -5);
+  EXPECT_EQ(tree.get(41), 5);
+  EXPECT_EQ(tree.get(3), 5);
+
+  EXPECT_EQ(copy.get(7), 3);
+  EXPECT_EQ(copy.get(4), -5);
+  EXPECT_EQ(copy.get(41), 5);
+  EXPECT_EQ(copy.get(3), 5);
+}
+
 TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
   auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
   tree.update(2, 10);
@@ -49,7 +84,7 @@ TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
   EXPECT_EQ(tree.get(13), -13);
 }
 
-TEST(DynamicNegateSegmentTree, SimpleRangweGet) {
+TEST(DynamicNegateSegmentTree, SimpleRangeGet) {
   auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
   tree.update(2, 10);
   tree.update(7, 21);
@@ -59,99 +94,76 @@ TEST(DynamicNegateSegmentTree, SimpleRangweGet) {
 }
 
 TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
+  constexpr auto treeEnd = size_t{1000};
   auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
   auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
 
-  const auto updateOp = [](int num) {
-    return -num;
-  };
   auto gen = std::mt19937(37);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
-    const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+    tree.update(rngBegin, rngEnd);
+    reference.update(rngBegin, rngEnd, knegateOp);
 
-    tree.update(rangeBeg, rangeBeg + rangeLen);
-    reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
-  }
-
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int idx = static_cast<int>(gen() % 1000);
-
-    const auto treeRes = tree.get(idx);
-    const auto referenceRes = reference.get(idx);
-
-    EXPECT_EQ(treeRes, referenceRes);
+    for (size_t idx : iota(size_t{0}, treeEnd)) {
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
+      EXPECT_EQ(treeRes, refRes);
+    }
   }
 }
 
 TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
-  auto tree = NegateSumDynamicSegmentTree<std::size_t, int>(0, 1000, 42);
-  auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 42);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = NegateSumDynamicSegmentTree<size_t, int>(0, treeEnd, 42);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 42);
 
-  const auto updateOp = [](int num) {
-    return -num;
-  };
   std::mt19937 generator(54);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
 
-    const int operationChoise = static_cast<int>(generator()) % 2;
-
-    if (operationChoise) {
-      const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
-      tree.set(rngStart, rngStart + rngLen, setVal);
-      reference.set(rngStart, rngStart + rngLen, setVal);
+    if (std::bernoulli_distribution()(generator)) {
+      const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
+      tree.set(rngBegin, rngEnd, setVal);
+      reference.set(rngBegin, rngEnd, setVal);
     } else {
-      tree.update(rngStart, rngStart + rngLen);
-      reference.update(rngStart, rngStart + rngLen, updateOp);
+      tree.update(rngBegin, rngEnd);
+      reference.update(rngBegin, rngEnd, knegateOp);
     }
-  }
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t idx = generator() % 100;  // [0..1000)
-    auto treeRes = tree.get(idx);
-    auto refRes = reference.get(idx);
-    EXPECT_EQ(treeRes, refRes);
+    for (size_t idx : iota(size_t{0}, treeEnd)) {
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
+      EXPECT_EQ(treeRes, refRes);
+    }
   }
 }
 
 TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
-  auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, treeEnd, 42);
+  auto reference = SegTreeReferenceBase<int, int>(0, treeEnd, 42);
 
-  const auto updateOp = [](int num) {
-    return -num;
-  };
   auto gen = std::mt19937(37);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
-    const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
-
-    tree.update(rangeBeg, rangeBeg + rangeLen);
-    reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+    tree.update(rngBegin, rngEnd);
+    reference.update(rngBegin, rngEnd, knegateOp);
   }
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
-    const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
-
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
     const int valueToSet = static_cast<int>(gen() % 1000);  // [0..1000)
+    tree.set(rngBegin, rngEnd, valueToSet);
+    reference.set(rngBegin, rngEnd, valueToSet);
 
-    tree.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
-    reference.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
-  }
-
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int idx = static_cast<int>(gen() % 1000);
-
-    const auto treeRes = tree.get(idx);
-    const auto referenceRes = reference.get(idx);
-
-    EXPECT_EQ(treeRes, referenceRes);
+    for (size_t idx : iota(size_t{0}, treeEnd)) {
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
+      EXPECT_EQ(treeRes, refRes);
+    }
   }
 }
 
