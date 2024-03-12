@@ -10,7 +10,6 @@ Checks: >
   clang-analyzer-*,
   readability-*,
   modernize-*,
-  clang-analyzer-*,
   cert-*,
   -readability-named-parameter,
   -readability-braces-around-statements,

@@ -115,17 +115,17 @@ void DynamicSegmentTreeUpdateVariationBase<
     currNode->update(updateOp_, allocator);
     return;
   }
-  const auto mid = (currBegin + currEnd) / 2;
   if (currNode->isLeaf()) {
     currNode->initChildren(allocator);
   }
   currNode->siftOptUpdate(updateOp_, allocator);
+  const auto mid = (currBegin + currEnd) / 2;
   if (mid >= currBegin + 1) {
-    auto leftNodePtr = currNode->getLeft();
+    auto* const leftNodePtr = currNode->getLeft();
     updateImpl_(begin, end, currBegin, mid, leftNodePtr, allocator);
   }
   if (currEnd >= mid + 1) {
-    auto rightNodePtr = currNode->getRight();
+    auto* const rightNodePtr = currNode->getRight();
     updateImpl_(begin, end, mid, currEnd, rightNodePtr, allocator);
   }
 }

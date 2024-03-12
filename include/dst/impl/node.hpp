@@ -93,8 +93,9 @@ template <class T, class UpdateT, class Allocator>
 auto Node<T, std::optional<UpdateT>, Allocator>::operator=(
     Node<T, std::optional<UpdateT>, Allocator>&& other) noexcept -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
+  updateValue_ = std::move(other.updateValue_);
   Base_::operator=(std::move(other));
-  updateValue_ = other.updateValue_;
+  other.updateValue_ = std::nullopt;
   return *this;
 }
 
@@ -125,6 +126,7 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
     updateValue_ = updateVal;
   } else {  // isLeaf()
     assert(Base_::hasValue() && "Leaf must have a value.");
+    assert(!updateValue_.has_value());
     Base_::setValue(
         updateOp(Base_::getValue(), std::forward<UpdateT1>(updateVal)),
         allocator);
@@ -177,6 +179,16 @@ class Node<T, bool, Allocator>
   Node& operator=(const Node& other) = delete;
   Node& assign(const Node& other, Allocator_& allocator);
   Node& operator=(Node&& other) noexcept;
+
+  /**
+   * @brief Set the value to node. Clears children if they exist.
+   *
+   * @param value value to set.
+   */
+  template <class ValueT>
+    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+  void setValue(ValueT&& value, Allocator_& allocator);
+
   void addUpdate();
   template <class UpdateOp>
   void update(const UpdateOp& updateOp, Allocator_& allocator);
@@ -212,6 +224,15 @@ auto Node<T, bool, Allocator>::operator=(Node&& other) noexcept -> This_& {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
+template <class ValueT>
+  requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+void Node<T, bool, Allocator>::setValue(ValueT&& value, Allocator_& allocator) {
+  Base_::setValue(std::forward<ValueT>(value), allocator);
+  toUpdate_ = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Allocator>
 template <class UpdateOp>
 void Node<T, bool, Allocator>::update(const UpdateOp& updateOp,
                                       Allocator_& allocator) {
@@ -224,6 +245,8 @@ void Node<T, bool, Allocator>::update(const UpdateOp& updateOp,
     }
     toUpdate_ = true;
   } else {  // isLeaf()
+    assert(Base_::hasValue());
+    assert(!toUpdate_);
     Base_::setValue(updateOp(Base_::getValue()), allocator);
   }
 }

@@ -12,9 +12,6 @@
 #include <ranges>
 #include <vector>
 
-namespace rng = std::ranges;
-namespace rngv = std::ranges::views;
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The SegTreeReferenceBase class - base segment tree mock class.
 ///
@@ -23,9 +20,9 @@ class SegTreeReferenceBase {
  public:
   /**
    * @brief SegTreeReferenceBase constructor.
-   * @param begin begining of a working area.
+   * @param begin beginning of a working area.
    * @param end ending of a working area (not included).
-   * @param value default velue, which is set on a range.
+   * @param value default value, which is set on a range.
    */
   SegTreeReferenceBase(KeyT begin, KeyT end, const ValueT& value);
 
@@ -57,7 +54,7 @@ class SegTreeReferenceBase {
    * @param toSet value to set.
    */
   void set(KeyT begin, KeyT end, const ValueT& toSet) {
-    rng::fill(getValuesRng_(begin, end), toSet);
+    std::ranges::fill(getValuesRng_(begin, end), toSet);
   }
 
   /**
@@ -117,14 +114,16 @@ void SegTreeReferenceBase<KeyT, ValueT>::update(KeyT begin, KeyT end,
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin, KeyT end) {
-  return values_ | rngv::drop(begin - begin_) | rngv::take(end - begin);
+  return values_ | std::views::drop(begin - begin_) |
+         std::views::take(end - begin);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT>
 auto SegTreeReferenceBase<KeyT, ValueT>::getValuesRng_(KeyT begin,
                                                        KeyT end) const {
-  return values_ | rngv::drop(begin - begin_) | rngv::take(end - begin);
+  return values_ | std::views::drop(begin - begin_) |
+         std::views::take(end - begin);
 }
 
 #endif  // SEG_TREE_REFERENCE_BASE_HPP

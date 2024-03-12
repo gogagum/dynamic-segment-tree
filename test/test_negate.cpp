@@ -147,15 +147,15 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
 
   auto gen = std::mt19937(37);
 
-  for (size_t i : iota(0, 100)) {
+  for (size_t i : iota(0, 200)) {
     const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
     tree.update(rngBegin, rngEnd);
     reference.update(rngBegin, rngEnd, knegateOp);
   }
 
-  for (size_t i : iota(0, 100)) {
+  for (size_t i : iota(0, 400)) {
     const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
-    const int valueToSet = static_cast<int>(gen() % 1000);  // [0..1000)
+    const auto valueToSet = std::uniform_int_distribution(0, 1000)(gen);
     tree.set(rngBegin, rngEnd, valueToSet);
     reference.set(rngBegin, rngEnd, valueToSet);
 

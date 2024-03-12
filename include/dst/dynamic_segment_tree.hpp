@@ -447,8 +447,8 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   if (currNode->isLeaf()) {
     currNode->initChildren(nodeAllocator_);
   }
-  const auto mid = (currBegin + currEnd) / 2;
   this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
+  const auto mid = (currBegin + currEnd) / 2;
   if (mid > begin) {
     setImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate);
   }
@@ -479,8 +479,8 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   if (currNode->isLeaf()) {
     currNode->initChildren(nodeAllocator_);
   }
-  const auto mid = (currBegin + currEnd) / 2;
   this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
+  const auto mid = (currBegin + currEnd) / 2;
   if (mid >= end) {
     // Only move to left as right is out of range.
     setImpl_(begin, end, currBegin, mid, currNode->getLeft(),
@@ -513,7 +513,7 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
     return currNode->getValue();
   }
   this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
-  if (auto mid = (currBegin + currEnd) / 2; key >= mid) {
+  if (const auto mid = (currBegin + currEnd) / 2; key >= mid) {
     return getImpl_(key, mid, currEnd, currNode->getRight());
   } else {
     return getImpl_(key, currBegin, mid, currNode->getLeft());

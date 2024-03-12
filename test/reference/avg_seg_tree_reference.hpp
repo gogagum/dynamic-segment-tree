@@ -14,7 +14,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AvgSegTreeReference<KeyT, ValueT> class.
-/// A reference of a data structure with a function of finding an averge
+/// A reference of a data structure with a function of finding an average
 /// value on a range.
 template <std::integral KeyT, class ValueT>
 class AvgSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {

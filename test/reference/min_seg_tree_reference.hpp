@@ -28,7 +28,7 @@ class MinSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
    * end.
    */
   [[nodiscard]] ValueT rangeGet(KeyT begin, KeyT end) const {
-    return rng::min(this->getValuesRng_(begin, end));
+    return std::ranges::min(this->getValuesRng_(begin, end));
   }
 };
 
