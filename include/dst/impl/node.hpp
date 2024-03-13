@@ -60,7 +60,6 @@ class Node<T, std::optional<UpdateT>, Allocator>
     requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
   void setValue(ValueT&& value, Allocator_& allocator);
 
-  void setUpdateValue(const UpdateT& updateValue);
   template <class UpdateOp, class UpdateT1>
     requires std::is_same_v<std::remove_cvref_t<UpdateT1>, UpdateT>
   void update(const UpdateOp& updateOp, UpdateT1&& update,
@@ -105,7 +104,7 @@ template <class ValueT>
   requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
 void Node<T, std::optional<UpdateT>, Allocator>::setValue(
     ValueT&& value, Allocator_& allocator) {
-  Base_::setValue(std::forward<ValueT>(value), allocator);
+  Base_::setValue_(std::forward<ValueT>(value), allocator);
   updateValue_ = std::nullopt;
 }
 
@@ -123,11 +122,11 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
       Base_::getRight()->update(updateOp, std::move(*updateValue_), allocator);
     }
     // _value continues to have delayed update meaning.
-    updateValue_ = updateVal;
+    updateValue_ = std::forward<UpdateT1>(updateVal);
   } else {  // isLeaf()
     assert(Base_::hasValue() && "Leaf must have a value.");
     assert(!updateValue_.has_value());
-    Base_::setValue(
+    Base_::setValue_(
         updateOp(Base_::getValue(), std::forward<UpdateT1>(updateVal)),
         allocator);
   }
@@ -144,14 +143,6 @@ void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
     Base_::getRight()->update(updateOp, std::move(*updateValue_), allocator);
     updateValue_ = std::nullopt;
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-template <class T, class UpdateT, class Allocator>
-void Node<T, std::optional<UpdateT>, Allocator>::setUpdateValue(
-    const UpdateT& updateValue) {
-  assert(!Base_::isLeaf() && "Can`t set update value for a leaf.");
-  updateValue_ = updateValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +180,6 @@ class Node<T, bool, Allocator>
     requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
   void setValue(ValueT&& value, Allocator_& allocator);
 
-  void addUpdate();
   template <class UpdateOp>
   void update(const UpdateOp& updateOp, Allocator_& allocator);
   template <class UpdateOp>
@@ -211,6 +201,7 @@ auto Node<T, bool, Allocator>::assign(const Node& other, Allocator_& allocator)
   assert(&other != this && "Node must not be assigned to itself.");
   Base_::assign(other, allocator);
   toUpdate_ = other.toUpdate_;
+  return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +218,7 @@ template <class T, class Allocator>
 template <class ValueT>
   requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
 void Node<T, bool, Allocator>::setValue(ValueT&& value, Allocator_& allocator) {
-  Base_::setValue(std::forward<ValueT>(value), allocator);
+  Base_::setValue_(std::forward<ValueT>(value), allocator);
   toUpdate_ = false;
 }
 
@@ -247,7 +238,7 @@ void Node<T, bool, Allocator>::update(const UpdateOp& updateOp,
   } else {  // isLeaf()
     assert(Base_::hasValue());
     assert(!toUpdate_);
-    Base_::setValue(updateOp(Base_::getValue()), allocator);
+    Base_::setValue_(updateOp(Base_::getValue()), allocator);
   }
 }
 
@@ -293,6 +284,15 @@ class Node<T, void, Allocator>
 
   ~Node() = default;
 
+  /**
+   * @brief Set the value to node. Clears children if they exist.
+   *
+   * @param value value to set.
+   */
+  template <class ValueT>
+    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+  void setValue(ValueT&& value, Allocator_& allocator);
+
  private:
   friend class BaseNode<T, Node<T, void, Allocator>, Allocator>;
 };
@@ -312,6 +312,14 @@ Node<T, void, Allocator>& Node<T, void, Allocator>::operator=(
     Node<T, void, Allocator>&& other) noexcept {
   return static_cast<Node<T, void, Allocator>&>(  // NOLINT
       Base_::operator=(other));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Allocator>
+template <class ValueT>
+    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+void Node<T, void, Allocator>::setValue(ValueT&& value, Allocator_& allocator) {
+  Base_::setValue_(std::forward<ValueT>(value), allocator);
 }
 
 }  // namespace dst::impl

@@ -75,6 +75,26 @@ TEST(DynamicNegateSegmentTree, UpdateSetAndCopy) {
   EXPECT_EQ(copy.get(3), 5);
 }
 
+TEST(DynamicNegateSegmentTree, UpdateSetAndCopyAssign) {
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 43, 5);
+  auto copy = NegateSumDynamicSegmentTree<int, int>(0, 32, 5);;
+
+  tree.update(4, 7);
+  tree.set(5, 11, 3);
+
+  copy = tree;
+
+  EXPECT_EQ(tree.get(7), 3);
+  EXPECT_EQ(tree.get(4), -5);
+  EXPECT_EQ(tree.get(41), 5);
+  EXPECT_EQ(tree.get(3), 5);
+
+  EXPECT_EQ(copy.get(7), 3);
+  EXPECT_EQ(copy.get(4), -5);
+  EXPECT_EQ(copy.get(41), 5);
+  EXPECT_EQ(copy.get(3), 5);
+}
+
 TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
   auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
   tree.update(2, 10);

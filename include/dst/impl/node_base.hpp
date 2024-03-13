@@ -76,14 +76,6 @@ class BaseNode {
     return *value_;
   }
 
-  /**
-   * @brief Set value to node making a copy.
-   * @param value value reference.
-   */
-  template <class ValueT>
-    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
-  void setValue(ValueT&&, Allocator_& allocator);
-
   [[nodiscard]] bool hasValue() const {
     return value_.has_value();
   }
@@ -98,6 +90,8 @@ class BaseNode {
 
   void initChildren(Allocator_& allocator);
 
+  void clearChildren(Allocator_& allocator);
+
   [[nodiscard]] Derived* getLeft() const {
     return ptr_;
   }
@@ -106,7 +100,14 @@ class BaseNode {
     return ptr_ + 1;  // NOLINT
   }
 
-  void clearChildren(Allocator_& allocator);
+ protected:
+  /**
+   * @brief Set value to node making a copy.
+   * @param value value reference.
+   */
+  template <class ValueT>
+    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+  void setValue_(ValueT&&, Allocator_& allocator);
 
   ~BaseNode();
 
@@ -164,8 +165,8 @@ auto BaseNode<T, Derived, Allocator>::operator=(BaseNode&& other) noexcept
 template <class T, class Derived, class Allocator>
 template <class ValueT>
   requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
-void BaseNode<T, Derived, Allocator>::setValue(ValueT&& value,
-                                               Allocator_& allocator) {
+void BaseNode<T, Derived, Allocator>::setValue_(ValueT&& value,
+                                                Allocator_& allocator) {
   value_ = std::forward<ValueT>(value);
   if (!this->isLeaf()) {
     clearChildren(allocator);

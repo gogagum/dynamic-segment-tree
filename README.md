@@ -46,7 +46,7 @@ in second -- value, beginning index and ending index.
 `UpdateOp` equals NoUpdateOp means that `update` operation is not supported.
 For `update` operation to be supported, UpdateOp must recieve one or two
 arquments. In first case one argument is an updated value. In second -- updated
-value and and update operation argument. In both cases UpdateOp must return 
+value and update operation argument. In both cases UpdateOp must return 
 updated value.
 
 `UpdateArgT` must be void id `update` operation must not be supported or if it 
