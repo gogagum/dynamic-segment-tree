@@ -211,10 +211,10 @@ class DynamicSegmentTree
   }
 
  private:
+  template <class ValueT1>
+    requires std::is_same_v<std::remove_cvref_t<ValueT1>, ValueT>
   void setImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-                Node_* currNode, const ValueT& toUpdate);
-  void setImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-                Node_* currNode, ValueT&& toUpdate);
+                Node_* currNode, ValueT1&& toUpdate);
   const ValueT& getImpl_(KeyT key, KeyT currBegin, KeyT currEnd,
                          Node_* currNode) const;
   GetValueT rangeGetImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
@@ -430,49 +430,19 @@ template <std::integral KeyT, class ValueT, class GetValueT,
           conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
           class UpdateOp, class UpdateArgT, class Allocator>
   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
+template <class ValueT1>
+  requires std::is_same_v<std::remove_cvref_t<ValueT1>, ValueT>
 void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                         UpdateOp, UpdateArgT,
                         Allocator>::setImpl_(KeyT begin, KeyT end,
                                              KeyT currBegin, KeyT currEnd,
                                              Node_* currNode,
-                                             const ValueT& toUpdate) {
+                                             ValueT1&& toUpdate) {
   assert(currBegin < end && "currBegin must be checked before call.");
   assert(currEnd > begin && "currEnd must be checked before call.");
   assert(begin < end && "Function must not be called on empty range");
   if (end >= currEnd && begin <= currBegin) {
-    currNode->setValue(toUpdate, nodeAllocator_);
-    return;
-  }
-  if (currNode->isLeaf()) {
-    currNode->initChildren(nodeAllocator_);
-  }
-  this->optionalSiftNodeUpdate_(currNode, nodeAllocator_);
-  const auto mid = (currBegin + currEnd) / 2;
-  if (mid > begin) {
-    setImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate);
-  }
-  if (mid < end) {
-    setImpl_(begin, end, mid, currEnd, currNode->getRight(), toUpdate);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-template <std::integral KeyT, class ValueT, class GetValueT,
-          conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
-          conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
-          class UpdateOp, class UpdateArgT, class Allocator>
-  requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
-void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                        UpdateOp, UpdateArgT,
-                        Allocator>::setImpl_(KeyT begin, KeyT end,
-                                             KeyT currBegin, KeyT currEnd,
-                                             Node_* currNode,
-                                             ValueT&& toUpdate) {
-  assert(currBegin < end && "currBegin must be checked before call.");
-  assert(currEnd > begin && "currEnd must be checked before call.");
-  assert(begin < end && "Function must not be called on empty range");
-  if (end >= currEnd && begin <= currBegin) {
-    currNode->setValue(std::move(toUpdate), nodeAllocator_);
+    currNode->setValue(std::forward<ValueT1>(toUpdate), nodeAllocator_);
     return;
   }
   if (currNode->isLeaf()) {
@@ -483,18 +453,19 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   if (mid >= end) {
     // Only move to left as right is out of range.
     setImpl_(begin, end, currBegin, mid, currNode->getLeft(),
-             std::move(toUpdate));
+             std::forward<ValueT1>(toUpdate));
     return;
   }
   if (mid <= begin) {
     // Only move to right as left is out of range.
     setImpl_(begin, end, mid, currEnd, currNode->getRight(),
-             std::move(toUpdate));
+             std::forward<ValueT1>(toUpdate));
     return;
   }
   // Copy to left and move to right
   setImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate);
-  setImpl_(begin, end, mid, currEnd, currNode->getRight(), std::move(toUpdate));
+  setImpl_(begin, end, mid, currEnd, currNode->getRight(),
+           std::forward<ValueT1>(toUpdate));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
