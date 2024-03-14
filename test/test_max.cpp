@@ -83,6 +83,21 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndCopyAssign) {
   EXPECT_EQ(tree.rangeGet(12, 18), 66);
 }
 
+TEST(DynamicMaxSegmentTree, CopyAssignToNonEmpty) {
+  auto tree = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  auto dest = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 37, 34);
+  dest.update(12, 22, 4);
+  dest.set(17, 27, 66);
+
+  dest = tree;
+
+  EXPECT_EQ(dest.rangeGet(5, 17), 34);
+  EXPECT_EQ(dest.rangeGet(12, 18), 34);
+
+  EXPECT_EQ(tree.rangeGet(5, 17), 34);
+  EXPECT_EQ(tree.rangeGet(12, 18), 34);
+}
+
 TEST(DynamicMaxSegmentTree, UpdateSetAndMove) {
   auto tree = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 42, 34);
   tree.update(12, 22, 4);
