@@ -209,6 +209,8 @@ inline void BaseNode<T, Derived, Allocator>::clearChildren(
   if (!getRight()->isLeaf()) {
     getRight()->clearChildren(allocator);
   }
+  AllocatorTraits_::destroy(allocator, getRight());
+  AllocatorTraits_::destroy(allocator, getLeft());
   AllocatorTraits_::deallocate(allocator, ptr_, 2);
   ptr_ = nullptr;
 }
