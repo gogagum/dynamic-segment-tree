@@ -24,11 +24,11 @@ jobs:
             - run: valgrind ./build-valgrind/test/dst-test
 
     linux-clang-16-libcpp:
-        name: Linux Clang 16 (libc++)
+        name: Linux Clang 17 (libc++)
         runs-on: ubuntu-22.04
         env:
-            CC: clang-16
-            CXX: clang++-16
+            CC: clang-17
+            CXX: clang++-17
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
             - run: valgrind ./build-valgrind/test/dst-test
 
     linux-clang-16-libstdcpp:
-        name: Linux Clang 16 (libstdc++)
+        name: Linux Clang 17 (libstdc++)
         runs-on: ubuntu-22.04
         env:
             CC: clang-17
@@ -82,8 +82,8 @@ jobs:
         name: macOS Clang (libc++)
         runs-on: macos-latest
         env:
-            CC: /usr/local/opt/llvm@16/bin/clang
-            CXX: /usr/local/opt/llvm@16/bin/clang++
+            CC: /usr/local/opt/llvm@17/bin/clang
+            CXX: /usr/local/opt/llvm@17/bin/clang++
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
