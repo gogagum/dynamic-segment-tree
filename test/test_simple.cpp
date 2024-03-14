@@ -35,6 +35,82 @@ TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
   EXPECT_EQ(tree.get(37), 77);
 }
 
+TEST(SimpleGetSetDynamicSegmentTree, SetAndCopy) {
+  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
+
+  tree.set(13, 17, 56);
+
+  auto copy = tree;
+
+  EXPECT_EQ(copy.get(13), 56);
+  EXPECT_EQ(copy.get(15), 56);
+  EXPECT_EQ(copy.get(16), 56);
+  EXPECT_EQ(copy.get(17), 77);
+  EXPECT_EQ(copy.get(8), 77);
+  EXPECT_EQ(copy.get(37), 77);
+
+  EXPECT_EQ(tree.get(13), 56);
+  EXPECT_EQ(tree.get(15), 56);
+  EXPECT_EQ(tree.get(16), 56);
+  EXPECT_EQ(tree.get(17), 77);
+  EXPECT_EQ(tree.get(8), 77);
+  EXPECT_EQ(tree.get(37), 77);
+}
+
+TEST(SimpleGetSetDynamicSegmentTree, SetAndCopyAssign) {
+  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
+  auto copy = DynamicSimpleGetSetSegmentTree<int, long long>(5, 13, 67);
+
+  tree.set(13, 17, 56);
+
+  copy = tree;
+
+  EXPECT_EQ(copy.get(13), 56);
+  EXPECT_EQ(copy.get(15), 56);
+  EXPECT_EQ(copy.get(16), 56);
+  EXPECT_EQ(copy.get(17), 77);
+  EXPECT_EQ(copy.get(8), 77);
+  EXPECT_EQ(copy.get(37), 77);
+
+  EXPECT_EQ(tree.get(13), 56);
+  EXPECT_EQ(tree.get(15), 56);
+  EXPECT_EQ(tree.get(16), 56);
+  EXPECT_EQ(tree.get(17), 77);
+  EXPECT_EQ(tree.get(8), 77);
+  EXPECT_EQ(tree.get(37), 77);
+}
+
+TEST(SimpleGetSetDynamicSegmentTree, SetAndMove) {
+  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
+  
+  tree.set(13, 17, 56);
+
+  auto copy = std::move(tree);
+
+  EXPECT_EQ(copy.get(13), 56);
+  EXPECT_EQ(copy.get(15), 56);
+  EXPECT_EQ(copy.get(16), 56);
+  EXPECT_EQ(copy.get(17), 77);
+  EXPECT_EQ(copy.get(8), 77);
+  EXPECT_EQ(copy.get(37), 77);
+}
+
+TEST(SimpleGetSetDynamicSegmentTree, SetAndMoveAssign) {
+  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
+  auto copy = DynamicSimpleGetSetSegmentTree<int, long long>(5, 13, 67);
+
+  tree.set(13, 17, 56);
+
+  copy = std::move(tree);
+
+  EXPECT_EQ(copy.get(13), 56);
+  EXPECT_EQ(copy.get(15), 56);
+  EXPECT_EQ(copy.get(16), 56);
+  EXPECT_EQ(copy.get(17), 77);
+  EXPECT_EQ(copy.get(8), 77);
+  EXPECT_EQ(copy.get(37), 77);
+}
+
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
   auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
   auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);

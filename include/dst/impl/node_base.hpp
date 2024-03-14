@@ -80,10 +80,6 @@ class BaseNode {
     return value_.has_value();
   }
 
-  void setNullValue() {
-    value_ = std::nullopt;
-  }
-
   [[nodiscard]] bool isLeaf() const {
     return !ptr_;
   }
@@ -196,7 +192,7 @@ void BaseNode<T, Derived, Allocator>::initChildren(Allocator_& allocator) {
     ptr_ = nullptr;
     throw;
   }
-  value_ = std::nullopt;
+  value_.reset();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

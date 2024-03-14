@@ -39,9 +39,7 @@ class Node<T, std::optional<UpdateT>, Allocator>
 
   Node(const Node&) = delete;
 
-  Node(const Node& node, Allocator_& allocator)
-      : Base_(node, allocator), updateValue_(node.updateValue_) {
-  }
+  Node(const Node& node, Allocator_& allocator);
 
   Node(Node&& other) noexcept = default;
 
@@ -78,23 +76,29 @@ class Node<T, std::optional<UpdateT>, Allocator>
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
-auto Node<T, std::optional<UpdateT>, Allocator>::assign(
-    const Node<T, std::optional<UpdateT>, Allocator>& other,
-    Allocator_& allocator) -> This_& {
+Node<T, std::optional<UpdateT>, Allocator>::Node(const Node& node,
+                                                 Allocator_& allocator)
+    : Base_(node, allocator), updateValue_(node.updateValue_) {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class UpdateT, class Allocator>
+auto Node<T, std::optional<UpdateT>, Allocator>::assign(const This_& other,
+                                                        Allocator_& allocator)
+    -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
-  Base_::assign(other, allocator);
   updateValue_ = other.updateValue_;
+  Base_::assign(other, allocator);
   return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
 auto Node<T, std::optional<UpdateT>, Allocator>::operator=(
-    Node<T, std::optional<UpdateT>, Allocator>&& other) noexcept -> This_& {
+    This_&& other) noexcept -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
-  updateValue_ = std::move(other.updateValue_);
+  std::swap(updateValue_, other.updateValue_);
   Base_::operator=(std::move(other));
-  other.updateValue_ = std::nullopt;
   return *this;
 }
 
@@ -105,7 +109,7 @@ template <class ValueT>
 void Node<T, std::optional<UpdateT>, Allocator>::setValue(
     ValueT&& value, Allocator_& allocator) {
   Base_::setValue_(std::forward<ValueT>(value), allocator);
-  updateValue_ = std::nullopt;
+  updateValue_.reset();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +145,7 @@ void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
     assert(!Base_::isLeaf() && "It must not be a leaf.");
     Base_::getLeft()->update(updateOp, *updateValue_, allocator);
     Base_::getRight()->update(updateOp, std::move(*updateValue_), allocator);
-    updateValue_ = std::nullopt;
+    updateValue_.reset();
   }
 }
 
@@ -199,19 +203,16 @@ template <class T, class Allocator>
 auto Node<T, bool, Allocator>::assign(const Node& other, Allocator_& allocator)
     -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
-  Base_::assign(other, allocator);
   toUpdate_ = other.toUpdate_;
-  return *this;
+  return static_cast<This_&>(Base_::assign(other, allocator));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
 auto Node<T, bool, Allocator>::operator=(Node&& other) noexcept -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
-  toUpdate_ = other.toUpdate_;
-  Base_::operator=(std::move(other));
-  other.toUpdate_ = false;
-  return *this;
+  std::swap(toUpdate_, other.toUpdate_);
+  return static_cast<This_&>(Base_::operator=(std::move(other)));  // NOLINT
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -274,8 +275,12 @@ class Node<T, void, Allocator>
       : Base_(std::move(value)) {
   }
 
+  Node(const Node&) = delete;
+
   Node(const Node& other, Allocator_& allocator) : Base_(other, allocator) {
   }
+
+  Node(Node&& other) noexcept = default;
 
   Node& operator=(const Node& other) = delete;
 
@@ -300,25 +305,22 @@ class Node<T, void, Allocator>
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
-Node<T, void, Allocator>& Node<T, void, Allocator>::assign(
-    const Node<T, void, Allocator>& other, Allocator_& allocator) {
+auto Node<T, void, Allocator>::assign(const This_& other, Allocator_& allocator)
+    -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
-  return static_cast<Node<T, void, Allocator>&>(
-      Base_::assign(other, allocator));
+  return static_cast<This_&>(Base_::assign(other, allocator));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
-Node<T, void, Allocator>& Node<T, void, Allocator>::operator=(
-    Node<T, void, Allocator>&& other) noexcept {
-  return static_cast<Node<T, void, Allocator>&>(  // NOLINT
-      Base_::operator=(other));
+auto Node<T, void, Allocator>::operator=(This_&& other) noexcept -> This_& {
+  return static_cast<This_&>(Base_::operator=(std::move(other)));  // NOLINT
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
 template <class ValueT>
-    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
+  requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
 void Node<T, void, Allocator>::setValue(ValueT&& value, Allocator_& allocator) {
   Base_::setValue_(std::forward<ValueT>(value), allocator);
 }
