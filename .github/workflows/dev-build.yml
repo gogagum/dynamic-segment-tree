@@ -21,7 +21,7 @@ jobs:
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
-            - run: valgrind ./build-valgrind/test/dst-test
+            - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
     linux-clang-16-libcpp:
         name: Linux Clang 17 (libc++)
@@ -43,7 +43,7 @@ jobs:
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
-            - run: valgrind ./build-valgrind/test/dst-test
+            - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
     linux-clang-16-libstdcpp:
         name: Linux Clang 17 (libstdc++)
@@ -64,7 +64,7 @@ jobs:
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
-            - run: valgrind ./build-valgrind/test/dst-test
+            - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
     mac-gcc:
         name: macOS GCC
