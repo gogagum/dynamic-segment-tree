@@ -94,6 +94,19 @@ TEST(DynamicMinSegmentTree, UpdateSetAndMove) {
   EXPECT_EQ(moved.rangeGet(12, 18), 34 + 4);
 }
 
+TEST(DynamicMinSegmentTree, UpdateSetAndMoveAssign) {
+  auto tree = DynamicMinSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  auto moved = DynamicMinSegmentTree<int, int, std::plus<int>>(18, 34, 3);
+  
+  tree.update(12, 22, 4);
+  tree.set(17, 27, 66);
+
+  moved = std::move(tree);
+
+  EXPECT_EQ(moved.rangeGet(5, 17), 34);
+  EXPECT_EQ(moved.rangeGet(12, 18), 34 + 4);
+}
+
 TEST(DynamicMinSegmentTree, LadderUpRight) {
   auto tree = DynamicMinSegmentTree<int, int>(0, 42, 0);
   tree.set(41, 42, 10000000);

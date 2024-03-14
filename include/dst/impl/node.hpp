@@ -208,9 +208,10 @@ auto Node<T, bool, Allocator>::assign(const Node& other, Allocator_& allocator)
 template <class T, class Allocator>
 auto Node<T, bool, Allocator>::operator=(Node&& other) noexcept -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
-  Base_::operator=(other);
   toUpdate_ = other.toUpdate_;
+  Base_::operator=(std::move(other));
   other.toUpdate_ = false;
+  return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

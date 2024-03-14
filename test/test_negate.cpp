@@ -95,6 +95,34 @@ TEST(DynamicNegateSegmentTree, UpdateSetAndCopyAssign) {
   EXPECT_EQ(copy.get(3), 5);
 }
 
+TEST(DynamicNegateSegmentTree, UpdateSetAndMove) {
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 43, 5);
+  tree.update(4, 7);
+  tree.set(5, 11, 3);
+
+  const auto dest = std::move(tree);
+
+  EXPECT_EQ(dest.get(7), 3);
+  EXPECT_EQ(dest.get(4), -5);
+  EXPECT_EQ(dest.get(41), 5);
+  EXPECT_EQ(dest.get(3), 5);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateSetAndMoveAssign) {
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 43, 5);
+  auto dest = NegateSumDynamicSegmentTree<int, int>(3, 4, 11);
+
+  tree.update(4, 7);
+  tree.set(5, 11, 3);
+
+  dest = std::move(tree);
+
+  EXPECT_EQ(dest.get(7), 3);
+  EXPECT_EQ(dest.get(4), -5);
+  EXPECT_EQ(dest.get(41), 5);
+  EXPECT_EQ(dest.get(3), 5);
+}
+
 TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
   auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
   tree.update(2, 10);
