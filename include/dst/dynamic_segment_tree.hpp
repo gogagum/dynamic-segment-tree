@@ -85,7 +85,7 @@ class DynamicSegmentTree
  public:
   DynamicSegmentTree(const DynamicSegmentTree& other);
 
-  DynamicSegmentTree(DynamicSegmentTree&& other) noexcept = default;
+  DynamicSegmentTree(DynamicSegmentTree&& other) noexcept;
 
   /**
    * @brief Construct a new Dynamic Segment Tree object.
@@ -235,6 +235,26 @@ template <std::integral KeyT, class ValueT, class GetValueT,
   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
 DynamicSegmentTree<
     KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp, UpdateArgT,
+    Allocator>::DynamicSegmentTree(DynamicSegmentTree&& other) noexcept
+    : nodeAllocator_{std::move(other.nodeAllocator_)},
+      rootNode_{std::move(other.rootNode_)},
+      begin_{other.begin_},
+      end_{other.end_},
+      RangeGetInitVariationBase_(std::move(other)),
+      RangeGetCombineVariationBase_(std::move(other)),
+      UpdateVariationBase_(std::move(other)) {
+  other.begin_ = 0;
+  other.end_ = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <std::integral KeyT, class ValueT, class GetValueT,
+          conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
+          conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
+          class UpdateOp, class UpdateArgT, class Allocator>
+  requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
+DynamicSegmentTree<
+    KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp, UpdateArgT,
     Allocator>::DynamicSegmentTree(const DynamicSegmentTree& other)
     : nodeAllocator_(other.nodeAllocator_),
       rootNode_(other.rootNode_, nodeAllocator_),
@@ -305,9 +325,9 @@ auto DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
     return *this;
   }
   nodeAllocator_ = other.nodeAllocator_;
-  rootNode_.assign(other.rootNode_, nodeAllocator_);
   begin_ = other.begin_;
   end_ = other.end_;
+  rootNode_.assign(other.rootNode_, nodeAllocator_);
   return *this;
 }
 
