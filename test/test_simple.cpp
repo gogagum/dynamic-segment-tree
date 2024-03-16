@@ -9,6 +9,7 @@
 #include <dst/partial/dynamic_simple_get_set_segment_tree.hpp>
 #include <random>
 #include <ranges>
+#include <array>
 
 #include "reference/seg_tree_reference_base.hpp"
 #include "tools/generate_index_range.hpp"
@@ -33,8 +34,8 @@ TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
   auto tree = I_LL_SimpleDST(0, 42, 77);
   tree.set(13, 17, 56);
 
-  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedValues = std::array{56, 56, 56, 77, 77, 77};
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedValues = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto values = indicies | transform(bind_front(kiLLValGetter, &tree));
 
   EXPECT_TRUE(equal(expectedValues, values));
@@ -47,8 +48,8 @@ TEST(SimpleGetSetDynamicSegmentTree, SetAndCopy) {
 
   auto copy = std::as_const(tree);
 
-  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto copyVals = indicies | transform(bind_front(kiLLValGetter, &tree));
   const auto treeVals = indicies | transform(bind_front(kiLLValGetter, &copy));
 
@@ -64,8 +65,8 @@ TEST(SimpleGetSetDynamicSegmentTree, SetAndCopyAssign) {
 
   copy = std::as_const(tree);
 
-  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto copyVals = indicies | transform(bind_front(kiLLValGetter, &tree));
   const auto treeVals = indicies | transform(bind_front(kiLLValGetter, &copy));
 
@@ -80,8 +81,8 @@ TEST(SimpleGetSetDynamicSegmentTree, SetAndMove) {
 
   auto moved = std::move(tree);
 
-  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto movedVals = indicies | transform(bind_front(kiLLValGetter, &moved));
 
   EXPECT_TRUE(equal(expectedVals, movedVals));
@@ -95,8 +96,8 @@ TEST(SimpleGetSetDynamicSegmentTree, SetAndMoveAssign) {
 
   moved = std::move(tree);
 
-  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto copyVals =
       indicies | transform(bind_front(&I_LL_SimpleDST::get, &moved));
 
