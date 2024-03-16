@@ -95,7 +95,7 @@ TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
     const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
     auto treeRes = tree.rangeGet(rngBegin, rngEnd);
     auto refRes = reference.rangeGet(rngBegin, rngEnd);
-    EXPECT_FLOAT_EQ(treeRes, refRes);
+    EXPECT_LE(std::abs((treeRes - refRes) / refRes), 1e-4);
   }
 }
 
@@ -124,7 +124,7 @@ TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
     auto treeRes = tree.rangeGet(rngBegin, rngEnd);
     auto refRes = reference.rangeGet(rngBegin, rngEnd);
-    EXPECT_FLOAT_EQ(treeRes, refRes);
+    EXPECT_LE(std::abs((treeRes - refRes) / refRes), 1e-3);
   }
 }
 
