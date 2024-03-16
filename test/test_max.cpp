@@ -17,8 +17,7 @@ using dst::DynamicMaxSegmentTree;
 using std::size_t;
 using std::views::iota;
 using std::views::transform;
-using UniformSizeTDistr = std::uniform_int_distribution<std::size_t>;
-using GenerateIndRng = GenerateIndexRange<std::size_t>;
+using GenerateIndRng = GenerateIndexRange<size_t>;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
@@ -59,7 +58,22 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndCopy) {
   tree.update(12, 22, 4);
   tree.set(17, 27, 66);
 
-  const auto copy = tree;
+  const auto copy = std::as_const(tree);
+
+  EXPECT_EQ(copy.rangeGet(5, 17), 34 + 4);
+  EXPECT_EQ(copy.rangeGet(12, 18), 66);
+
+  EXPECT_EQ(tree.rangeGet(5, 17), 34 + 4);
+  EXPECT_EQ(tree.rangeGet(12, 18), 66);
+}
+
+TEST(DynamicMaxSegmentTree, UpdateSetAndCopyWithSpecifiedAllocator) {
+  auto tree = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  tree.update(12, 22, 4);
+  tree.set(17, 27, 66);
+
+  const DynamicMaxSegmentTree<int, int, std::plus<int>> copy(
+      std::as_const(tree), std::allocator<int>{});
 
   EXPECT_EQ(copy.rangeGet(5, 17), 34 + 4);
   EXPECT_EQ(copy.rangeGet(12, 18), 66);
@@ -74,7 +88,7 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndCopyAssign) {
   tree.update(12, 22, 4);
   tree.set(17, 27, 66);
 
-  dest = tree;
+  dest = std::as_const(tree);
 
   EXPECT_EQ(dest.rangeGet(5, 17), 34 + 4);
   EXPECT_EQ(dest.rangeGet(12, 18), 66);
@@ -84,7 +98,7 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndCopyAssign) {
 }
 
 TEST(DynamicMaxSegmentTree, CopyAssignToNonEmpty) {
-  auto tree = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  const auto tree = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 42, 34);
   auto dest = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 37, 34);
   dest.update(12, 22, 4);
   dest.set(17, 27, 66);
@@ -104,6 +118,18 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndMove) {
   tree.set(17, 27, 66);
 
   const auto moved = std::move(tree);
+
+  EXPECT_EQ(moved.rangeGet(5, 17), 34 + 4);
+  EXPECT_EQ(moved.rangeGet(12, 18), 66);
+}
+
+TEST(DynamicMaxSegmentTree, UpdateSetAndMoveWithSpecifiedAllocator) {
+  auto tree = DynamicMaxSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  tree.update(12, 22, 4);
+  tree.set(17, 27, 66);
+
+  const DynamicMaxSegmentTree<int, int, std::plus<int>> moved(
+      std::move(tree), std::allocator<int>{});
 
   EXPECT_EQ(moved.rangeGet(5, 17), 34 + 4);
   EXPECT_EQ(moved.rangeGet(12, 18), 66);
@@ -141,6 +167,7 @@ TEST(DynamicMaxSegmentTree, LadderUpRight) {
 
 TEST(DynamicMaxSegmentTree, LadderUpLeft) {
   auto tree = DynamicMaxSegmentTree<int, int>(0, 42, 0);
+  
   tree.set(0, 1, 10000000);
   tree.set(1, 2, 1000000);
   tree.set(2, 3, 100000);
@@ -148,7 +175,7 @@ TEST(DynamicMaxSegmentTree, LadderUpLeft) {
   tree.set(4, 5, 1000);
   tree.set(5, 6, 100);
   tree.set(6, 7, 10);
-  tree.set(7, 7, 1);
+  tree.set(7, 8, 1);
 
   EXPECT_EQ(tree.rangeGet(0, 42), 10000000);
   EXPECT_EQ(tree.rangeGet(0, 6), 10000000);
@@ -195,8 +222,7 @@ TEST(DynamicMaxSegmentTree, LadderDownLeft) {
 
 TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
   constexpr auto treeEnd = size_t{1000};
-  auto tree =
-      DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, 1000, 0);
+  auto tree = DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, 1000, 0);
   auto reference = MaxSegTreeReference<size_t, int>(0, 1000, 0);
 
   std::mt19937 generator(42);
@@ -223,9 +249,8 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
 }
 
 TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateGet) {
-  constexpr auto treeEnd = std::size_t{1000};
-  auto tree =
-      DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, treeEnd, 0);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, treeEnd, 0);
   auto reference = MaxSegTreeReference<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(54);
@@ -275,8 +300,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetRangeGet) {
 
 TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
   constexpr auto treeEnd = size_t{1000};
-  auto tree =
-      DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, treeEnd, 0);
+  auto tree = DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, treeEnd, 0);
   auto reference = MaxSegTreeReference<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(54);

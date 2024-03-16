@@ -11,146 +11,138 @@
 #include <ranges>
 
 #include "reference/seg_tree_reference_base.hpp"
+#include "tools/generate_index_range.hpp"
 
-using dst::DynamicSimpleGetSetSegmentTree;
-namespace rng = std::ranges;
+using I_LL_SimpleDST = dst::DynamicSimpleGetSetSegmentTree<int, long long>;
+constexpr auto kiLLValGetter = &I_LL_SimpleDST::get;
+using std::bind_front;
+using std::size_t;
+using std::ranges::equal;
+using std::views::iota;
+using std::views::transform;
+using GenerateIndRng = GenerateIndexRange<size_t>;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
 
 TEST(SimpleGetSetDynamicSegmentTree, Construct) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(-5, 100, 77);
+  auto tree = I_LL_SimpleDST(-5, 100, 77);
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
-
+  auto tree = I_LL_SimpleDST(0, 42, 77);
   tree.set(13, 17, 56);
 
-  EXPECT_EQ(tree.get(13), 56);
-  EXPECT_EQ(tree.get(15), 56);
-  EXPECT_EQ(tree.get(16), 56);
-  EXPECT_EQ(tree.get(17), 77);
-  EXPECT_EQ(tree.get(8), 77);
-  EXPECT_EQ(tree.get(37), 77);
+  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedValues = std::array{56, 56, 56, 77, 77, 77};
+  const auto values = indicies | transform(bind_front(kiLLValGetter, &tree));
+
+  EXPECT_TRUE(equal(expectedValues, values));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndCopy) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
+  auto tree = I_LL_SimpleDST(0, 42, 77);
 
   tree.set(13, 17, 56);
 
-  auto copy = tree;
+  auto copy = std::as_const(tree);
 
-  EXPECT_EQ(copy.get(13), 56);
-  EXPECT_EQ(copy.get(15), 56);
-  EXPECT_EQ(copy.get(16), 56);
-  EXPECT_EQ(copy.get(17), 77);
-  EXPECT_EQ(copy.get(8), 77);
-  EXPECT_EQ(copy.get(37), 77);
+  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  const auto copyVals = indicies | transform(bind_front(kiLLValGetter, &tree));
+  const auto treeVals = indicies | transform(bind_front(kiLLValGetter, &copy));
 
-  EXPECT_EQ(tree.get(13), 56);
-  EXPECT_EQ(tree.get(15), 56);
-  EXPECT_EQ(tree.get(16), 56);
-  EXPECT_EQ(tree.get(17), 77);
-  EXPECT_EQ(tree.get(8), 77);
-  EXPECT_EQ(tree.get(37), 77);
+  EXPECT_TRUE(equal(expectedVals, copyVals));
+  EXPECT_TRUE(equal(expectedVals, treeVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndCopyAssign) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
-  auto copy = DynamicSimpleGetSetSegmentTree<int, long long>(5, 13, 67);
+  auto tree = I_LL_SimpleDST(0, 42, 77);
+  auto copy = I_LL_SimpleDST(5, 13, 67);
 
   tree.set(13, 17, 56);
 
-  copy = tree;
+  copy = std::as_const(tree);
 
-  EXPECT_EQ(copy.get(13), 56);
-  EXPECT_EQ(copy.get(15), 56);
-  EXPECT_EQ(copy.get(16), 56);
-  EXPECT_EQ(copy.get(17), 77);
-  EXPECT_EQ(copy.get(8), 77);
-  EXPECT_EQ(copy.get(37), 77);
+  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  const auto copyVals = indicies | transform(bind_front(kiLLValGetter, &tree));
+  const auto treeVals = indicies | transform(bind_front(kiLLValGetter, &copy));
 
-  EXPECT_EQ(tree.get(13), 56);
-  EXPECT_EQ(tree.get(15), 56);
-  EXPECT_EQ(tree.get(16), 56);
-  EXPECT_EQ(tree.get(17), 77);
-  EXPECT_EQ(tree.get(8), 77);
-  EXPECT_EQ(tree.get(37), 77);
+  EXPECT_TRUE(equal(expectedVals, copyVals));
+  EXPECT_TRUE(equal(expectedVals, treeVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndMove) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
-  
+  auto tree = I_LL_SimpleDST(0, 42, 77);
+
   tree.set(13, 17, 56);
 
-  auto copy = std::move(tree);
+  auto moved = std::move(tree);
 
-  EXPECT_EQ(copy.get(13), 56);
-  EXPECT_EQ(copy.get(15), 56);
-  EXPECT_EQ(copy.get(16), 56);
-  EXPECT_EQ(copy.get(17), 77);
-  EXPECT_EQ(copy.get(8), 77);
-  EXPECT_EQ(copy.get(37), 77);
+  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  const auto movedVals = indicies | transform(bind_front(kiLLValGetter, &moved));
+
+  EXPECT_TRUE(equal(expectedVals, movedVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndMoveAssign) {
-  auto tree = DynamicSimpleGetSetSegmentTree<int, long long>(0, 42, 77);
-  auto copy = DynamicSimpleGetSetSegmentTree<int, long long>(5, 13, 67);
+  auto tree = I_LL_SimpleDST(0, 42, 77);
+  auto moved = I_LL_SimpleDST(5, 13, 67);
 
   tree.set(13, 17, 56);
 
-  copy = std::move(tree);
+  moved = std::move(tree);
 
-  EXPECT_EQ(copy.get(13), 56);
-  EXPECT_EQ(copy.get(15), 56);
-  EXPECT_EQ(copy.get(16), 56);
-  EXPECT_EQ(copy.get(17), 77);
-  EXPECT_EQ(copy.get(8), 77);
-  EXPECT_EQ(copy.get(37), 77);
+  constexpr auto indicies = std::array{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array{56, 56, 56, 77, 77, 77};
+  const auto copyVals =
+      indicies | transform(bind_front(&I_LL_SimpleDST::get, &moved));
+
+  EXPECT_TRUE(equal(expectedVals, copyVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
-  auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
-  auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
+  using DST = dst::DynamicSimpleGetSetSegmentTree<size_t, int>;
+  using Ref = SegTreeReferenceBase<size_t, int>;
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = DST(0, treeEnd, 0);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(42);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;           // [0..500)
-    const std::size_t rngLen = generator() % 500;             // [0..500)
-    const int setVal = static_cast<int>(generator()) % 1000;  // [0..100)
-    tree.set(rngStart, rngStart + rngLen, setVal);
-    reference.set(rngStart, rngStart + rngLen, setVal);
-  }
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+    const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
+    tree.set(rngBegin, rngEnd, setVal);
+    reference.set(rngBegin, rngEnd, setVal);
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t idx = generator() % 1000;  // [0..1000)
-    auto treeRes = tree.get(idx);
-    auto refRes = reference.get(idx);
-    EXPECT_EQ(treeRes, refRes);
+    constexpr auto ids = iota(size_t{0}, treeEnd);
+    const auto treeVals = ids | transform(bind_front(&DST::get, &tree));
+    const auto refVals = ids | transform(bind_front(&Ref::get, &reference));
+    EXPECT_TRUE(equal(treeVals, refVals));
   }
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
-  auto tree = DynamicSimpleGetSetSegmentTree<std::size_t, int>(0, 1000, 0);
-  auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = dst::DynamicSimpleGetSetSegmentTree<size_t, int>(0, treeEnd, 0);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(42);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
 
-    if (const int opType = static_cast<int>(generator()) % 2; opType == 0) {
-      const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
-      tree.set(rngStart, rngStart + rngLen, setVal);
-      reference.set(rngStart, rngStart + rngLen, setVal);
+    if (std::bernoulli_distribution()(generator)) {
+      const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
+      tree.set(rngBegin, rngEnd, setVal);
+      reference.set(rngBegin, rngEnd, setVal);
     } else {
-      const std::size_t idx = generator() % 1000;  // [0..1000)
-      auto treeRes = tree.get(idx);
-      auto refRes = reference.get(idx);
+      const auto idx = std::uniform_int_distribution<size_t>(0, 999)(generator);
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
       EXPECT_EQ(treeRes, refRes);
     }
   }

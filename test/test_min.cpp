@@ -17,8 +17,8 @@
 using dst::DynamicMinSegmentTree;
 using std::size_t;
 using std::views::iota;
-using UniformSizeTDistr = std::uniform_int_distribution<std::size_t>;
-using GenerateIndRng = GenerateIndexRange<std::size_t>;
+using UniformSizeTDistr = std::uniform_int_distribution<size_t>;
+using GenerateIndRng = GenerateIndexRange<size_t>;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
@@ -59,7 +59,22 @@ TEST(DynamicMinSegmentTree, UpdateSetAndCopy) {
   tree.update(12, 22, 4);
   tree.set(17, 27, 66);
 
-  const auto copy = tree;
+  const auto copy = std::as_const(tree);
+
+  EXPECT_EQ(copy.rangeGet(5, 17), 34);
+  EXPECT_EQ(copy.rangeGet(12, 18), 34 + 4);
+
+  EXPECT_EQ(tree.rangeGet(5, 17), 34);
+  EXPECT_EQ(tree.rangeGet(12, 18), 34 + 4);
+}
+
+TEST(DynamicMinSegmentTree, UpdateSetAndCopyWithSpecifiedAllocator) {
+  auto tree = DynamicMinSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  tree.update(12, 22, 4);
+  tree.set(17, 27, 66);
+
+  const DynamicMinSegmentTree<int, int, std::plus<int>> copy(
+      std::as_const(tree), std::allocator<int>{});
 
   EXPECT_EQ(copy.rangeGet(5, 17), 34);
   EXPECT_EQ(copy.rangeGet(12, 18), 34 + 4);
@@ -74,7 +89,7 @@ TEST(DynamicMinSegmentTree, UpdateSetAndCopyAssign) {
   tree.update(12, 22, 4);
   tree.set(17, 27, 66);
 
-  dest = tree;
+  dest = std::as_const(tree);
 
   EXPECT_EQ(dest.rangeGet(5, 17), 34);
   EXPECT_EQ(dest.rangeGet(12, 18), 34 + 4);
@@ -107,6 +122,18 @@ TEST(DynamicMinSegmentTree, UpdateSetAndMove) {
 
   EXPECT_EQ(moved.rangeGet(5, 17), 34);
   EXPECT_EQ(moved.rangeGet(12, 18), 34 + 4);
+}
+
+TEST(DynamicMinSegmentTree, UpdateSetAndMoveWithSpecifiedAllocator) {
+  auto tree = DynamicMinSegmentTree<int, int, std::plus<int>>(0, 42, 34);
+  tree.update(12, 22, 4);
+  tree.set(17, 27, 66);
+
+  const DynamicMinSegmentTree<int, int, std::plus<int>> moved(
+      std::move(tree), std::allocator<int>{});
+
+  EXPECT_EQ(moved.rangeGet(5, 17), 34);
+  EXPECT_EQ(moved.rangeGet(12, 18), 38);
 }
 
 TEST(DynamicMinSegmentTree, UpdateSetAndMoveAssign) {
@@ -224,7 +251,7 @@ TEST(DynamicMinSegmentTree, FuzzTestSetUpdateGet) {
 }
 
 TEST(DynamicMinSegmentTree, FuzzTestMixedSetUpdateGet) {
-  constexpr auto treeEnd = std::size_t{1000};
+  constexpr auto treeEnd = size_t{1000};
   auto tree =
       DynamicMinSegmentTree<size_t, int, std::plus<int>>(0, treeEnd, 0);
   auto reference = MinSegTreeReference<size_t, int>(0, treeEnd, 0);

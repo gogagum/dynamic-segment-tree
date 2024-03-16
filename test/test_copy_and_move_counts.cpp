@@ -198,7 +198,7 @@ TEST(DSTCopyAndMoveCount, SetSomeValuesInSmallTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 16, initCounter);
 
   EXPECT_EQ(initStats->getCopyCount(), 1);
@@ -240,7 +240,7 @@ TEST(DSTCopyAndMoveCount, SetSomeValuesInBigTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 1024ul * 1024, initCounter);
 
   initStats->reset();
@@ -280,7 +280,7 @@ TEST(DSTCopyAndMoveCount, SetManyNumbersInBigTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
           0, 1024ul * 1024, initCounter);
 
   EXPECT_EQ(initStats->getCopyCount(), 1);

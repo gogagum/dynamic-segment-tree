@@ -11,9 +11,12 @@
 #include <ranges>
 
 #include "reference/avg_seg_tree_reference.hpp"
+#include "tools/generate_index_range.hpp"
 
-namespace rng = std::ranges;
 using dst::DynamicAvgSegmentTree;
+using std::size_t;
+using std::views::iota;
+using GenerateIndRng = GenerateIndexRange<size_t>;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
@@ -25,7 +28,7 @@ TEST(DynamicAvgSegmentTree, Construct) {
 TEST(DynamicAvgSegmentTree, SimpleRangeGet) {
   auto tree = DynamicAvgSegmentTree<int, float>(2, 57, 42.f);
 
-  auto avg = tree.rangeGet(3, 16);
+  const auto avg = tree.rangeGet(3, 16);
   EXPECT_FLOAT_EQ(avg, 42.f);
 }
 
@@ -59,7 +62,7 @@ TEST(DynamicAvgSegmentTree, SimpleRangeGetAfterSetTwoToOne) {
 TEST(DynamicAvgSegmentTree, Copy) {
   auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
   tree.set(0, 2, 37.f);
-  auto copy = tree;
+  auto copy = std::as_const(tree);
 
   auto avg = copy.rangeGet(0, 6);
   EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
@@ -75,60 +78,52 @@ TEST(DynamicAvgSegmentTree, Move) {
 }
 
 TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
-  auto tree = DynamicAvgSegmentTree<std::size_t, float>(0, 1000, 0.f);
-  auto reference = AvgSegTreeReference<std::size_t, float>(0, 1000, 0.f);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = DynamicAvgSegmentTree<size_t, float>(0, treeEnd, 0.f);
+  auto reference = AvgSegTreeReference<size_t, float>(0, treeEnd, 0.f);
 
-  std::mt19937 generator(42);
+  std::mt19937 gen(42);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;               // [0..500)
-    const std::size_t rngLen = generator() % 500;                 // [0..500)
-    const float setVal = static_cast<float>(generator() % 1000);  // [0..1000)
-    tree.set(rngStart, rngStart + rngLen, setVal);
-    reference.set(rngStart, rngStart + rngLen, setVal);
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+    const auto valToSet = std::uniform_real_distribution(0.f, 1000.f)(gen);
+    tree.set(rngBegin, rngEnd, valToSet);
+    reference.set(rngBegin, rngEnd, valToSet);
   }
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
-    auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
-    auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
+  for (size_t i : iota(0, 50)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+    auto treeRes = tree.rangeGet(rngBegin, rngEnd);
+    auto refRes = reference.rangeGet(rngBegin, rngEnd);
     EXPECT_FLOAT_EQ(treeRes, refRes);
   }
 }
 
 TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
-  auto tree =
-      DynamicAvgSegmentTree<std::size_t, float, float, std::plus<float>>(
-          0, 1000, 0);
-  auto reference = AvgSegTreeReference<std::size_t, float>(0, 1000, 0);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = DynamicAvgSegmentTree<size_t, float, float, std::plus<float>>(
+      0, treeEnd, 0);
+  auto reference = AvgSegTreeReference<size_t, float>(0, treeEnd, 0);
 
-  std::mt19937 generator(54);
+  std::mt19937 gen(54);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
-
-    const int operationChoise = static_cast<int>(generator()) % 2;
-
-    if (operationChoise) {
-      const float setVal = static_cast<float>(generator() % 1000);  // [0..1000)
-      tree.set(rngStart, rngStart + rngLen, setVal);
-      reference.set(rngStart, rngStart + rngLen, setVal);
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+    if (std::bernoulli_distribution()(gen)) {
+      const auto setVal = std::uniform_real_distribution(0.f, 1000.f)(gen);
+      tree.set(rngBegin, rngEnd, setVal);
+      reference.set(rngBegin, rngEnd, setVal);
     } else {
-      const float updateValue =
-          static_cast<float>(generator() % 1000);  // [0..1000)
-      tree.update(rngStart, rngStart + rngLen, updateValue);
-      reference.update(rngStart, rngStart + rngLen, std::plus<int>(),
-                       updateValue);
+      const auto updateVal = std::uniform_real_distribution(0.f, 1000.f)(gen);
+      tree.update(rngBegin, rngEnd, updateVal);
+      reference.update(rngBegin, rngEnd, std::plus<int>(), updateVal);
     }
   }
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
-    auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
-    auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
+  for (size_t i : iota(0, 50)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+    auto treeRes = tree.rangeGet(rngBegin, rngEnd);
+    auto refRes = reference.rangeGet(rngBegin, rngEnd);
     EXPECT_FLOAT_EQ(treeRes, refRes);
   }
 }

@@ -15,7 +15,7 @@
 
 using std::size_t;
 using std::views::iota;
-using GenerateIndRng = GenerateIndexRange<std::size_t>;
+using GenerateIndRng = GenerateIndexRange<size_t>;
 
 constexpr auto knegateOp = [](int num) {
   return -num;
@@ -172,9 +172,9 @@ TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
     const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
 
     if (std::bernoulli_distribution()(generator)) {
-      const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
-      tree.set(rngBegin, rngEnd, setVal);
-      reference.set(rngBegin, rngEnd, setVal);
+      const auto valueToSet = std::uniform_int_distribution(0, 1000)(generator);
+      tree.set(rngBegin, rngEnd, valueToSet);
+      reference.set(rngBegin, rngEnd, valueToSet);
     } else {
       tree.update(rngBegin, rngEnd);
       reference.update(rngBegin, rngEnd, knegateOp);

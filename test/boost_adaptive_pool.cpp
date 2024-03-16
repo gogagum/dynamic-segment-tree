@@ -12,25 +12,25 @@
 #include <ranges>
 
 #include "reference/seg_tree_reference_base.hpp"
+#include "tools/generate_index_range.hpp"
 
-namespace rng = std::ranges;
-using dst::DynamicSimpleGetSetSegmentTree;
+using std::size_t;
+using std::views::iota;
+using GenerateIndRng = GenerateIndexRange<std::size_t>;
+
+template <class KeyT, class ValueT>
+using SimpleAdaptivePoolDST = dst::DynamicSimpleGetSetSegmentTree<
+    KeyT, ValueT, boost::container::adaptive_pool<ValueT>>;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
 
 TEST(BoostAdaptivePoolSimpleTree, Construct) {
-  auto tree =
-      DynamicSimpleGetSetSegmentTree<int, int,
-                                     boost::container::adaptive_pool<int>>(
-          0, 100, 0);
+  auto tree = SimpleAdaptivePoolDST<int, int>(0, 100, 0);
 }
 
 TEST(BoostAdaptivePoolSimpleTree, RangeSet) {
-  auto tree =
-      DynamicSimpleGetSetSegmentTree<int, long long,
-                                     boost::container::adaptive_pool<int>>(
-          0, 42, 77);
+  auto tree = SimpleAdaptivePoolDST<int, long long>(0, 42, 77);
 
   tree.set(13, 17, 56);
 
@@ -43,24 +43,21 @@ TEST(BoostAdaptivePoolSimpleTree, RangeSet) {
 }
 
 TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
-  auto tree =
-      DynamicSimpleGetSetSegmentTree<std::size_t, int,
-                                     boost::container::adaptive_pool<int>>(
-          0, 1000, 0);
-  auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = SimpleAdaptivePoolDST<size_t, int>(0, treeEnd, 0);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(42);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;           // [0..500)
-    const std::size_t rngLen = generator() % 500;             // [0..500)
-    const int setVal = static_cast<int>(generator()) % 1000;  // [0..100)
-    tree.set(rngStart, rngStart + rngLen, setVal);
-    reference.set(rngStart, rngStart + rngLen, setVal);
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+    const int valueToSet = std::uniform_int_distribution(0, 1000)(generator);
+    tree.set(rngBegin, rngEnd, valueToSet);
+    reference.set(rngBegin, rngEnd, valueToSet);
   }
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t idx = generator() % 1000;  // [0..1000)
+  for (size_t i : iota(0, 50)) {
+    const auto idx = std::uniform_int_distribution<size_t>(0, 999)(generator);
     auto treeRes = tree.get(idx);
     auto refRes = reference.get(idx);
     EXPECT_EQ(treeRes, refRes);
@@ -68,24 +65,20 @@ TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
 }
 
 TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGetMixed) {
-  auto tree =
-      DynamicSimpleGetSetSegmentTree<std::size_t, int,
-                                     boost::container::adaptive_pool<int>>(
-          0, 1000, 0);
-  auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 0);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = SimpleAdaptivePoolDST<size_t, int>(0, treeEnd, 0);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(42);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
-
-    if (const int opType = static_cast<int>(generator()) % 2; opType == 0) {
-      const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
-      tree.set(rngStart, rngStart + rngLen, setVal);
-      reference.set(rngStart, rngStart + rngLen, setVal);
+  for (size_t i : iota(0, 100)) {
+    if (std::bernoulli_distribution()(generator)) {
+      const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+      const auto valueToSet = std::uniform_int_distribution(0, 1000)(generator);
+      tree.set(rngBegin, rngEnd, valueToSet);
+      reference.set(rngBegin, rngEnd, valueToSet);
     } else {
-      const std::size_t idx = generator() % 1000;  // [0..1000)
+      const auto idx = std::uniform_int_distribution<size_t>(0, 999)(generator);
       auto treeRes = tree.get(idx);
       auto refRes = reference.get(idx);
       EXPECT_EQ(treeRes, refRes);
