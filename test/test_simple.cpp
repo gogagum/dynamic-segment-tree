@@ -6,10 +6,10 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <dst/partial/dynamic_simple_get_set_segment_tree.hpp>
 #include <random>
 #include <ranges>
-#include <array>
 
 #include "reference/seg_tree_reference_base.hpp"
 #include "tools/generate_index_range.hpp"
@@ -83,7 +83,8 @@ TEST(SimpleGetSetDynamicSegmentTree, SetAndMove) {
 
   constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
   constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
-  const auto movedVals = indicies | transform(bind_front(kiLLValGetter, &moved));
+  const auto movedVals =
+      indicies | transform(bind_front(kiLLValGetter, &moved));
 
   EXPECT_TRUE(equal(expectedVals, movedVals));
 }
@@ -98,10 +99,10 @@ TEST(SimpleGetSetDynamicSegmentTree, SetAndMoveAssign) {
 
   constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
   constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
-  const auto copyVals =
-      indicies | transform(bind_front(&I_LL_SimpleDST::get, &moved));
+  const auto movedVals =
+      indicies | transform(bind_front(kiLLValGetter, &moved));
 
-  EXPECT_TRUE(equal(expectedVals, copyVals));
+  EXPECT_TRUE(equal(expectedVals, movedVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {

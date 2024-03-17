@@ -14,8 +14,11 @@
 #include "reference/seg_tree_reference_base.hpp"
 #include "tools/generate_index_range.hpp"
 
+using std::bind_front;
 using std::size_t;
+using std::ranges::equal;
 using std::views::iota;
+using std::views::transform;
 using GenerateIndRng = GenerateIndexRange<std::size_t>;
 
 template <class KeyT, class ValueT>
@@ -31,21 +34,89 @@ TEST(BoostAdaptivePoolSimpleTree, Construct) {
 
 TEST(BoostAdaptivePoolSimpleTree, RangeSet) {
   auto tree = SimpleAdaptivePoolDST<int, long long>(0, 42, 77);
+  tree.set(13, 17, 56);
+
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedValues = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+
+  constexpr auto valGetter = &SimpleAdaptivePoolDST<int, long long>::get;
+  const auto values = indicies | transform(bind_front(valGetter, &tree));
+
+  EXPECT_TRUE(equal(expectedValues, values));
+}
+
+TEST(BoostAdaptivePoolSimpleTree, SetAndCopy) {
+  auto tree = SimpleAdaptivePoolDST<int, int>(0, 42, 77);
 
   tree.set(13, 17, 56);
 
-  EXPECT_EQ(tree.get(13), 56);
-  EXPECT_EQ(tree.get(15), 56);
-  EXPECT_EQ(tree.get(16), 56);
-  EXPECT_EQ(tree.get(17), 77);
-  EXPECT_EQ(tree.get(8), 77);
-  EXPECT_EQ(tree.get(37), 77);
+  auto copy = std::as_const(tree);
+
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  constexpr auto valGetter = &SimpleAdaptivePoolDST<int, int>::get;
+  const auto copyVals = indicies | transform(bind_front(valGetter, &tree));
+  const auto treeVals = indicies | transform(bind_front(valGetter, &copy));
+
+  EXPECT_TRUE(equal(expectedVals, copyVals));
+  EXPECT_TRUE(equal(expectedVals, treeVals));
+}
+
+TEST(BoostAdaptivePoolSimpleTree, SetAndCopyAssign) {
+  auto tree = SimpleAdaptivePoolDST<int, int>(0, 42, 77);
+  auto copy = SimpleAdaptivePoolDST<int, int>(5, 13, 67);
+
+  tree.set(13, 17, 56);
+
+  copy = std::as_const(tree);
+
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  constexpr auto valGetter = &SimpleAdaptivePoolDST<int, int>::get;
+  const auto copyVals = indicies | transform(bind_front(valGetter, &tree));
+  const auto treeVals = indicies | transform(bind_front(valGetter, &copy));
+
+  EXPECT_TRUE(equal(expectedVals, copyVals));
+  EXPECT_TRUE(equal(expectedVals, treeVals));
+}
+
+TEST(BoostAdaptivePoolSimpleTree, SetAndMove) {
+  auto tree = SimpleAdaptivePoolDST<int, int>(0, 42, 77);
+
+  tree.set(13, 17, 56);
+
+  auto moved = std::move(tree);
+
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  constexpr auto valGetter = &SimpleAdaptivePoolDST<int, int>::get;
+  const auto movedVals = indicies | transform(bind_front(valGetter, &moved));
+
+  EXPECT_TRUE(equal(expectedVals, movedVals));
+}
+
+TEST(BoostAdaptivePoolSimpleTree, SetAndMoveAssign) {
+  auto tree = SimpleAdaptivePoolDST<int, int>(0, 42, 77);
+  auto moved = SimpleAdaptivePoolDST<int, int>(5, 13, 67);
+
+  tree.set(13, 17, 56);
+
+  moved = std::move(tree);
+
+  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  constexpr auto valGetter = &SimpleAdaptivePoolDST<int, int>::get;
+  const auto movedVals = indicies | transform(bind_front(valGetter, &moved));
+
+  EXPECT_TRUE(equal(expectedVals, movedVals));
 }
 
 TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
+  using DST = dst::DynamicSimpleGetSetSegmentTree<size_t, int>;
+  using Ref = SegTreeReferenceBase<size_t, int>;
   constexpr auto treeEnd = size_t{1000};
-  auto tree = SimpleAdaptivePoolDST<size_t, int>(0, treeEnd, 0);
-  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
+  auto tree = DST(0, treeEnd, 0);
+  auto reference = Ref(0, treeEnd, 0);
 
   std::mt19937 generator(42);
 
@@ -54,13 +125,11 @@ TEST(BoostAdaptivePoolSimpleTree, FuzzTestSetGet) {
     const int valueToSet = std::uniform_int_distribution(0, 1000)(generator);
     tree.set(rngBegin, rngEnd, valueToSet);
     reference.set(rngBegin, rngEnd, valueToSet);
-  }
 
-  for (size_t i : iota(0, 50)) {
-    const auto idx = std::uniform_int_distribution<size_t>(0, 999)(generator);
-    auto treeRes = tree.get(idx);
-    auto refRes = reference.get(idx);
-    EXPECT_EQ(treeRes, refRes);
+    constexpr auto ids = iota(size_t{0}, treeEnd);
+    const auto treeVals = ids | transform(bind_front(&DST::get, &tree));
+    const auto refVals = ids | transform(bind_front(&Ref::get, &reference));
+    EXPECT_TRUE(equal(treeVals, refVals));
   }
 }
 
