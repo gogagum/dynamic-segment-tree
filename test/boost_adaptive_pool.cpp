@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <boost/container/adaptive_pool.hpp>
 #include <dst/partial/dynamic_simple_get_set_segment_tree.hpp>
 #include <random>
