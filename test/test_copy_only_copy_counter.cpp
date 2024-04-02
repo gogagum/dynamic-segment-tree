@@ -43,7 +43,7 @@ TEST(CopyOnlyCopyCounter, OneCopyAndReset) {
 TEST(CopyOnlyCopyCounter, Loop) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  for (size_t i : iota(0, 42)) {
+  for ([[maybe_unused]] size_t i : iota(0, 42)) {
     auto copy = copyCounter;
   }
 
@@ -53,7 +53,7 @@ TEST(CopyOnlyCopyCounter, Loop) {
 TEST(CopyOnlyCopyCounter, CopiesAndReset) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  for (size_t i : iota(0, 42)) {
+  for ([[maybe_unused]] size_t i : iota(0, 42)) {
     auto copy = copyCounter;
   }
 

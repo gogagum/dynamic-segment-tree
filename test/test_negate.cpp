@@ -143,8 +143,8 @@ TEST(DynamicNegateSegmentTree, SimpleRangeGet) {
 
 TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
   constexpr auto treeEnd = size_t{1000};
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
-  auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, treeEnd, 42);
+  auto reference = SegTreeReferenceBase<int, int>(0, treeEnd, 42);
 
   auto gen = std::mt19937(37);
 

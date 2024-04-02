@@ -14,7 +14,7 @@
 #include "reference/seg_tree_reference_base.hpp"
 #include "tools/generate_index_range.hpp"
 
-using I_LL_SimpleDST = dst::DynamicSimpleGetSetSegmentTree<int, long long>;
+using I_LL_SimpleDST = dst::DynamicSimpleGetSetSegmentTree<int, std::int64_t>;
 constexpr auto kiLLValGetter = &I_LL_SimpleDST::get;
 using std::bind_front;
 using std::size_t;
