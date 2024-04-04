@@ -18,97 +18,118 @@ using std::size_t;
 using std::views::iota;
 using GenerateIndRng = GenerateIndexRange<size_t>;
 
-// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
-// cert-err58-cpp)
+// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-msc51-cpp, cert-msc32-c)
 
 TEST(DynamicAvgSegmentTree, Construct) {
-  [[maybe_unused]] auto tree = DynamicAvgSegmentTree<int, float>(2, 57);
+  constexpr auto kTreeEnd = size_t{57};
+  [[maybe_unused]] auto tree = DynamicAvgSegmentTree<int, float>(2, kTreeEnd);
 }
 
 TEST(DynamicAvgSegmentTree, SimpleRangeGet) {
-  auto tree = DynamicAvgSegmentTree<int, float>(2, 57, 42.f);
+  constexpr auto kTreeEnd = size_t{57};
+  constexpr auto kFillValue = 42.f;
+
+  const auto tree = DynamicAvgSegmentTree<int, float>(2, kTreeEnd, kFillValue);
 
   const auto avg = tree.rangeGet(3, 16);
-  EXPECT_FLOAT_EQ(avg, 42.f);
+  EXPECT_FLOAT_EQ(avg, kFillValue);
 }
 
 TEST(DynamicAvgSegmentTree, SimpleRangeGetAfterSet) {
-  auto tree = DynamicAvgSegmentTree<int, float>(0, 4, 42.f);
+  constexpr auto kFillValue = 42.f;
+  auto tree = DynamicAvgSegmentTree<int, float>(0, 4, kFillValue);
 
-  tree.set(2, 4, 37.f);
+  constexpr auto kSetValue = 37.f;
+  tree.set(2, 4, kSetValue);
 
-  auto avg = tree.rangeGet(0, 4);
-  EXPECT_FLOAT_EQ(avg, (37.f + 42.f) / 2.f);
+  const auto avg = tree.rangeGet(0, 4);
+  EXPECT_FLOAT_EQ(avg, (kSetValue + kFillValue) / 2.f);
 }
 
 TEST(DynamicAvgSegmentTree, SimpleRangeGetAfterSetOneToTwo) {
-  auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
+  constexpr auto kTreeEnd = size_t{6};
+  constexpr auto kFillValue = 42.f;
+  auto tree = DynamicAvgSegmentTree<int, float>(0, kTreeEnd, kFillValue);
 
-  tree.set(4, 6, 37.f);
+  constexpr auto kSetValue = 37.f;
+  tree.set(4, kTreeEnd, kSetValue);
 
-  auto avg = tree.rangeGet(0, 6);
-  EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
+  const auto avg = tree.rangeGet(0, kTreeEnd);
+  EXPECT_FLOAT_EQ(avg, (kSetValue + kFillValue * 2) / 3.f);
 }
 
 TEST(DynamicAvgSegmentTree, SimpleRangeGetAfterSetTwoToOne) {
-  auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
+  constexpr auto kTreeEnd = size_t{6};
+  constexpr auto kFillValue = 42.f;
+  auto tree = DynamicAvgSegmentTree<int, float>(0, kTreeEnd, kFillValue);
 
-  tree.set(0, 2, 37.f);
+  constexpr auto kSetValue = 37.f;
+  tree.set(0, 2, kSetValue);
 
-  auto avg = tree.rangeGet(0, 6);
-  EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
+  const auto avg = tree.rangeGet(0, kTreeEnd);
+  EXPECT_FLOAT_EQ(avg, (kSetValue + kFillValue * 2) / 3.f);
 }
 
 TEST(DynamicAvgSegmentTree, Copy) {
-  auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
-  tree.set(0, 2, 37.f);
+  constexpr auto kTreeEnd = size_t{6};
+  constexpr auto kFillValue = 42.f;
+  auto tree = DynamicAvgSegmentTree<int, float>(0, kTreeEnd, kFillValue);
+
+  constexpr auto kSetValue = 37.f;
+  tree.set(0, 2, kSetValue);
   auto copy = std::as_const(tree);
 
-  auto avg = copy.rangeGet(0, 6);
-  EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
+  const auto avg = copy.rangeGet(0, kTreeEnd);
+  EXPECT_FLOAT_EQ(avg, (kSetValue + kFillValue * 2) / 3.f);
 }
 
 TEST(DynamicAvgSegmentTree, Move) {
-  auto tree = DynamicAvgSegmentTree<int, float>(0, 6, 42.f);
-  tree.set(0, 2, 37.f);
-  auto moved = std::move(tree);
+  constexpr auto kTreeEnd = size_t{6};
+  constexpr auto kFillValue = 42.f;
+  auto tree = DynamicAvgSegmentTree<int, float>(0, kTreeEnd, kFillValue);
 
-  auto avg = moved.rangeGet(0, 6);
-  EXPECT_FLOAT_EQ(avg, (37.f + 42.f * 2) / 3.f);
+  constexpr auto kSetValue = 37.f;
+  tree.set(0, 2, kSetValue);
+  const auto moved = std::move(tree);
+
+  const auto avg = moved.rangeGet(0, kTreeEnd);
+  EXPECT_FLOAT_EQ(avg, (kSetValue + kFillValue * 2) / 3.f);
 }
 
 TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {
-  constexpr auto treeEnd = size_t{1000};
-  auto tree = DynamicAvgSegmentTree<size_t, float>(0, treeEnd, 0.f);
-  auto reference = AvgSegTreeReference<size_t, float>(0, treeEnd, 0.f);
+  constexpr auto kTreeEnd = size_t{1000};
+  auto tree = DynamicAvgSegmentTree<size_t, float>(0, kTreeEnd, 0.f);
+  auto reference = AvgSegTreeReference<size_t, float>(0, kTreeEnd, 0.f);
 
-  std::mt19937 gen(42);
+  constexpr auto kGenSeed = 42U;
+  std::mt19937 gen(kGenSeed);
 
-  for (size_t i : iota(0, 100)) {
-    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+  for ([[maybe_unused]] size_t iterNum : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
     const auto valToSet = std::uniform_real_distribution(0.f, 1000.f)(gen);
     tree.set(rngBegin, rngEnd, valToSet);
     reference.set(rngBegin, rngEnd, valToSet);
   }
 
-  for (size_t i : iota(0, 50)) {
-    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
-    auto treeRes = tree.rangeGet(rngBegin, rngEnd);
-    auto refRes = reference.rangeGet(rngBegin, rngEnd);
+  for ([[maybe_unused]] size_t iterNum : iota(0, 50)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
+    const auto treeRes = tree.rangeGet(rngBegin, rngEnd);
+    const auto refRes = reference.rangeGet(rngBegin, rngEnd);
     EXPECT_LE(std::abs((treeRes - refRes) / refRes), 1e-4);
   }
 }
 
 TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
-  constexpr auto treeEnd = size_t{1000};
+  constexpr auto kTreeEnd = size_t{1000};
   auto tree = DynamicAvgSegmentTree<size_t, float, float, std::plus<float>>(
-      0, treeEnd, 0);
-  auto reference = AvgSegTreeReference<size_t, float>(0, treeEnd, 0);
+      0, kTreeEnd, 0);
+  auto reference = AvgSegTreeReference<size_t, float>(0, kTreeEnd, 0);
 
-  std::mt19937 gen(54);
+  constexpr auto kGenSeed = 54U;
+  std::mt19937 gen(kGenSeed);
 
-  for (size_t i : iota(0, 100)) {
-    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
+  for ([[maybe_unused]] size_t iterNum : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
     if (std::bernoulli_distribution()(gen)) {
       const auto setVal = std::uniform_real_distribution(0.f, 1000.f)(gen);
       tree.set(rngBegin, rngEnd, setVal);
@@ -116,17 +137,16 @@ TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     } else {
       const auto updateVal = std::uniform_real_distribution(0.f, 1000.f)(gen);
       tree.update(rngBegin, rngEnd, updateVal);
-      reference.update(rngBegin, rngEnd, std::plus<int>(), updateVal);
+      reference.update(rngBegin, rngEnd, std::plus<>{}, updateVal);
     }
   }
 
-  for (size_t i : iota(0, 50)) {
-    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(gen);
-    auto treeRes = tree.rangeGet(rngBegin, rngEnd);
-    auto refRes = reference.rangeGet(rngBegin, rngEnd);
+  for ([[maybe_unused]] size_t iterNum : iota(0, 50)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
+    const auto treeRes = tree.rangeGet(rngBegin, rngEnd);
+    const auto refRes = reference.rangeGet(rngBegin, rngEnd);
     EXPECT_LE(std::abs((treeRes - refRes) / refRes), 1e-3);
   }
 }
 
-// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
-// cert-err58-cpp)
+// NOLINTEND(cppcoreguidelines-owning-memory, cert-msc51-cpp, cert-msc32-c)
