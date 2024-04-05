@@ -24,7 +24,8 @@ using std::views::iota;
 using std::views::transform;
 using GenerateIndRng = GenerateIndexRange<size_t>;
 
-// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-*)
+// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-err58-cpp, cert-msc51-cpp,
+// cert-msc32-c)
 
 TEST(DynamicMaxSegmentTree, Construct) {
   constexpr auto kTreeEnd = 42;
@@ -71,7 +72,7 @@ TEST(DynamicMaxSegmentTree, UpdateAndSet) {
   constexpr auto kFillValue = 34;
   auto tree =
       DynamicMaxSegmentTree<int, int, std::plus<int>>(0, kTreeEnd, kFillValue);
-  
+
   constexpr auto kUpdateOpBegin = 12;
   constexpr auto kUpdateOpEnd = 22;
   tree.update(kUpdateOpBegin, kUpdateOpEnd, 4);
@@ -90,7 +91,7 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndCopy) {
   constexpr auto kFillValue = 34;
   auto tree =
       DynamicMaxSegmentTree<int, int, std::plus<int>>(0, kTreeEnd, kFillValue);
-  
+
   constexpr auto kUpdateOpBegin = 12;
   constexpr auto kUpdateOpEnd = 22;
   tree.update(kUpdateOpBegin, kUpdateOpEnd, 4);
@@ -207,11 +208,12 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndMove) {
 }
 
 TEST(DynamicMaxSegmentTree, UpdateSetAndMoveWithSpecifiedAllocator) {
+  using DST = DynamicMaxSegmentTree<int, int, std::plus<int>>;
+
   constexpr auto kTreeEnd = 42;
   constexpr auto kFillValue = 34;
-  auto tree =
-      DynamicMaxSegmentTree<int, int, std::plus<int>>(0, kTreeEnd, kFillValue);
-  
+  auto tree = DST(0, kTreeEnd, kFillValue);
+
   constexpr auto kUpdateOpBegin = 12;
   constexpr auto kUpdateOpEnd = 22;
   tree.update(kUpdateOpBegin, kUpdateOpEnd, 4);
@@ -221,8 +223,7 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndMoveWithSpecifiedAllocator) {
   constexpr auto kSetValue = 66;
   tree.set(kSetOpBegin, kSetOpEnd, kSetValue);
 
-  const DynamicMaxSegmentTree<int, int, std::plus<int>> moved(
-      std::move(tree), std::allocator<int>{});
+  const DST moved(std::move(tree), std::allocator<int>{});
 
   EXPECT_EQ(moved.rangeGet(5, 17), 34 + 4);
   EXPECT_EQ(moved.rangeGet(12, 18), 66);
@@ -230,11 +231,16 @@ TEST(DynamicMaxSegmentTree, UpdateSetAndMoveWithSpecifiedAllocator) {
 
 TEST(DynamicMaxSegmentTree, UpdateSetAndMoveAssign) {
   using DST = DynamicMaxSegmentTree<int, int, std::plus<int>>;
+
+  constexpr auto kTreeBegin = -17;
   constexpr auto kTreeEnd = 42;
   constexpr auto kFillValue = 34;
-  auto tree = DST(0, kTreeEnd, kFillValue);
+  auto tree = DST(kTreeBegin, kTreeEnd, kFillValue);
+
+  constexpr auto kDestTreeBegin = -14;
   constexpr auto kDestTreeEnd = 37;
-  auto dest = DST(0, kDestTreeEnd, kFillValue);
+  constexpr auto kDestFillValue = 3;
+  auto dest = DST(kDestTreeBegin, kDestTreeEnd, kDestFillValue);
 
   constexpr auto kUpdateOpBegin = 12;
   constexpr auto kUpdateOpEnd = 22;
@@ -290,7 +296,7 @@ TEST(DynamicMaxSegmentTree, LadderUpLeft) {
 TEST(DynamicMaxSegmentTree, LadderDownRight) {
   constexpr auto kTreeEnd = 42;
   auto tree = DynamicMaxSegmentTree<int, int>(0, kTreeEnd, 0);
-  
+
   constexpr auto kSetBegins = iota(34, 42);
   auto kSetValues = std::array<int, kSetBegins.size()>{
       -1, -10, -100, -1000, -10000, -100000, -1000000, -10000000};  // NOLINT
@@ -343,7 +349,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
     const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(generator);
     const auto updVal = std::uniform_int_distribution(0, 1000)(generator);
     tree.update(rngBegin, rngEnd, updVal);
-    reference.update(rngBegin, rngEnd, std::plus<>(), updVal);
+    reference.update(rngBegin, rngEnd, std::plus<>{}, updVal);
 
     for (auto idx : iota(0, 1000)) {
       auto treeRes = tree.get(idx);
@@ -355,7 +361,8 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetUpdateGet) {
 
 TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateGet) {
   constexpr auto kTreeEnd = size_t{1000};
-  auto tree = DynamicMaxSegmentTree<size_t, int, std::plus<>>(0, kTreeEnd, 0);
+  auto tree =
+      DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, kTreeEnd, 0);
   auto reference = MaxSegTreeReference<size_t, int>(0, kTreeEnd, 0);
 
   constexpr auto kGenSeed = 54U;
@@ -407,7 +414,8 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetRangeGet) {
 
 TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
   constexpr auto kTreeEnd = size_t{1000};
-  auto tree = DynamicMaxSegmentTree<size_t, int, std::plus<>>(0, kTreeEnd, 0);
+  auto tree =
+      DynamicMaxSegmentTree<size_t, int, std::plus<int>>(0, kTreeEnd, 0);
   auto reference = MaxSegTreeReference<size_t, int>(0, kTreeEnd, 0);
 
   constexpr auto kGenSeed = 54U;
@@ -434,4 +442,5 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
   }
 }
 
-// NOLINTEND(cppcoreguidelines-owning-memory, cert-*)
+// NOLINTEND(cppcoreguidelines-owning-memory, cert-err58-cpp, cert-msc51-cpp,
+// cert-msc32-c)

@@ -14,7 +14,8 @@
 #include "reference/seg_tree_reference_base.hpp"
 #include "tools/generate_index_range.hpp"
 
-using I_LL_SimpleDST = dst::DynamicSimpleGetSetSegmentTree<int, std::int64_t>;
+using std::uint64_t;
+using I_LL_SimpleDST = dst::DynamicSimpleGetSetSegmentTree<int, int64_t>;
 constexpr auto kiLLValGetter = &I_LL_SimpleDST::get;
 using std::bind_front;
 using std::size_t;
@@ -23,119 +24,159 @@ using std::views::iota;
 using std::views::transform;
 using GenerateIndRng = GenerateIndexRange<size_t>;
 
-// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
-// cert-err58-cpp)
+// NOLINTBEGIN(cppcoreguidelines-*, cert-*, cert-err58-cpp)
 
 TEST(SimpleGetSetDynamicSegmentTree, Construct) {
-  auto tree = I_LL_SimpleDST(-5, 100, 77);
+  constexpr auto kTreeBegin = -5;
+  constexpr auto kTreeEnd = 100;
+  constexpr auto kFillValue = 77;
+  auto tree = I_LL_SimpleDST(kTreeBegin, kTreeEnd, kFillValue);
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, RangeSet) {
-  auto tree = I_LL_SimpleDST(0, 42, 77);
-  tree.set(13, 17, 56);
+  constexpr auto kTreeBegin = -17;
+  constexpr auto kTreeEnd = 93;
+  constexpr auto kFillValue = 77;
+  auto tree = I_LL_SimpleDST(kTreeBegin, kTreeEnd, kFillValue);
 
-  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedValues = std::array<int, 6>{56, 56, 56, 77, 77, 77};
-  const auto values = indicies | transform(bind_front(kiLLValGetter, &tree));
+  constexpr auto kSetOpBegin = 13;
+  constexpr auto kSetOpEnd = 17;
+  constexpr auto kSetValue = uint64_t{56};
+  tree.set(kSetOpBegin, kSetOpEnd, kSetValue);
 
-  EXPECT_TRUE(equal(expectedValues, values));
+  constexpr auto kIndicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto kExpectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  const auto values = kIndicies | transform(bind_front(kiLLValGetter, &tree));
+
+  EXPECT_TRUE(equal(kExpectedVals, values));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndCopy) {
-  auto tree = I_LL_SimpleDST(0, 42, 77);
+  constexpr auto kTreeBegin = 0;
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = 77;
+  auto tree = I_LL_SimpleDST(kTreeBegin, kTreeEnd, kFillValue);
 
-  tree.set(13, 17, 56);
+  constexpr auto kSetOpBegin = 13;
+  constexpr auto kSetOpEnd = 17;
+  constexpr auto kSetValue = uint64_t{56};
+  tree.set(kSetOpBegin, kSetOpEnd, kSetValue);
 
   auto copy = std::as_const(tree);
 
-  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
-  const auto copyVals = indicies | transform(bind_front(kiLLValGetter, &tree));
-  const auto treeVals = indicies | transform(bind_front(kiLLValGetter, &copy));
+  constexpr auto kIndicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto kExpectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  const auto copyVals = kIndicies | transform(bind_front(kiLLValGetter, &tree));
+  const auto treeVals = kIndicies | transform(bind_front(kiLLValGetter, &copy));
 
-  EXPECT_TRUE(equal(expectedVals, copyVals));
-  EXPECT_TRUE(equal(expectedVals, treeVals));
+  EXPECT_TRUE(equal(kExpectedVals, copyVals));
+  EXPECT_TRUE(equal(kExpectedVals, treeVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndCopyAssign) {
-  auto tree = I_LL_SimpleDST(0, 42, 77);
-  auto copy = I_LL_SimpleDST(5, 13, 67);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = uint64_t{77};
+  auto tree = I_LL_SimpleDST(0, kTreeEnd, kFillValue);
 
-  tree.set(13, 17, 56);
+  constexpr auto kCopyBegin = 5;
+  constexpr auto kCopyEnd = 13;
+  constexpr auto kCopyFillValue = uint64_t{67};
+  auto copy = I_LL_SimpleDST(kCopyBegin, kCopyEnd, kCopyFillValue);
+
+  constexpr auto kSetOpBegin = 13;
+  constexpr auto kSetOpEnd = 17;
+  constexpr auto kSetValue = uint64_t{56};
+  tree.set(kSetOpBegin, kSetOpEnd, kSetValue);
 
   copy = std::as_const(tree);
 
-  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
-  const auto copyVals = indicies | transform(bind_front(kiLLValGetter, &tree));
-  const auto treeVals = indicies | transform(bind_front(kiLLValGetter, &copy));
+  constexpr auto kIndicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto kExpectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  const auto copyVals = kIndicies | transform(bind_front(kiLLValGetter, &tree));
+  const auto treeVals = kIndicies | transform(bind_front(kiLLValGetter, &copy));
 
-  EXPECT_TRUE(equal(expectedVals, copyVals));
-  EXPECT_TRUE(equal(expectedVals, treeVals));
+  EXPECT_TRUE(equal(kExpectedVals, copyVals));
+  EXPECT_TRUE(equal(kExpectedVals, treeVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndMove) {
-  auto tree = I_LL_SimpleDST(0, 42, 77);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = uint64_t{77};
+  auto tree = I_LL_SimpleDST(0, kTreeEnd, kFillValue);
 
-  tree.set(13, 17, 56);
+  constexpr auto kSetOpBegin = 13;
+  constexpr auto kSetOpEnd = 17;
+  constexpr auto kSetValue = uint64_t{56};
+  tree.set(kSetOpBegin, kSetOpEnd, kSetValue);
 
   auto moved = std::move(tree);
 
-  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  constexpr auto kIndicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto kExpectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto movedVals =
-      indicies | transform(bind_front(kiLLValGetter, &moved));
+      kIndicies | transform(bind_front(kiLLValGetter, &moved));
 
-  EXPECT_TRUE(equal(expectedVals, movedVals));
+  EXPECT_TRUE(equal(kExpectedVals, movedVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, SetAndMoveAssign) {
-  auto tree = I_LL_SimpleDST(0, 42, 77);
-  auto moved = I_LL_SimpleDST(5, 13, 67);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = uint64_t{77};
+  auto tree = I_LL_SimpleDST(0, kTreeEnd, kFillValue);
 
-  tree.set(13, 17, 56);
+  constexpr auto kDestTreeBegin = 5;
+  constexpr auto kDestTreeEnd = 13;
+  constexpr auto kDestTreeFillValue = 67;
+  auto moved = I_LL_SimpleDST(kDestTreeBegin, kDestTreeEnd, kDestTreeFillValue);
+
+  constexpr auto kSetOpBegin = 13;
+  constexpr auto kSetOpEnd = 17;
+  constexpr auto kSetValue = uint64_t{56};
+  tree.set(kSetOpBegin, kSetOpEnd, kSetValue);
 
   moved = std::move(tree);
 
-  constexpr auto indicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
-  constexpr auto expectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
+  constexpr auto kIndicies = std::array<int, 6>{13, 15, 16, 17, 8, 37};
+  constexpr auto kExpectedVals = std::array<int, 6>{56, 56, 56, 77, 77, 77};
   const auto movedVals =
-      indicies | transform(bind_front(kiLLValGetter, &moved));
+      kIndicies | transform(bind_front(kiLLValGetter, &moved));
 
-  EXPECT_TRUE(equal(expectedVals, movedVals));
+  EXPECT_TRUE(equal(kExpectedVals, movedVals));
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGet) {
   using DST = dst::DynamicSimpleGetSetSegmentTree<size_t, int>;
   using Ref = SegTreeReferenceBase<size_t, int>;
-  constexpr auto treeEnd = size_t{1000};
-  auto tree = DST(0, treeEnd, 0);
-  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
+  constexpr auto kTreeEnd = size_t{1000};
+  auto tree = DST(0, kTreeEnd, 0);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, kTreeEnd, 0);
 
-  std::mt19937 generator(42);
+  constexpr auto kGenSeed = 42U;
+  std::mt19937 generator(kGenSeed);
 
-  for (size_t i : iota(0, 100)) {
-    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+  for ([[maybe_unused]] size_t iterNum : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(generator);
     const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
     tree.set(rngBegin, rngEnd, setVal);
     reference.set(rngBegin, rngEnd, setVal);
 
-    constexpr auto ids = iota(size_t{0}, treeEnd);
-    const auto treeVals = ids | transform(bind_front(&DST::get, &tree));
-    const auto refVals = ids | transform(bind_front(&Ref::get, &reference));
+    constexpr auto kids = iota(size_t{0}, kTreeEnd);
+    const auto treeVals = kids | transform(bind_front(&DST::get, &tree));
+    const auto refVals = kids | transform(bind_front(&Ref::get, &reference));
     EXPECT_TRUE(equal(treeVals, refVals));
   }
 }
 
 TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
-  constexpr auto treeEnd = size_t{1000};
-  auto tree = dst::DynamicSimpleGetSetSegmentTree<size_t, int>(0, treeEnd, 0);
-  auto reference = SegTreeReferenceBase<size_t, int>(0, treeEnd, 0);
+  constexpr auto kTreeEnd = size_t{1000};
+  auto tree = dst::DynamicSimpleGetSetSegmentTree<size_t, int>(0, kTreeEnd, 0);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, kTreeEnd, 0);
 
-  std::mt19937 generator(42);
+  constexpr auto kGenSeed = 42U;
+  std::mt19937 generator(kGenSeed);
 
-  for (size_t i : iota(0, 100)) {
-    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+  for ([[maybe_unused]] size_t iterNum : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(generator);
 
     if (std::bernoulli_distribution()(generator)) {
       const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
@@ -150,5 +191,4 @@ TEST(SimpleGetSetDynamicSegmentTree, FuzzTestSetGetMixed) {
   }
 }
 
-// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
-// cert-err58-cpp)
+// NOLINTEND(cppcoreguidelines-*, cert-*, cert-err58-cpp)
