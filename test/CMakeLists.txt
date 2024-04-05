@@ -19,6 +19,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
+FetchContent_Declare(
+    range-v3
+    URL https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.zip
+)
+
+FetchContent_MakeAvailable(range-v3)
+
 add_subdirectory(boost)
 
 add_executable(dst-test
@@ -52,4 +59,4 @@ endif()
 
 include(GoogleTest)
 
-target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree Boost::container)
+target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree Boost::container range-v3)

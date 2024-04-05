@@ -5,11 +5,14 @@
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include <gtest/gtest.h>
+
 #include <ranges>
 
 #include "counters/copy_and_move_counter.hpp"
 
-// NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
+using std::views::iota;
+
+// NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*)
 
 static_assert(std::copyable<CopyAndMoveCounter>);
 
@@ -56,7 +59,7 @@ TEST(CopyAndMoveCounter, MakeOneMove) {
 TEST(CopyAndMoveCounter, Make42Copies) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
-  for ([[maybe_unused]] auto i : std::ranges::iota_view(0, 42)) {
+  for ([[maybe_unused]] auto iterNum : iota(0, 42)) {
     [[maybe_unused]] auto copy = copyAndMoveCounter;
   }
 
@@ -67,7 +70,7 @@ TEST(CopyAndMoveCounter, Make42Copies) {
 TEST(CopyAndMoveCounter, Make42CopiesAndReset) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
-  for ([[maybe_unused]] auto i : std::ranges::iota_view(0, 42)) {
+  for ([[maybe_unused]] auto iterNum : iota(0, 42)) {
     [[maybe_unused]] auto copy = copyAndMoveCounter;
   }
 
@@ -80,7 +83,7 @@ TEST(CopyAndMoveCounter, Make42CopiesAndReset) {
 TEST(CopyAndMoveCounter, Make42CopiesAndMoves) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
-  for ([[maybe_unused]] auto i : std::ranges::iota_view(0, 42)) {
+  for ([[maybe_unused]] auto iterNum : iota(0, 42)) {
     auto copy = copyAndMoveCounter;
     [[maybe_unused]] auto moved = std::move(copy);
   }
@@ -89,4 +92,4 @@ TEST(CopyAndMoveCounter, Make42CopiesAndMoves) {
   EXPECT_EQ(stats->getMoveCount(), 42);
 }
 
-// NOLINTEND(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
+// NOLINTEND(cppcoreguidelines-*, cert-err58-*)

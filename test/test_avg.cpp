@@ -18,7 +18,8 @@ using std::size_t;
 using std::views::iota;
 using GenerateIndRng = GenerateIndexRange<size_t>;
 
-// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-msc51-cpp, cert-msc32-c)
+// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-msc51-cpp, cert-msc32-c,
+// cert-err58-cpp)
 
 TEST(DynamicAvgSegmentTree, Construct) {
   constexpr auto kTreeEnd = size_t{57};
@@ -149,4 +150,5 @@ TEST(DynamicAvgSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
   }
 }
 
-// NOLINTEND(cppcoreguidelines-owning-memory, cert-msc51-cpp, cert-msc32-c)
+// NOLINTEND(cppcoreguidelines-owning-memory, cert-msc51-cpp, cert-msc32-c,
+// cert-err58-cpp)

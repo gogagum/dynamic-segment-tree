@@ -10,7 +10,7 @@
 
 #include "counters/copy_only_copy_counter.hpp"
 
-// NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
+// NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*)
 
 using std::size_t;
 using std::views::iota;
@@ -43,7 +43,7 @@ TEST(CopyOnlyCopyCounter, OneCopyAndReset) {
 TEST(CopyOnlyCopyCounter, Loop) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  for ([[maybe_unused]] size_t i : iota(0, 42)) {
+  for ([[maybe_unused]] size_t iterNum : iota(0, 42)) {
     auto copy = copyCounter;
   }
 
@@ -53,7 +53,7 @@ TEST(CopyOnlyCopyCounter, Loop) {
 TEST(CopyOnlyCopyCounter, CopiesAndReset) {
   auto [stats, copyCounter] = CopyOnlyCopyCounter::init();
 
-  for ([[maybe_unused]] size_t i : iota(0, 42)) {
+  for ([[maybe_unused]] size_t iterNum : iota(0, 42)) {
     auto copy = copyCounter;
   }
 
@@ -61,4 +61,4 @@ TEST(CopyOnlyCopyCounter, CopiesAndReset) {
   EXPECT_EQ(stats->getCopyCount(), 0);
 }
 
-// NOLINTEND(cppcoreguidelines-*, cert-err58-*, readability-identifier-length)
+// NOLINTEND(cppcoreguidelines-*, cert-err58-*)
