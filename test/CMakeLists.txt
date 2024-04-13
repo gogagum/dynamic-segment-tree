@@ -29,14 +29,12 @@ FetchContent_MakeAvailable(range-v3)
 add_subdirectory(boost)
 
 add_executable(dst-test
-    boost_allocator.cpp
-    boost_adaptive_pool.cpp
+    allocator_common.cpp
     node.cpp
     test_negate.cpp
     test_sum.cpp
     test_min.cpp
     test_max.cpp
-    test_simple.cpp
     test_avg.cpp
     test_copy_only_copy_counter.cpp
     test_copy_and_move_counter.cpp
