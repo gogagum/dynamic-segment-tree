@@ -195,8 +195,8 @@ TYPED_TEST(AllocatorsCommonTest, FuzzGetSetMixed) {
       reference.set(rngBegin, rngEnd, valueToSet);
     } else {
       const auto idx = std::uniform_int_distribution<size_t>(0, 999)(generator);
-      auto treeRes = tree.get(idx);
-      auto refRes = reference.get(idx);
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
       EXPECT_EQ(treeRes, refRes);
     }
   }
