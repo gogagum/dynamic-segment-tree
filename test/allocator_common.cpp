@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <boost/container/adaptive_pool.hpp>
 #include <boost/container/allocator.hpp>
 #include <dst/disable_operations.hpp>
