@@ -22,12 +22,12 @@ class Node;
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
 class Node<T, std::optional<UpdateT>, Allocator>
-    : public BaseNode<T, Node<T, std::optional<UpdateT>, Allocator>,
-                      Allocator> {
+    : public BaseNode<Node<T, std::optional<UpdateT>, Allocator>> {
  private:
   using This_ = Node<T, std::optional<UpdateT>, Allocator>;
-  using Base_ = BaseNode<T, This_, Allocator>;
-  using Allocator_ = Base_::Allocator_;
+  using Base_ = BaseNode<This_>;
+  using Allocator_ =
+      std::allocator_traits<Allocator>::template rebind_alloc<This_>;
 
  public:
   explicit Node(const T& value) : Base_(value) {
@@ -71,7 +71,7 @@ class Node<T, std::optional<UpdateT>, Allocator>
   std::optional<UpdateT> updateValue_;
 
  private:
-  friend class BaseNode<T, This_, Allocator>;
+  friend class BaseNode<This_>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,9 +83,8 @@ Node<T, std::optional<UpdateT>, Allocator>::Node(const Node& node,
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class UpdateT, class Allocator>
-auto Node<T, std::optional<UpdateT>, Allocator>::assign(const This_& other,
-                                                        Allocator_& allocator)
-    -> This_& {
+auto Node<T, std::optional<UpdateT>, Allocator>::assign(
+    const This_& other, Allocator_& allocator) -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
   updateValue_ = other.updateValue_;
   Base_::assign(other, allocator);
@@ -151,12 +150,12 @@ void Node<T, std::optional<UpdateT>, Allocator>::siftOptUpdate(
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
-class Node<T, bool, Allocator>
-    : public BaseNode<T, Node<T, bool, Allocator>, Allocator> {
+class Node<T, bool, Allocator> : public BaseNode<Node<T, bool, Allocator>> {
  private:
   using This_ = Node<T, bool, Allocator>;
-  using Base_ = BaseNode<T, This_, Allocator>;
-  using Allocator_ = Base_::Allocator_;
+  using Base_ = BaseNode<This_>;
+  using Allocator_ =
+      std::allocator_traits<Allocator>::template rebind_alloc<This_>;
 
  public:
   Node() = default;
@@ -195,13 +194,13 @@ class Node<T, bool, Allocator>
   bool toUpdate_{false};
 
  private:
-  friend class BaseNode<T, This_, Allocator>;
+  friend class BaseNode<This_>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
-auto Node<T, bool, Allocator>::assign(const Node& other, Allocator_& allocator)
-    -> This_& {
+auto Node<T, bool, Allocator>::assign(const Node& other,
+                                      Allocator_& allocator) -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
   toUpdate_ = other.toUpdate_;
   return static_cast<This_&>(Base_::assign(other, allocator));
@@ -259,12 +258,12 @@ void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp,
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
-class Node<T, void, Allocator>
-    : public BaseNode<T, Node<T, void, Allocator>, Allocator> {
+class Node<T, void, Allocator> : public BaseNode<Node<T, void, Allocator>> {
  private:
   using This_ = Node<T, void, Allocator>;
-  using Base_ = BaseNode<T, This_, Allocator>;
-  using Allocator_ = Base_::Allocator_;
+  using Base_ = BaseNode<This_>;
+  using Allocator_ =
+      std::allocator_traits<Allocator>::template rebind_alloc<This_>;
 
  public:
   Node() = default;
@@ -300,13 +299,13 @@ class Node<T, void, Allocator>
   void setValue(ValueT&& value, Allocator_& allocator);
 
  private:
-  friend class BaseNode<T, Node<T, void, Allocator>, Allocator>;
+  friend class BaseNode<This_>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
-auto Node<T, void, Allocator>::assign(const This_& other, Allocator_& allocator)
-    -> This_& {
+auto Node<T, void, Allocator>::assign(const This_& other,
+                                      Allocator_& allocator) -> This_& {
   assert(&other != this && "Node must not be assigned to itself.");
   return static_cast<This_&>(Base_::assign(other, allocator));
 }

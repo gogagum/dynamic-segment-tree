@@ -55,32 +55,32 @@ template <std::integral KeyT, class ValueT, class GetValueT,
           class Allocator = std::allocator<ValueT>>
   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
 class DynamicSegmentTree
-    : protected impl::DynamicSegmentTreeUpdateVariationBase<
-          KeyT, ValueT, UpdateOp, UpdateArgT, Allocator>,
+    : public impl::DynamicSegmentTreeUpdateVariationBase<
+          DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
+                             UpdateOp, UpdateArgT, Allocator>>,
       protected impl::DynamicSegmentTreeRangeGetCombineVariationBase<
           KeyT, GetValueT, SegGetComb>,
       protected impl::DynamicSegmentTreeRangeGetInitVariationBase<
           KeyT, ValueT, GetValueT, SegGetInit> {
  private:
+  using This_ = DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb,
+                                   SegGetInit, UpdateOp, UpdateArgT, Allocator>;
+
   using UpdateVariationBase_ =
-      impl::DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp,
-                                                  UpdateArgT, Allocator>;
+      impl::DynamicSegmentTreeUpdateVariationBase<This_>;
 
   using RangeGetCombineVariationBase_ =
       impl::DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
                                                            SegGetComb>;
 
   using RangeGetInitVariationBase_ =
-      impl::DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
-                                                        SegGetInit>;
+      impl::DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT,
+                                                        GetValueT, SegGetInit>;
 
   using Node_ = UpdateVariationBase_::Node_;
 
   using NodeAlloc_ =
       std::allocator_traits<Allocator>::template rebind_alloc<Node_>;
-
-  using This_ = DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb,
-                                   SegGetInit, UpdateOp, UpdateArgT, Allocator>;
 
  public:
   /**
@@ -179,9 +179,7 @@ class DynamicSegmentTree
    * @param end ending of an updated segment (not included).
    * @param toUpdate argument for update operation.
    */
-  template <class UpdateArg1>
-    requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
-  void update(KeyT begin, KeyT end, const UpdateArg1& toUpdate);
+  // void update(KeyT begin, KeyT end, const UpdateArgT& toUpdate);
 
   /**
    * @brief Apply no arguments update operation on a range.
@@ -189,8 +187,7 @@ class DynamicSegmentTree
    * @param begin beginning of an updated segment.
    * @param end ending of an updated segment (not included).
    */
-  void update(KeyT begin, KeyT end)
-    requires conc::OneArgUpdateOp<UpdateOp, ValueT>;
+  // void update(KeyT begin, KeyT end)
 
   /**
    * @brief Set value on a range.
@@ -255,6 +252,9 @@ class DynamicSegmentTree
   mutable Node_ rootNode_;
   KeyT begin_;
   KeyT end_;
+
+ private:
+  friend class impl::DynamicSegmentTreeUpdateVariationBase<This_>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -391,10 +391,9 @@ template <std::integral KeyT, class ValueT, class GetValueT,
           conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
           class UpdateOp, class UpdateArgT, class Allocator>
   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
-auto DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                        UpdateOp, UpdateArgT,
-                        Allocator>::operator=(const DynamicSegmentTree& other)
-    -> This_& {
+auto DynamicSegmentTree<
+    KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp, UpdateArgT,
+    Allocator>::operator=(const DynamicSegmentTree& other) -> This_& {
   if (this == &other) {
     return *this;
   }
@@ -436,36 +435,19 @@ auto DynamicSegmentTree<
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-template <std::integral KeyT, class ValueT, class GetValueT,
-          conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
-          conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
-          class UpdateOp, class UpdateArgT, class Allocator>
-  requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
-template <class UpdateArgT1>
-  requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
-void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                        UpdateOp, UpdateArgT,
-                        Allocator>::update(KeyT begin, KeyT end,
-                                           const UpdateArgT1& toUpdate) {
-  UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_,
-                                    static_cast<const UpdateArgT&>(toUpdate),
-                                    nodeAllocator_);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-template <std::integral KeyT, class ValueT, class GetValueT,
-          conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
-          conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
-          class UpdateOp, class UpdateArgT, class Allocator>
-  requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
-void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-                        UpdateOp, UpdateArgT, Allocator>::update(KeyT begin,
-                                                                 KeyT end)
-  requires conc::OneArgUpdateOp<UpdateOp, ValueT>
-{
-  UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_,
-                                    nodeAllocator_);
-}
+// template <std::integral KeyT, class ValueT, class GetValueT,
+//           conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
+//           conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
+//           class UpdateOp, class UpdateArgT, class Allocator>
+//   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
+// void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
+//                         UpdateOp, UpdateArgT, Allocator>::update(KeyT begin,
+//                                                                  KeyT end)
+//   requires conc::OneArgUpdateOp<UpdateOp, ValueT>
+//{
+//   UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_,
+//                                     nodeAllocator_);
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT, class GetValueT,
