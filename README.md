@@ -7,13 +7,13 @@
     GitHub Actions main build CI Status
 ](
 https://github.com/gogagum/dynamic-segment-tree/workflows/build-main/badge.svg
-)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/main-build.yml)
+)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/main-build-and-test.yml)
 [
 ![
 GitHub Actions dev build CI Status
 ](
 https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg
-)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/dev-build.yml)
+)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/dev-build-and-test.yml)
 
 ## Project structure:
 
@@ -22,7 +22,7 @@ https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg
 The base class of seg tree is `DynamicSegmentTree`. It is customizable 
 by the following template parameters:
 
-- `KeyT`  - indices type.
+- `KeyT` - indices type.
 - `ValueT` - values type.
 - `GetValueT` - rangeGet operation type.
 - `SegGetComb` - segments combining operation.
@@ -117,4 +117,7 @@ your CMakeLists.txt:
 
 TODO list (with no priority):
 
+- Better exceptions safety & tests for it.
+
 - Add benchmarks.
+- More moves for segment get operation.

@@ -7,8 +7,6 @@
 #ifndef DYNAMIC_SEGMENT_TREE_UPDATE_VARIATION_BASE_HPP
 #define DYNAMIC_SEGMENT_TREE_UPDATE_VARIATION_BASE_HPP
 
-#include <sys/types.h>
-
 #include <dst/concepts.hpp>
 #include <dst/disable_operations.hpp>
 #include <dst/impl/node.hpp>

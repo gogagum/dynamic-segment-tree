@@ -1,9 +1,9 @@
 name: build-dev
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ dev ]
+    branches: [ main ]
 
 jobs:
     linux-gcc:
@@ -23,7 +23,7 @@ jobs:
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
             - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
-    linux-clang-16-libcpp:
+    linux-clang-17-libcpp:
         name: Linux Clang 17 (libc++)
         runs-on: ubuntu-22.04
         env:
@@ -45,7 +45,7 @@ jobs:
             - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
             - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
-    linux-clang-16-libstdcpp:
+    linux-clang-17-libstdcpp:
         name: Linux Clang 17 (libstdc++)
         runs-on: ubuntu-22.04
         env:
@@ -75,19 +75,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: brew install ninja gcc@13
-            - run: /bin/bash .ci/build-project.sh build-simple
-            - run: ./build-simple/test/dst-test
-
-    mac-clang-libcpp:
-        name: macOS Clang (libc++)
-        runs-on: macos-latest
-        env:
-            CC: /usr/local/opt/llvm@17/bin/clang
-            CXX: /usr/local/opt/llvm@17/bin/clang++
-            CXXFLAGS: -stdlib=libc++
-        steps:
-            - uses: actions/checkout@v3
-            - run: brew install ninja llvm@17
             - run: /bin/bash .ci/build-project.sh build-simple
             - run: ./build-simple/test/dst-test
 
