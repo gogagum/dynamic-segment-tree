@@ -11,8 +11,15 @@
 #include <ranges>
 
 #include "reference/seg_tree_reference_base.hpp"
+#include "tools/generate_index_range.hpp"
 
-namespace rng = std::ranges;
+using std::size_t;
+using std::views::iota;
+using GenerateIndRng = GenerateIndexRange<size_t>;
+
+constexpr auto knegateOp = [](int num) {
+  return -num;
+};
 
 template <std::integral KeyT, class ValueT,
           class Allocator = std::allocator<ValueT>>
@@ -20,140 +27,268 @@ using NegateSumDynamicSegmentTree =
     dst::DynamicNegateSegmentTree<KeyT, ValueT, ValueT, dst::NoRangeGetOp,
                                   dst::NoRangeGetOp, Allocator>;
 
-// NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
-// cert-err58-cpp)
+// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-err58-cpp, cert-msc51-cpp,
+// cert-msc32-c)
 
 TEST(DynamicNegateSegmentTree, Construct) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = 13;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
 }
 
 TEST(DynamicNegateSegmentTree, Update) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
-  tree.update(2, 5);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = 13;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+  constexpr auto kUpdateOpEnd = 5;
+  tree.update(2, kUpdateOpEnd);
   EXPECT_EQ(tree.get(4), -13);
 }
 
 TEST(DynamicNegateSegmentTree, DoubleUpdate) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
-  tree.update(2, 5);
-  tree.update(2, 5);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = 13;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+  constexpr auto kUpdateOpEnd = 5;
+  tree.update(2, kUpdateOpEnd);
+  tree.update(2, kUpdateOpEnd);
   EXPECT_EQ(tree.get(4), 13);
 }
 
+TEST(DynamicNegateSegmentTree, UpdateAndSet) {
+  constexpr auto kTreeEnd = 43;
+  constexpr auto kFillValue = 5;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+
+  constexpr auto kUpdateOpEnd = 7;
+  tree.update(4, kUpdateOpEnd);
+
+  constexpr auto kSetOpBegin = 5;
+  constexpr auto kSetOpEnd = 11;
+  tree.set(kSetOpBegin, kSetOpEnd, 3);
+
+  EXPECT_EQ(tree.get(7), 3);
+  EXPECT_EQ(tree.get(4), -5);
+  EXPECT_EQ(tree.get(41), 5);
+  EXPECT_EQ(tree.get(3), 5);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateSetAndCopy) {
+  constexpr auto kTreeEnd = 43;
+  constexpr auto kFillValue = 5;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+
+  constexpr auto kUpdateOpEnd = 7;
+  tree.update(4, kUpdateOpEnd);
+
+  constexpr auto kSetOpBegin = 5;
+  constexpr auto kSetOpEnd = 11;
+  tree.set(kSetOpBegin, kSetOpEnd, 3);
+
+  const auto copy = tree;
+
+  EXPECT_EQ(tree.get(7), 3);
+  EXPECT_EQ(tree.get(4), -5);
+  EXPECT_EQ(tree.get(41), 5);
+  EXPECT_EQ(tree.get(3), 5);
+
+  EXPECT_EQ(copy.get(7), 3);
+  EXPECT_EQ(copy.get(4), -5);
+  EXPECT_EQ(copy.get(41), 5);
+  EXPECT_EQ(copy.get(3), 5);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateSetAndCopyAssign) {
+  using DST = NegateSumDynamicSegmentTree<int, int>;
+
+  constexpr auto kTreeBegin = -14;
+  constexpr auto kTreeEnd = 43;
+  constexpr auto kFillValue = 5;
+  auto tree = DST(kTreeBegin, kTreeEnd, kFillValue);
+
+  constexpr auto kDestBegin = -11;
+  constexpr auto kDestEnd = 32;
+  constexpr auto kDestFillValue = -23;
+  auto copy = DST(kDestBegin, kDestEnd, kDestFillValue);
+
+  constexpr auto kUpdateOpEnd = 7;
+  tree.update(4, kUpdateOpEnd);
+
+  constexpr auto kSetOpBegin = 5;
+  constexpr auto kSetOpEnd = 11;
+  tree.set(kSetOpBegin, kSetOpEnd, 3);
+
+  copy = tree;
+
+  EXPECT_EQ(tree.get(7), 3);
+  EXPECT_EQ(tree.get(4), -5);
+  EXPECT_EQ(tree.get(41), 5);
+  EXPECT_EQ(tree.get(3), 5);
+
+  EXPECT_EQ(copy.get(7), 3);
+  EXPECT_EQ(copy.get(4), -5);
+  EXPECT_EQ(copy.get(41), 5);
+  EXPECT_EQ(copy.get(3), 5);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateSetAndMove) {
+  constexpr auto kTreeEnd = 43;
+  constexpr auto kFillValue = 5;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+
+  constexpr auto kUpdateOpEnd = 7;
+  tree.update(4, kUpdateOpEnd);
+
+  constexpr auto kSetOpBegin = 5;
+  constexpr auto kSetOpEnd = 11;
+  tree.set(kSetOpBegin, kSetOpEnd, 3);
+
+  const auto dest = std::move(tree);
+
+  EXPECT_EQ(dest.get(7), 3);
+  EXPECT_EQ(dest.get(4), -5);
+  EXPECT_EQ(dest.get(41), 5);
+  EXPECT_EQ(dest.get(3), 5);
+}
+
+TEST(DynamicNegateSegmentTree, UpdateSetAndMoveAssign) {
+  constexpr auto kTreeEnd = 43;
+  constexpr auto kFillValue = 5;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+
+  constexpr auto kDestFillValue = 11;
+  auto dest = NegateSumDynamicSegmentTree<int, int>(3, 4, kDestFillValue);
+
+  constexpr auto kUpdateOpEnd = 7;
+  tree.update(4, kUpdateOpEnd);
+
+  constexpr auto kSetBegin = 5;
+  constexpr auto kSetEnd = 11;
+  tree.set(kSetBegin, kSetEnd, 3);
+
+  dest = std::move(tree);
+
+  EXPECT_EQ(dest.get(7), 3);
+  EXPECT_EQ(dest.get(4), -5);
+  EXPECT_EQ(dest.get(41), 5);
+  EXPECT_EQ(dest.get(3), 5);
+}
+
 TEST(DynamicNegateSegmentTree, TwoIntersectingUpdate) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
-  tree.update(2, 10);
-  tree.update(7, 21);
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = 13;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+  {
+    constexpr auto kUpdateOpEnd = 10;
+    tree.update(2, kUpdateOpEnd);
+  }
+  {
+    constexpr auto kUpdateOpBegin = 7;
+    constexpr auto kUpdateOpEnd = 21;
+    tree.update(kUpdateOpBegin, kUpdateOpEnd);
+  }
   EXPECT_EQ(tree.get(8), 13);
   EXPECT_EQ(tree.get(3), -13);
   EXPECT_EQ(tree.get(13), -13);
 }
 
-TEST(DynamicNegateSegmentTree, SimpleRangweGet) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 42, 13);
-  tree.update(2, 10);
-  tree.update(7, 21);
+TEST(DynamicNegateSegmentTree, SimpleRangeGet) {
+  constexpr auto kTreeEnd = 42;
+  constexpr auto kFillValue = 13;
+  auto tree = NegateSumDynamicSegmentTree<int, int>(0, kTreeEnd, kFillValue);
+  {
+    constexpr auto kUpdateOpEnd = 10;
+    tree.update(2, kUpdateOpEnd);
+  }
+  {
+    constexpr auto kUpdateOpBegin = 7;
+    constexpr auto kUpdateOpEnd = 21;
+    tree.update(kUpdateOpBegin, kUpdateOpEnd);
+  }
   EXPECT_EQ(tree.get(8), 13);
   EXPECT_EQ(tree.get(3), -13);
   EXPECT_EQ(tree.get(13), -13);
 }
 
 TEST(DynamicNegateSegmentTree, UpdateFuzzTest) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
-  auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+  constexpr auto kTreeEnd = size_t{1000};
+  constexpr auto kFillVal = 42;
+  auto tree = NegateSumDynamicSegmentTree<size_t, int>(0, kTreeEnd, kFillVal);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, kTreeEnd, kFillVal);
 
-  const auto updateOp = [](int num) {
-    return -num;
-  };
-  auto gen = std::mt19937(37);
+  constexpr auto kGenSeed = 37U;
+  auto gen = std::mt19937(kGenSeed);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
-    const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
+  for (size_t iterNum : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
+    tree.update(rngBegin, rngEnd);
+    reference.update(rngBegin, rngEnd, knegateOp);
 
-    tree.update(rangeBeg, rangeBeg + rangeLen);
-    reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
-  }
-
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int idx = static_cast<int>(gen() % 1000);
-
-    const auto treeRes = tree.get(idx);
-    const auto referenceRes = reference.get(idx);
-
-    EXPECT_EQ(treeRes, referenceRes);
+    for (size_t idx : iota(size_t{0}, kTreeEnd)) {
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
+      EXPECT_EQ(treeRes, refRes);
+    }
   }
 }
 
 TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
-  auto tree = NegateSumDynamicSegmentTree<std::size_t, int>(0, 1000, 42);
-  auto reference = SegTreeReferenceBase<std::size_t, int>(0, 1000, 42);
+  constexpr auto kTreeEnd = size_t{1000};
+  constexpr auto kFillValue = 42;
+  auto tree = NegateSumDynamicSegmentTree<size_t, int>(0, kTreeEnd, kFillValue);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, kTreeEnd, kFillValue);
 
-  const auto updateOp = [](int num) {
-    return -num;
-  };
-  std::mt19937 generator(54);
+  constexpr auto kGenSeed = 54U;
+  std::mt19937 generator(kGenSeed);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
+  for (size_t iterNum : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(generator);
 
-    const int operationChoise = static_cast<int>(generator()) % 2;
-
-    if (operationChoise) {
-      const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
-      tree.set(rngStart, rngStart + rngLen, setVal);
-      reference.set(rngStart, rngStart + rngLen, setVal);
+    if (std::bernoulli_distribution()(generator)) {
+      const auto valueToSet = std::uniform_int_distribution(0, 1000)(generator);
+      tree.set(rngBegin, rngEnd, valueToSet);
+      reference.set(rngBegin, rngEnd, valueToSet);
     } else {
-      tree.update(rngStart, rngStart + rngLen);
-      reference.update(rngStart, rngStart + rngLen, updateOp);
+      tree.update(rngBegin, rngEnd);
+      reference.update(rngBegin, rngEnd, knegateOp);
     }
-  }
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t idx = generator() % 100;  // [0..1000)
-    auto treeRes = tree.get(idx);
-    auto refRes = reference.get(idx);
-    EXPECT_EQ(treeRes, refRes);
+    for (size_t idx : iota(size_t{0}, kTreeEnd)) {
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
+      EXPECT_EQ(treeRes, refRes);
+    }
   }
 }
 
 TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
-  auto tree = NegateSumDynamicSegmentTree<int, int>(0, 1000, 42);
-  auto reference = SegTreeReferenceBase<int, int>(0, 1000, 42);
+  constexpr auto kTreeEnd = size_t{1000};
+  constexpr auto kFillValue = 42;
+  auto tree = NegateSumDynamicSegmentTree<size_t, int>(0, kTreeEnd, kFillValue);
+  auto reference = SegTreeReferenceBase<size_t, int>(0, kTreeEnd, kFillValue);
 
-  const auto updateOp = [](int num) {
-    return -num;
-  };
-  auto gen = std::mt19937(37);
+  constexpr auto kGenSeed = 37U;
+  auto gen = std::mt19937(kGenSeed);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
-    const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
-
-    tree.update(rangeBeg, rangeBeg + rangeLen);
-    reference.update(rangeBeg, rangeBeg + rangeLen, updateOp);
+  for (size_t iterNum : iota(0, 200)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
+    tree.update(rngBegin, rngEnd);
+    reference.update(rngBegin, rngEnd, knegateOp);
   }
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int rangeBeg = static_cast<int>(gen() % 500);  // [0..500)
-    const int rangeLen = static_cast<int>(gen() % 500);  // [0..500)
+  for (size_t iterNum : iota(0, 400)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(gen);
+    const auto valueToSet = std::uniform_int_distribution(0, 1000)(gen);
+    tree.set(rngBegin, rngEnd, valueToSet);
+    reference.set(rngBegin, rngEnd, valueToSet);
 
-    const int valueToSet = static_cast<int>(gen() % 1000);  // [0..1000)
-
-    tree.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
-    reference.set(rangeBeg, rangeBeg + rangeLen, valueToSet);
-  }
-
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const int idx = static_cast<int>(gen() % 1000);
-
-    const auto treeRes = tree.get(idx);
-    const auto referenceRes = reference.get(idx);
-
-    EXPECT_EQ(treeRes, referenceRes);
+    for (size_t idx : iota(size_t{0}, kTreeEnd)) {
+      const auto treeRes = tree.get(idx);
+      const auto refRes = reference.get(idx);
+      EXPECT_EQ(treeRes, refRes);
+    }
   }
 }
 
-// NOLINTEND(cppcoreguidelines-*, cert-*, readability-magic-numbers,
-// cert-err58-cpp)
+// NOLINTEND(cppcoreguidelines-owning-memory, cert-err58-cpp, cert-msc51-cpp,
+// cert-msc32-c)

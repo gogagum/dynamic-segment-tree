@@ -16,20 +16,33 @@ namespace dst::impl {
 ////////////////////////////////////////////////////////////////////////////////
 // Update variation.                                                          //
 ////////////////////////////////////////////////////////////////////////////////
-template <class KeyT, class ValueT, class UpdateOp, class UpdateArgT,
-          class Allocator>
+template <class Derived>
 class DynamicSegmentTreeUpdateVariationBase;
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class KeyT, class ValueT, class UpdateOp, class UpdateArgT,
-          class Allocator>
+template <template <class...> class Derived, class KeyT, class ValueT,
+          class GetValueT, class SegGetComb, class SegGetInit, class UpdateOp,
+          class UpdateArgT, class Allocator>
   requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
-class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
-                                            Allocator> {
+class DynamicSegmentTreeUpdateVariationBase<
+    Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
+            UpdateArgT, Allocator>> {
  protected:
+  using Derived_ = Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
+                           UpdateOp, UpdateArgT, Allocator>;
   using Node_ = Node<ValueT, std::optional<UpdateArgT>, Allocator>;
-  using NodeAllocator_ =
+  using NodeAlloc_ =
       std::allocator_traits<Allocator>::template rebind_alloc<Node_>;
+
+ public:
+  /**
+   * @brief Apply one argument operation on a range.
+   *
+   * @param begin beginning of an updated segment.
+   * @param end ending of an updated segment (not included).
+   * @param toUpdate argument for update operation.
+   */
+  void update(KeyT begin, KeyT end, const UpdateArgT& toUpdate);
 
  protected:
   explicit DynamicSegmentTreeUpdateVariationBase(const UpdateOp& updateOp)
@@ -37,36 +50,11 @@ class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
   }
 
  protected:
-  // TODO(gogagum): separate definition and implementation
-  // Out-of-line definitions don't work on clang 15, 16.
-  // This bug will be fixed in clang 17, and when this version will be released,
-  // code here should be edited.
   void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
                    Node_* currNode, const UpdateArgT& toUpdate,
-                   NodeAllocator_& allocator) {
-    if (begin >= currEnd || currBegin >= end) {
-      return;
-    }
-    if (end >= currEnd && begin <= currBegin) {
-      currNode->update(updateOp_, toUpdate, allocator);
-      return;
-    }
-    if (currNode->isLeaf()) {
-      currNode->initChildren(allocator);
-    }
-    if constexpr (conc::UpdateOp<UpdateOp, ValueT, UpdateArgT>) {
-      currNode->siftOptUpdate(updateOp_, allocator);
-    }
-    assert(currEnd >= currBegin + 2);
-    const auto mid = (currBegin + currEnd) / 2;
-    updateImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate,
-                allocator);
-    updateImpl_(begin, end, mid, currEnd, currNode->getRight(), toUpdate,
-                allocator);
-  }
+                   NodeAlloc_& allocator);
 
-  void optionalSiftNodeUpdate_(Node_* nodePtr,
-                               NodeAllocator_& allocator) const {
+  void optionalSiftNodeUpdate_(Node_* nodePtr, NodeAlloc_& allocator) const {
     nodePtr->siftOptUpdate(updateOp_, allocator);
   }
 
@@ -75,13 +63,65 @@ class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, UpdateArgT,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class KeyT, class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp,
-          class Allocator>
-class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, void,
-                                            Allocator> {
+template <template <class...> class Derived, class KeyT, class ValueT,
+          class GetValueT, class SegGetComb, class SegGetInit, class UpdateOp,
+          class UpdateArgT, class Allocator>
+  requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
+void DynamicSegmentTreeUpdateVariationBase<
+    Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
+            UpdateArgT, Allocator>>::update(KeyT begin, KeyT end,
+                                            const UpdateArgT& toUpdate) {
+  updateImpl_(begin, end, static_cast<Derived_*>(this)->begin_,
+              static_cast<Derived_*>(this)->end_,
+              &static_cast<Derived_*>(this)->rootNode_, toUpdate,
+              static_cast<Derived_*>(this)->nodeAllocator_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <template <class...> class Derived, class KeyT, class ValueT,
+          class GetValueT, class SegGetComb, class SegGetInit, class UpdateOp,
+          class UpdateArgT, class Allocator>
+  requires conc::TwoArgsUpdateOp<UpdateOp, ValueT, UpdateArgT>
+void DynamicSegmentTreeUpdateVariationBase<
+    Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
+            UpdateArgT, Allocator>>::updateImpl_(KeyT begin, KeyT end,
+                                                 KeyT currBegin, KeyT currEnd,
+                                                 Node_* currNode,
+                                                 const UpdateArgT& toUpdate,
+                                                 NodeAlloc_& allocator) {
+  if (begin >= currEnd || currBegin >= end) {
+    return;
+  }
+  if (end >= currEnd && begin <= currBegin) {
+    currNode->update(updateOp_, toUpdate, allocator);
+    return;
+  }
+  if (currNode->isLeaf()) {
+    currNode->initChildren(allocator);
+  }
+  if constexpr (conc::UpdateOp<UpdateOp, ValueT, UpdateArgT>) {
+    currNode->siftOptUpdate(updateOp_, allocator);
+  }
+  assert(currEnd >= currBegin + 2);
+  const auto mid = (currBegin + currEnd) / 2;
+  updateImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate,
+              allocator);
+  updateImpl_(begin, end, mid, currEnd, currNode->getRight(), toUpdate,
+              allocator);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <template <class...> class Derived, class KeyT, class ValueT,
+          class GetValueT, class SegGetComb, class SegGetInit,
+          conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
+class DynamicSegmentTreeUpdateVariationBase<
+    Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp, void,
+            Allocator>> {
  protected:
+  using Derived_ = Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
+                           UpdateOp, void, Allocator>;
   using Node_ = Node<ValueT, bool, Allocator>;
-  using NodeAllocator_ =
+  using NodeAlloc_ =
       std::allocator_traits<Allocator>::template rebind_alloc<Node_>;
 
  protected:
@@ -89,11 +129,25 @@ class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, void,
       : updateOp_(updateOp) {
   }
 
+ public:
+  /**
+   * @brief Apply no arguments update operation on a range.
+   *
+   * @param begin beginning of an updated segment.
+   * @param end ending of an updated segment (not included).
+   */
+  void update(KeyT begin, KeyT end) {
+    updateImpl_(begin, end, static_cast<Derived_*>(this)->begin_,
+                static_cast<Derived_*>(this)->end_,
+                &static_cast<Derived_*>(this)->rootNode_,
+                static_cast<Derived_*>(this)->nodeAllocator_);
+  }
+
  protected:
+  template <class NodeAlloc>
   void updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-                   Node_* currNode, NodeAllocator_& allocator);
-  void optionalSiftNodeUpdate_(Node_* nodePtr,
-                               NodeAllocator_& allocator) const {
+                   Node_* currNode, NodeAlloc& allocator);
+  void optionalSiftNodeUpdate_(Node_* nodePtr, NodeAlloc_& allocator) const {
     nodePtr->siftOptUpdate(updateOp_, allocator);
   }
 
@@ -102,12 +156,15 @@ class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, UpdateOp, void,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class KeyT, class ValueT, conc::OneArgUpdateOp<ValueT> UpdateOp,
-          class Allocator>
+template <template <class...> class Derived, class KeyT, class ValueT,
+          class GetValueT, class SegGetComb, class SegGetInit,
+          conc::OneArgUpdateOp<ValueT> UpdateOp, class Allocator>
+template <class NodeAlloc>
 void DynamicSegmentTreeUpdateVariationBase<
-    KeyT, ValueT, UpdateOp, void,
-    Allocator>::updateImpl_(KeyT begin, KeyT end, KeyT currBegin, KeyT currEnd,
-                            Node_* currNode, NodeAllocator_& allocator) {
+    Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp, void,
+            Allocator>>::updateImpl_(KeyT begin, KeyT end, KeyT currBegin,
+                                     KeyT currEnd, Node_* currNode,
+                                     NodeAlloc& allocator) {
   if (begin >= currEnd || currBegin >= end) {
     return;
   }
@@ -115,35 +172,37 @@ void DynamicSegmentTreeUpdateVariationBase<
     currNode->update(updateOp_, allocator);
     return;
   }
-  const auto mid = (currBegin + currEnd) / 2;
   if (currNode->isLeaf()) {
     currNode->initChildren(allocator);
   }
   currNode->siftOptUpdate(updateOp_, allocator);
+  const auto mid = (currBegin + currEnd) / 2;
   if (mid >= currBegin + 1) {
-    auto leftNodePtr = currNode->getLeft();
+    auto* const leftNodePtr = currNode->getLeft();
     updateImpl_(begin, end, currBegin, mid, leftNodePtr, allocator);
   }
   if (currEnd >= mid + 1) {
-    auto rightNodePtr = currNode->getRight();
+    auto* const rightNodePtr = currNode->getRight();
     updateImpl_(begin, end, mid, currEnd, rightNodePtr, allocator);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-template <class KeyT, class ValueT, class Allocator>
-class DynamicSegmentTreeUpdateVariationBase<KeyT, ValueT, NoUpdateOp, void,
-                                            Allocator> {
+template <template <class...> class Derived, class KeyT, class ValueT,
+          class GetValueT, class SegGetComb, class SegGetInit, class Allocator>
+class DynamicSegmentTreeUpdateVariationBase<
+    Derived<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, NoUpdateOp, void,
+            Allocator>> {
  protected:
   using Node_ = Node<ValueT, void, Allocator>;
-  using NodeAllocator_ =
+  using NodeAlloc_ =
       std::allocator_traits<Allocator>::template rebind_alloc<Node_>;
 
  protected:
   explicit DynamicSegmentTreeUpdateVariationBase(NoUpdateOp){};
 
  protected:
-  void optionalSiftNodeUpdate_(Node_*, NodeAllocator_&) const {
+  void optionalSiftNodeUpdate_(Node_*, NodeAlloc_&) const {
   }
 };
 

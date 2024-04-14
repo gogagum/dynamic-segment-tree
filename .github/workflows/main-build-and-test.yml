@@ -1,5 +1,7 @@
-name: build-main
+name: build-dev
 on:
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -15,15 +17,18 @@ jobs:
             - run: |
                   sudo apt-get update
                   sudo apt-get install -y ninja-build g++-13 libstdc++-13-dev libc6-dbg
-            - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/dst-test
+                  sudo snap install valgrind --classic
+            - run: /bin/bash .ci/build-project.sh build-simple
+            - run: ./build-simple/test/dst-test
+            - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
+            - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
-    linux-clang-16-libcpp:
-        name: Linux Clang 16 (libc++)
+    linux-clang-17-libcpp:
+        name: Linux Clang 17 (libc++)
         runs-on: ubuntu-22.04
         env:
-            CC: clang-16
-            CXX: clang++-16
+            CC: clang-17
+            CXX: clang++-17
             CXXFLAGS: -stdlib=libc++
         steps:
             - uses: actions/checkout@v3
@@ -33,17 +38,19 @@ jobs:
                   sudo snap install valgrind --classic
                   wget https://apt.llvm.org/llvm.sh
                   chmod +x llvm.sh
-                  sudo ./llvm.sh 16
-                  sudo apt-get install -y libc++-16-dev libc++abi-16-dev
-            - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/dst-test
+                  sudo ./llvm.sh 17
+                  sudo apt-get install -y libc++-17-dev libc++abi-17-dev
+            - run: /bin/bash .ci/build-project.sh build-simple
+            - run: ./build-simple/test/dst-test
+            - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
+            - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
-    linux-clang-16-libstdcpp:
-        name: Linux Clang 16 (libstdc++)
+    linux-clang-17-libstdcpp:
+        name: Linux Clang 17 (libstdc++)
         runs-on: ubuntu-22.04
         env:
-            CC: clang-16
-            CXX: clang++-16
+            CC: clang-17
+            CXX: clang++-17
             CXXFLAGS: -stdlib=libstdc++
         steps:
             - uses: actions/checkout@v3
@@ -53,9 +60,11 @@ jobs:
                   sudo snap install valgrind --classic
                   wget https://apt.llvm.org/llvm.sh
                   chmod +x llvm.sh
-                  sudo ./llvm.sh 16
-            - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/dst-test
+                  sudo ./llvm.sh 17
+            - run: /bin/bash .ci/build-project.sh build-simple
+            - run: ./build-simple/test/dst-test
+            - run: /bin/bash .ci/build-project-valgrind.sh build-valgrind
+            - run: valgrind --leak-check=full ./build-valgrind/test/dst-test
 
     mac-gcc:
         name: macOS GCC
@@ -66,21 +75,8 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: brew install ninja gcc@13
-            - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/dst-test
-
-    mac-clang-libcpp:
-        name: macOS Clang (libc++)
-        runs-on: macos-latest
-        env:
-            CC: /usr/local/opt/llvm@16/bin/clang
-            CXX: /usr/local/opt/llvm@16/bin/clang++
-            CXXFLAGS: -stdlib=libc++
-        steps:
-            - uses: actions/checkout@v3
-            - run: brew install ninja llvm@16
-            - run: /bin/bash .ci/build-project.sh
-            - run: ./build/test/dst-test
+            - run: /bin/bash .ci/build-project.sh build-simple
+            - run: ./build-simple/test/dst-test
 
     windows-msvc:
         name: Windows MSVC

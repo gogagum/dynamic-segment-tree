@@ -11,51 +11,73 @@
 #include "counters/copy_and_move_counter.hpp"
 #include "tools/info_stream.hpp"
 
-// NOLINTBEGIN(cppcoreguidelines-*, cert-err58-*, readability-*)
+using std::size_t;
+
+// NOLINTBEGIN(cppcoreguidelines-owning-memory, cert-err58-*)
 
 TEST(DSTCopyAndMoveCount, ConstructCopying) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{42};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 42, copyAndMoveCounter);
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, copyAndMoveCounter);
 
+  EXPECT_EQ(stats->getMoveCount(), 0);
   EXPECT_EQ(stats->getCopyCount(), 1);
 }
 
 TEST(DSTCopyAndMoveCount, ConstructAndMoving) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{42};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 42, std::move(copyAndMoveCounter));
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, std::move(copyAndMoveCounter));
 
   EXPECT_EQ(stats->getMoveCount(), 1);
+  EXPECT_EQ(stats->getCopyCount(), 0);
+}
+
+TEST(DSTCopyAndMoveCount, CopyTree) {
+  auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
+
+  const auto segTree =
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, 42, copyAndMoveCounter);
+
+  const auto copy = segTree;  // NOLINT
+
+  EXPECT_EQ(stats->getMoveCount(), 0);
+  EXPECT_EQ(stats->getCopyCount(), 2);
 }
 
 TEST(DSTCopyAndMoveCount, ConstructAndSet) {
   auto [stats, copyAndMoveCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{42};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 42, std::move(copyAndMoveCounter));
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, std::move(copyAndMoveCounter));
 
   auto [setStats, setCopyAndMoveCounter] = CopyAndMoveCounter::init();
 
   {
-    segTree.set(21, 42, std::move(setCopyAndMoveCounter));
+    constexpr auto kSetOpBegin = size_t{21};
+    segTree.set(kSetOpBegin, kTreeEnd, std::move(setCopyAndMoveCounter));
 
     EXPECT_EQ(setStats->getMoveCount(), 1);
     EXPECT_EQ(setStats->getCopyCount(), 0);
   }
 }
 
-TEST(DSTCopyAndMoveCount, EmptyRangeSetOpreation) {
+TEST(DSTCopyAndMoveCount, EmptyRangeSetOperation) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{32};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 32, std::move(initCounter));
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, std::move(initCounter));
 
   initStats->reset();
   {
@@ -70,12 +92,13 @@ TEST(DSTCopyAndMoveCount, EmptyRangeSetOpreation) {
   EXPECT_EQ(initStats->getMoveCount(), 0);
 }
 
-TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheEnd) {
+TEST(DSTCopyAndMoveCount, SetToAlignedQuarterRangeInTheEnd) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{32};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 32, std::move(initCounter));
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, std::move(initCounter));
 
   EXPECT_EQ(initStats->getCopyCount(), 0);
   EXPECT_EQ(initStats->getMoveCount(), 1);
@@ -84,7 +107,8 @@ TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheEnd) {
   {
     auto [setStats, setCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(24, 32, std::move(setCounter));
+    constexpr auto kSetOpBegin = 24;
+    segTree.set(kSetOpBegin, kTreeEnd, std::move(setCounter));
 
     EXPECT_EQ(setStats->getMoveCount(), 1);
     EXPECT_EQ(setStats->getCopyCount(), 0);
@@ -94,12 +118,13 @@ TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheEnd) {
   EXPECT_EQ(initStats->getCopyCount(), 2);
 }
 
-TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheBeginning) {
+TEST(DSTCopyAndMoveCount, SetToAlignedQuarterRangeInTheBeginning) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{32};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 32, std::move(initCounter));
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, std::move(initCounter));
 
   EXPECT_EQ(initStats->getCopyCount(), 0);
   EXPECT_EQ(initStats->getMoveCount(), 1);
@@ -108,7 +133,8 @@ TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheBeginning) {
   {
     auto [setStats, setCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(0, 8, std::move(setCounter));
+    constexpr auto kSetOpEnd = size_t{8};
+    segTree.set(0, kSetOpEnd, std::move(setCounter));
 
     EXPECT_EQ(setStats->getMoveCount(), 1);
     EXPECT_EQ(setStats->getCopyCount(), 0);
@@ -118,12 +144,13 @@ TEST(DSTCopyAndMoveCount, SetToAlignedQuaterRangeInTheBeginning) {
   EXPECT_EQ(initStats->getCopyCount(), 2);
 }
 
-TEST(DSTCopyAndMoveCount, SetToNonAlignedQuaterRange) {
+TEST(DSTCopyAndMoveCount, SetToNonAlignedQuarterRange) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{32};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 32, std::move(initCounter));
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, std::move(initCounter));
 
   EXPECT_EQ(initStats->getCopyCount(), 0);
   EXPECT_EQ(initStats->getMoveCount(), 1);
@@ -132,7 +159,9 @@ TEST(DSTCopyAndMoveCount, SetToNonAlignedQuaterRange) {
   {
     auto [setStats, setCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(19, 27, std::move(setCounter));
+    constexpr auto kSetOpBegin = size_t{19};
+    constexpr auto kSetOpEnd = size_t{27};
+    segTree.set(kSetOpBegin, kSetOpEnd, std::move(setCounter));
 
     EXPECT_EQ(setStats->getMoveCount(), 1);
     EXPECT_EQ(setStats->getCopyCount(), 3);
@@ -145,44 +174,47 @@ TEST(DSTCopyAndMoveCount, SetToNonAlignedQuaterRange) {
 TEST(DSTCopyAndMoveCount, SetOneValueInSmallTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{16};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 16, initCounter);
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, initCounter);
 
   initStats->reset();
   {
     auto [singleSetStats, singleSetCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(4, 5, std::move(singleSetCounter));
-    EXPECT_TRUE(singleSetStats->getCopyCount() <= 0);
-    EXPECT_TRUE(singleSetStats->getMoveCount() <= 1);
+    constexpr auto kSetOpEnd = size_t{5};
+    segTree.set(4, kSetOpEnd, std::move(singleSetCounter));
+    EXPECT_LE(singleSetStats->getCopyCount(), 0);
+    EXPECT_LE(singleSetStats->getMoveCount(), 1);
 
     if (singleSetStats->getMoveCount() < 1) {
-      infoStream() << "Move count is smaller than expected: "
-                   << singleSetStats->getMoveCount() << std::endl;
+      infoStreamPrint("Move count is smaller than expected: {}\n",
+                      singleSetStats->getMoveCount());
     }
   }
 
-  EXPECT_TRUE(initStats->getCopyCount() <= 4);
-  EXPECT_TRUE(initStats->getMoveCount() <= 4);
+  EXPECT_LE(initStats->getCopyCount(), 4);
+  EXPECT_LE(initStats->getMoveCount(), 4);
 
   if (initStats->getCopyCount() < 4) {
-    infoStream() << "Init value copy count is smaller than expected: "
-                 << initStats->getCopyCount() << std::endl;
+    infoStreamPrint("Init value copy count is smaller than expected: {}\n",
+                    initStats->getCopyCount());
   }
 
   if (initStats->getMoveCount() < 4) {
-    infoStream() << "Init value move count is smaller than expected: "
-                 << initStats->getMoveCount() << std::endl;
+    infoStreamPrint("Init value move count is smaller than expected: {}\n",
+                    initStats->getMoveCount());
   }
 }
 
 TEST(DSTCopyAndMoveCount, SetSomeValuesInSmallTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{16};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 16, initCounter);
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, initCounter);
 
   EXPECT_EQ(initStats->getCopyCount(), 1);
 
@@ -190,81 +222,94 @@ TEST(DSTCopyAndMoveCount, SetSomeValuesInSmallTree) {
   {
     auto [setStats, setCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(4, 10, std::move(setCounter));
-    EXPECT_TRUE(setStats->getCopyCount() <= 1);
-    EXPECT_TRUE(setStats->getMoveCount() <= 1);
+    constexpr auto kSetOpEnd = size_t{10};
+    segTree.set(4, kSetOpEnd, std::move(setCounter));
+    EXPECT_LE(setStats->getCopyCount(), 1);
+    EXPECT_LE(setStats->getMoveCount(), 1);
 
     if (setStats->getCopyCount() < 1) {
-      infoStream() << "Copy count is smaller than expected: "
-                   << setStats->getCopyCount() << std::endl;
+      infoStreamPrint("Copy count is smaller than expected: {}\n",
+                      setStats->getCopyCount());
     }
 
     if (setStats->getMoveCount() < 1) {
-      infoStream() << "Move count is smaller than expected: "
-                   << setStats->getMoveCount() << std::endl;
+      infoStreamPrint("Move count is smaller than expected: {}\n",
+                      setStats->getMoveCount());
     }
   }
 
-  EXPECT_TRUE(initStats->getCopyCount() <= 4);
-  EXPECT_TRUE(initStats->getMoveCount() <= 4);
+  EXPECT_LE(initStats->getCopyCount(), 4);
+  EXPECT_LE(initStats->getMoveCount(), 4);
 
   if (initStats->getCopyCount() < 4) {
-    infoStream() << "Copy count for init value is smaller than expected: "
-                 << initStats->getCopyCount() << std::endl;
+    infoStreamPrint("Copy count for init value is smaller than expected: {}\n",
+                    initStats->getCopyCount());
   }
 
   if (initStats->getCopyCount() < 4) {
-    infoStream() << "Copy count for init value is smaller than expected: "
-                 << initStats->getMoveCount() << std::endl;
+    infoStreamPrint("Copy count for init value is smaller than expected: {}\n",
+                    initStats->getMoveCount());
   }
 }
 
 TEST(DSTCopyAndMoveCount, SetSomeValuesInBigTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{1024ul * 1024};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 1024ul * 1024, initCounter);
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, initCounter);
 
   initStats->reset();
   {
     auto [setStats, setCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(1004, 2005, std::move(setCounter));
-    EXPECT_TRUE(setStats->getCopyCount() <= 8);
-    EXPECT_TRUE(setStats->getMoveCount() <= 1);
+    constexpr auto kSetOpBegin = size_t{1004};
+    constexpr auto kSetOpEnd = size_t{2005};
 
-    if (setStats->getCopyCount() < 8) {
-      infoStream() << "Copy count is smaller than expected: "
-                   << setStats->getCopyCount() << std::endl;
+    segTree.set(kSetOpBegin, kSetOpEnd, std::move(setCounter));
+
+    constexpr auto kExpectedCopyCount = size_t{8};
+    EXPECT_LE(setStats->getCopyCount(), kExpectedCopyCount);
+    EXPECT_LE(setStats->getMoveCount(), 1);
+
+    if (setStats->getCopyCount() < kExpectedCopyCount) {
+      infoStreamPrint("Copy count is smaller than expected: {}\n",
+                      setStats->getCopyCount());
     }
 
     if (setStats->getMoveCount() < 1) {
-      infoStream() << "Move count is smaller than expected: "
-                   << setStats->getMoveCount() << std::endl;
+      infoStreamPrint("Move count is smaller than expected: {}\n",
+                      setStats->getMoveCount());
     }
   }
 
-  EXPECT_TRUE(initStats->getCopyCount() <= 28);
-  EXPECT_TRUE(initStats->getMoveCount() <= 28);
+  constexpr auto kExpectedCopyCount = size_t{28};
+  constexpr auto kExpectedMoveCount = size_t{28};
 
-  if (initStats->getCopyCount() < 28) {
-    infoStream() << "Copy count of initial value is smaller than expected: "
-                 << initStats->getCopyCount() << std::endl;
+  EXPECT_LE(initStats->getCopyCount(), kExpectedCopyCount);
+  EXPECT_LE(initStats->getMoveCount(), kExpectedMoveCount);
+
+  if (initStats->getCopyCount() < kExpectedCopyCount) {
+    infoStreamPrint(
+        "Copy count of initial value is smaller than expected: {}\n",
+        initStats->getCopyCount());
   }
 
-  if (initStats->getMoveCount() < 28) {
-    infoStream() << "Move count of initial value is smaller than expected: "
-                 << initStats->getMoveCount() << std::endl;
+  if (initStats->getMoveCount() < kExpectedMoveCount) {
+    infoStreamPrint(
+        "Move count of initial value is smaller than expected: {}\n",
+        initStats->getMoveCount());
   }
 }
 
 TEST(DSTCopyAndMoveCount, SetManyNumbersInBigTree) {
   auto [initStats, initCounter] = CopyAndMoveCounter::init();
 
+  constexpr auto kTreeEnd = size_t{1024ul * 1024};
   auto segTree =
-      dst::DynamicSimpleGetSetSegmentTree<std::size_t, CopyAndMoveCounter>(
-          0, 1024ul * 1024, initCounter);
+      dst::DynamicSimpleGetSetSegmentTree<size_t, CopyAndMoveCounter>(
+          0, kTreeEnd, initCounter);
 
   EXPECT_EQ(initStats->getCopyCount(), 1);
 
@@ -272,33 +317,46 @@ TEST(DSTCopyAndMoveCount, SetManyNumbersInBigTree) {
   {
     auto [setStats, setCounter] = CopyAndMoveCounter::init();
 
-    segTree.set(1004, 1024ul * 512, std::move(setCounter));
-    EXPECT_TRUE(setStats->getCopyCount() <= 10);
-    EXPECT_TRUE(setStats->getMoveCount() <= 1);
+    constexpr auto kSetOpBegin = size_t{1004};
+    constexpr auto kSetOpEnd = size_t{1024ul * 512};
 
-    if (setStats->getCopyCount() < 10) {
-      infoStream() << "Copy count is smaller than expected: "
-                   << setStats->getCopyCount() << std::endl;
+    segTree.set(kSetOpBegin, kSetOpEnd, std::move(setCounter));
+
+    constexpr auto kExpectedCopyCount = size_t{10};
+
+    EXPECT_LE(setStats->getCopyCount(), kExpectedCopyCount);
+    EXPECT_LE(setStats->getMoveCount(), 1);
+
+    if (setStats->getCopyCount() < kExpectedCopyCount) {
+      infoStreamPrint(
+          "Copy count of initial value is smaller than expected: {}\n",
+          initStats->getCopyCount());
     }
 
     if (setStats->getMoveCount() < 1) {
-      infoStream() << "MoveCount is smallr than expected: "
-                   << setStats->getMoveCount() << std::endl;
+      infoStreamPrint(
+          "Move count of initial value is smaller than expected: {}\n",
+          initStats->getMoveCount());
     }
   }
 
-  EXPECT_TRUE(initStats->getCopyCount() <= 18);
-  EXPECT_TRUE(initStats->getMoveCount() <= 18);
+  constexpr auto kExpectedCopyCount = size_t{18};
+  constexpr auto kExpectedMoveCount = size_t{18};
 
-  if (initStats->getCopyCount() < 18) {
-    infoStream() << "Copy count of initial value is smaller than expected: "
-                 << initStats->getCopyCount() << std::endl;
+  EXPECT_LE(initStats->getCopyCount(), kExpectedCopyCount);
+  EXPECT_LE(initStats->getMoveCount(), kExpectedMoveCount);
+
+  if (initStats->getCopyCount() < kExpectedCopyCount) {
+    infoStreamPrint(
+        "Copy count of initial value is smaller than expected: {}\n",
+        initStats->getCopyCount());
   }
 
-  if (initStats->getMoveCount() < 18) {
-    infoStream() << "Move count of initial value is smaller than expected: "
-                 << initStats->getMoveCount() << std::endl;
+  if (initStats->getMoveCount() < kExpectedMoveCount) {
+    infoStreamPrint(
+        "Move count of initial value is smaller than expected: {}\n",
+        initStats->getMoveCount());
   }
 }
 
-// NOLINTEND(cppcoreguidelines-*, cert-err58-*, readability-*)
+// NOLINTEND(cppcoreguidelines-owning-memory, cert-err58-*)

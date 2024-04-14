@@ -10,7 +10,6 @@ Checks: >
   clang-analyzer-*,
   readability-*,
   modernize-*,
-  clang-analyzer-*,
   cert-*,
   -readability-named-parameter,
   -readability-braces-around-statements,
@@ -31,8 +30,16 @@ CheckOptions:
       value: CamelCase
     }
   - {
+      key: readability-identifier-naming.ClassIgnoredRegexp,
+      value: "^([A-Z][a-z]*)+_$"
+    }
+  - {
       key: readability-identifier-naming.StructCase,
       value: CamelCase
+    }
+  - {
+      key: readability-identifier-naming.StructIgnoredRegexp,
+      value: "^([A-Z][a-z]*)+_$"
     }
   - {
       key: readability-identifier-naming.TemplateParameterCase,

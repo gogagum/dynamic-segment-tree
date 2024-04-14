@@ -14,9 +14,13 @@
 #include <ranges>
 
 #include "reference/sum_seg_tree_reference.hpp"
+#include "tools/generate_index_range.hpp"
 
 using dst::DynamicSumSegmentTree;
-namespace rng = std::ranges;
+using std::int64_t;
+using std::size_t;
+using std::views::iota;
+using GenerateIndRng = GenerateIndexRange<size_t>;
 
 // NOLINTBEGIN(cppcoreguidelines-*, cert-*, readability-magic-numbers,
 // cert-err58-cpp)
@@ -213,75 +217,72 @@ TEST(DynamicSumSegmentTree, SetOnTheSameRange) {
 }
 
 TEST(DynamicSumSegmentTree, IntRangesGiveInt64Sum) {
-  auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 3, 0);
-  tree.set(0, 1, std::numeric_limits<int>::max() - 13);
-  tree.set(1, 3, std::numeric_limits<int>::max() - 7);
+  constexpr auto maxInt = std::numeric_limits<int>::max();
 
-  const long long part1LL =
-      static_cast<std::int64_t>(std::numeric_limits<int>::max() - 13);
+  auto tree = DynamicSumSegmentTree<int, int, int64_t>(0, 3, 0);
+  tree.set(0, 1, maxInt - 13);
+  tree.set(1, 3, maxInt - 7);
 
-  const long long part2LL =
-      static_cast<std::int64_t>(std::numeric_limits<int>::max() - 7);
+  const auto part1LL = static_cast<int64_t>(maxInt - 13);
+  const auto part2LL = static_cast<int64_t>(maxInt - 7);
 
   EXPECT_EQ(tree.rangeGet(0, 3), part1LL + part2LL * 2);
 }
 
 TEST(DynamicSumSegmentTree, IntRangesGiveInt64SumLongRange) {
-  auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 100, 0);
-  tree.set(0, 42, std::numeric_limits<int>::max() / 3);
-  tree.set(42, 100, std::numeric_limits<int>::max() / 7);
+  constexpr auto maxInt = std::numeric_limits<int>::max();
 
-  const auto part1LL =
-      static_cast<std::int64_t>(std::numeric_limits<int>::max() / 3);
+  auto tree = DynamicSumSegmentTree<int, int, int64_t>(0, 100, 0);
+  tree.set(0, 42, maxInt / 3);
+  tree.set(42, 100, maxInt / 7);
 
-  const auto part2LL =
-      static_cast<std::int64_t>(std::numeric_limits<int>::max() / 7);
+  const auto part1LL = static_cast<int64_t>(maxInt / 3);
+  const auto part2LL = static_cast<int64_t>(maxInt / 7);
 
   EXPECT_EQ(tree.rangeGet(0, 100), part1LL * 42 + part2LL * 58);
 }
 
 TEST(DynamicSumSegmentTree, FuzzTestSetRangeGet) {
-  auto tree = DynamicSumSegmentTree<std::size_t, int>(0, 1000, 0);
-  auto reference = SumSegTreeReference<std::size_t, int>(0, 1000, 0);
+  constexpr auto treeEnd = size_t{1000};
+  auto tree = DynamicSumSegmentTree<size_t, int>(0, treeEnd, 0);
+  auto reference = SumSegTreeReference<size_t, int>(0, treeEnd, 0);
 
   std::mt19937 generator(42);
 
-  for (std::size_t i : rng::iota_view(0, 100)) {
-    const std::size_t rngStart = generator() % 500;           // [0..500)
-    const std::size_t rngLen = generator() % 500;             // [0..500)
-    const int setVal = static_cast<int>(generator()) % 1000;  // [0..1000)
-    tree.set(rngStart, rngStart + rngLen, setVal);
-    reference.set(rngStart, rngStart + rngLen, setVal);
+  for (size_t i : iota(0, 100)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+    const auto valToSet = std::uniform_int_distribution(0, 1000)(generator);
+    tree.set(rngBegin, rngEnd, valToSet);
+    reference.set(rngBegin, rngEnd, valToSet);
   }
 
-  for (std::size_t i : rng::iota_view(0, 50)) {
-    const std::size_t rngStart = generator() % 500;  // [0..500)
-    const std::size_t rngLen = generator() % 500;    // [0..500)
-    auto treeRes = tree.rangeGet(rngStart, rngStart + rngLen);
-    auto refRes = reference.rangeGet(rngStart, rngStart + rngLen);
+  for (size_t i : iota(0, 50)) {
+    const auto [rngBegin, rngEnd] = GenerateIndRng(0, treeEnd)(generator);
+    const auto treeRes = tree.rangeGet(rngBegin, rngEnd);
+    const auto refRes = reference.rangeGet(rngBegin, rngEnd);
     EXPECT_EQ(treeRes, refRes);
   }
 }
 
-TEST(DynamicSumSementTree, IntRangeGivesInt64SumFuzzTest) {
-  std::mt19937 generator(37);
+TEST(DynamicSumSegmentTree, IntRangeGivesInt64SumFuzzTest) {
+  std::mt19937 gen(37);
 
-  for (std::size_t i : rng::iota_view(0, 20)) {
-    auto tree = DynamicSumSegmentTree<int, int, std::int64_t>(0, 1 << 29, 0);
+  for (size_t i : iota(0, 20)) {
+    auto tree = DynamicSumSegmentTree<int, int, int64_t>(0, 1 << 29, 0);
 
-    const int rng1Start = generator() % (1 << 28);   // [0..2**28)
-    const int rng1Length = generator() % (1 << 27);  // [0..2**27)
-    const int rng2Length = generator() % (1 << 27);  // [0..2**27)
+    const int rng1Start = std::uniform_int_distribution(0, (1 << 28) - 1)(gen);
+    const int rng1Length = std::uniform_int_distribution(0, (1 << 27) - 1)(gen);
+    const int rng2Length = std::uniform_int_distribution(0, (1 << 27) - 1)(gen);
 
-    const int setVal1 = generator() % (1 << 30);  // [0..2**30)
-    const int setVal2 = generator() % (1 << 30);  // [0..2**30)
+    const auto setVal1 = std::uniform_int_distribution(0, (1 << 30) - 1)(gen);
+    const auto setVal2 = std::uniform_int_distribution(0, (1 << 30) - 1)(gen);
 
     tree.set(rng1Start, rng1Start + rng1Length, setVal1);
     tree.set(rng1Start + rng1Length, rng1Start + rng1Length + rng2Length,
              setVal2);
 
-    const auto expectedSum = static_cast<std::int64_t>(setVal1) * rng1Length +
-                             static_cast<std::int64_t>(setVal2) * rng2Length;
+    const auto expectedSum = static_cast<int64_t>(setVal1) * rng1Length +
+                             static_cast<int64_t>(setVal2) * rng2Length;
 
     const auto rangeGetRes =
         tree.rangeGet(rng1Start, rng1Start + rng1Length + rng2Length);

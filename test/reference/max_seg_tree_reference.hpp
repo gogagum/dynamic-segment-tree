@@ -28,7 +28,7 @@ class MaxSegTreeReference : public SegTreeReferenceBase<KeyT, ValueT> {
    * end.
    */
   [[nodiscard]] ValueT rangeGet(KeyT begin, KeyT end) const {
-    return rng::max(this->getValuesRng_(begin, end));
+    return std::ranges::max(this->getValuesRng_(begin, end));
   }
 };
 

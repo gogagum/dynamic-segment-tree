@@ -8,23 +8,18 @@
 #define DYNAMIC_MIN_SEGMENT_TREE_HPP
 
 #include <concepts>
-#include <dst/dynamic_segment_tree.hpp>
 #include <dst/comb.hpp>
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace dst {
 
-template <std::integral KeyT, class ValueT, class GetValueT = ValueT,
-          class UpdateOp = NoUpdateOp,
+template <std::integral KeyT, class ValueT, class UpdateOp = NoUpdateOp,
           class UpdateArgT = mp::DefaultUpdateArgT<UpdateOp, ValueT>,
           class Allocator = std::allocator<ValueT>>
 using DynamicMinSegmentTree =
-    DynamicSegmentTree<KeyT, ValueT, GetValueT,
-                       comb::Min<GetValueT>,
-                       decltype([](const ValueT& val) {
-                         return static_cast<GetValueT>(val);
-                       }),
+    DynamicSegmentTree<KeyT, ValueT, ValueT, comb::Min<ValueT>, std::identity,
                        UpdateOp, UpdateArgT, Allocator>;
 
-} // namespace dst
+}  // namespace dst
 
 #endif  // DYNAMIC_MIN_SEGMENT_TREE_HPP

@@ -7,13 +7,13 @@
     GitHub Actions main build CI Status
 ](
 https://github.com/gogagum/dynamic-segment-tree/workflows/build-main/badge.svg
-)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/main-build.yml)
+)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/main-build-and-test.yml)
 [
 ![
 GitHub Actions dev build CI Status
 ](
 https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg
-)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/dev-build.yml)
+)](https://github.com/gogagum/dynamic-segment-tree/actions/workflows/dev-build-and-test.yml)
 
 ## Project structure:
 
@@ -22,7 +22,7 @@ https://github.com/gogagum/dynamic-segment-tree/workflows/build-dev/badge.svg
 The base class of seg tree is `DynamicSegmentTree`. It is customizable 
 by the following template parameters:
 
-- `KeyT`  - indices type.
+- `KeyT` - indices type.
 - `ValueT` - values type.
 - `GetValueT` - rangeGet operation type.
 - `SegGetComb` - segments combining operation.
@@ -32,7 +32,7 @@ filled with equal elements.
 applied to elements in update operation.
 - `UpdateArgT` - argument of update operation. Must be void if operation
 is unary or there is no update operation.
-- `Allocator` - custom alocator.
+- `Allocator` - custom allocator.
 
 `SegGetComb` must receive either two or five arguments. In first case these two
 parameters are `rangeGet` results of two combined segments (simplified version),
@@ -46,7 +46,7 @@ in second -- value, beginning index and ending index.
 `UpdateOp` equals NoUpdateOp means that `update` operation is not supported.
 For `update` operation to be supported, UpdateOp must recieve one or two
 arquments. In first case one argument is an updated value. In second -- updated
-value and and update operation argument. In both cases UpdateOp must return 
+value and update operation argument. For both cases UpdateOp must return 
 updated value.
 
 `UpdateArgT` must be void id `update` operation must not be supported or if it 
@@ -55,7 +55,7 @@ must not take arguments.
 ### Other classes
 
 Examples of `DynamicSegmentTree` template usage can be seen in the
-`include/curried/` directory. They are:
+`include/dst/partial/` directory. They are:
 
 - `DynamicMinSegmentTree`
 - `DynamicMaxSegmentTree`
@@ -84,7 +84,7 @@ Doxygen documentation is configured for this project.
 
 ## Requirements:
 
-- `C++20` (`clang 16+` or `gcc 13+`)
+- `C++20` (`clang 17+` or `gcc 13+`)
 - `CMake 3.15+`
 
 ## Usage:
@@ -117,4 +117,7 @@ your CMakeLists.txt:
 
 TODO list (with no priority):
 
+- Better exceptions safety & tests for it.
+
 - Add benchmarks.
+- More moves for segment get operation.
