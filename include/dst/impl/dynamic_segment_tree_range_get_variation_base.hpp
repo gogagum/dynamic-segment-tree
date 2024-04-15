@@ -9,6 +9,7 @@
 
 #include <dst/concepts.hpp>
 #include <dst/disable_operations.hpp>
+#include <utility>
 
 namespace dst::impl {
 
@@ -95,11 +96,11 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  protected:
-  [[nodiscard]] GetValueT combineGet_(const GetValueT& leftValue,
-                                      const GetValueT& rightValue,
+  [[nodiscard]] GetValueT combineGet_(GetValueT&& leftValue,
+                                      GetValueT&& rightValue,
                                       KeyT /*leftBegin*/, KeyT /*separation*/,
                                       KeyT /*rightEnd*/) const {
-    return segCombiner_(leftValue, rightValue);
+    return segCombiner_(std::move(leftValue), std::move(rightValue));
   }
 
  private:
@@ -118,11 +119,11 @@ class DynamicSegmentTreeRangeGetCombineVariationBase<KeyT, GetValueT,
   }
 
  protected:
-  [[nodiscard]] GetValueT combineGet_(const GetValueT& leftValue,
-                                      const GetValueT& rightValue,
-                                      KeyT leftBegin, KeyT separation,
-                                      KeyT rightEnd) const {
-    return segCombiner_(leftValue, rightValue, leftBegin, separation, rightEnd);
+  [[nodiscard]] GetValueT combineGet_(GetValueT&& leftValue,
+                                      GetValueT&& rightValue, KeyT leftBegin,
+                                      KeyT separation, KeyT rightEnd) const {
+    return segCombiner_(std::move(leftValue), std::move(rightValue), leftBegin,
+                        separation, rightEnd);
   }
 
  private:

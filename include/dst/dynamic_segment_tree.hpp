@@ -74,8 +74,8 @@ class DynamicSegmentTree
                                                            SegGetComb>;
 
   using RangeGetInitVariationBase_ =
-      impl::DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT,
-                                                        GetValueT, SegGetInit>;
+      impl::DynamicSegmentTreeRangeGetInitVariationBase<KeyT, ValueT, GetValueT,
+                                                        SegGetInit>;
 
   using Node_ = UpdateVariationBase_::Node_;
 
@@ -435,21 +435,6 @@ auto DynamicSegmentTree<
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// template <std::integral KeyT, class ValueT, class GetValueT,
-//           conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
-//           conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
-//           class UpdateOp, class UpdateArgT, class Allocator>
-//   requires conc::OptUpdateOp<UpdateOp, ValueT, UpdateArgT>
-// void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
-//                         UpdateOp, UpdateArgT, Allocator>::update(KeyT begin,
-//                                                                  KeyT end)
-//   requires conc::OneArgUpdateOp<UpdateOp, ValueT>
-//{
-//   UpdateVariationBase_::updateImpl_(begin, end, begin_, end_, &rootNode_,
-//                                     nodeAllocator_);
-// }
-
-////////////////////////////////////////////////////////////////////////////////
 template <std::integral KeyT, class ValueT, class GetValueT,
           conc::OptGetCombiner<GetValueT, KeyT> SegGetComb,
           conc::OptGetInitializer<ValueT, KeyT, GetValueT> SegGetInit,
@@ -628,11 +613,12 @@ GetValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
 
   Node_* const rightNodePtr = currNode->getRight();
   Node_* const leftNodePtr = currNode->getLeft();
-  const GetValueT rVal = rangeGetImpl_(begin, end, mid, currEnd, rightNodePtr);
-  const GetValueT lVal = rangeGetImpl_(begin, end, currBegin, mid, leftNodePtr);
+  GetValueT rVal = rangeGetImpl_(begin, end, mid, currEnd, rightNodePtr);
+  GetValueT lVal = rangeGetImpl_(begin, end, currBegin, mid, leftNodePtr);
 
   return RangeGetCombineVariationBase_::combineGet_(
-      lVal, rVal, std::max(currBegin, begin), mid, std::min(currEnd, end));
+      std::move(lVal), std::move(rVal), std::max(currBegin, begin), mid,
+      std::min(currEnd, end));
 }
 
 }  // namespace dst
