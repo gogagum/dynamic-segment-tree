@@ -118,6 +118,4 @@ your CMakeLists.txt:
 TODO list (with no priority):
 
 - Better exceptions safety & tests for it.
-
 - Add benchmarks.
-- More moves for segment get operation.

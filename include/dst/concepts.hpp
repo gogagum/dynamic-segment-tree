@@ -27,7 +27,7 @@ concept ValueAndBordersGetCombiner =
              KeyT leftBegin, KeyT separation, KeyT rightEnd) {
       {
         segComb(left, right, leftBegin, separation, rightEnd)
-        } -> std::same_as<GetValueT>;
+      } -> std::same_as<GetValueT>;
     };
 
 template <class T, class GetValueT, class KeyT>
@@ -39,15 +39,17 @@ concept GetCombiner = ValueGetCombiner<T, GetValueT> ||
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class ValueT, class GetValueT>
 concept ValueGetInitializer = requires(const T& segInit, const ValueT& value) {
-                                {
-                                  segInit(value)
-                                  } -> std::convertible_to<GetValueT>;
-                              };
+  { segInit(value) } -> std::convertible_to<GetValueT>;
+} || requires(const T& segInit, const ValueT& value) {
+  { segInit(value) } -> std::same_as<GetValueT>;
+};
 
 template <class T, class ValueT, class KeyT, class GetValueT>
 concept ValueAndBordersGetInitializer =
     requires(const T& segInit, const ValueT& value, KeyT begin, KeyT end) {
       { segInit(value, begin, end) } -> std::convertible_to<GetValueT>;
+    } || requires(const T& segInit, const ValueT& value, KeyT begin, KeyT end) {
+      { segInit(value, begin, end) } -> std::same_as<GetValueT>;
     };
 
 template <class T, class ValueT, class KeyT, class GetValueT>
@@ -60,16 +62,14 @@ concept GetInitializer =
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class ValueT>
 concept OneArgUpdateOp = requires(const T& operation, const ValueT& val) {
-                           { operation(val) } -> std::convertible_to<ValueT>;
-                         };
+  { operation(val) } -> std::convertible_to<ValueT>;
+};
 
 template <class T, class ValueT, class UpdateArgT>
 concept TwoArgsUpdateOp = requires(const T& operation, const ValueT& val,
                                    const UpdateArgT& updateArg) {
-                            {
-                              operation(val, updateArg)
-                              } -> std::convertible_to<ValueT>;
-                          };
+  { operation(val, updateArg) } -> std::convertible_to<ValueT>;
+};
 
 template <class T, class ValueT, class UpdateArgT>
 concept UpdateOp =
@@ -83,8 +83,8 @@ concept OptGetCombiner =
     GetCombiner<T, GetValueT, KeyT> || std::is_same_v<T, NoRangeGetOp>;
 
 template <class T, class ValueT, class KeyT, class GetValueT>
-concept OptGetInitializer =
-    GetInitializer<T, ValueT, KeyT, GetValueT> || std::is_same_v<T, NoRangeGetOp>;
+concept OptGetInitializer = GetInitializer<T, ValueT, KeyT, GetValueT> ||
+                            std::is_same_v<T, NoRangeGetOp>;
 
 template <class T, class ValueT, class UpdateArgT>
 concept OptUpdateOp =

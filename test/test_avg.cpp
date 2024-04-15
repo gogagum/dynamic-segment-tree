@@ -12,6 +12,8 @@
 
 #include "reference/avg_seg_tree_reference.hpp"
 #include "tools/generate_index_range.hpp"
+#include "tools/non_movable_and_non_copyable.hpp"
+#include "tools/non_movable_and_non_copyable_avg_combiner.hpp"
 
 using dst::DynamicAvgSegmentTree;
 using std::size_t;
@@ -95,6 +97,23 @@ TEST(DynamicAvgSegmentTree, Move) {
 
   const auto avg = moved.rangeGet(0, kTreeEnd);
   EXPECT_FLOAT_EQ(avg, (kSetValue + kFillValue * 2) / 3.f);
+}
+
+TEST(DynamicAvgSegmentTree, NonCopyableGetValueT) {
+  constexpr auto kTreeEnd = size_t{6};
+  constexpr auto kFillValue = 42.f;
+  auto tree =
+      dst::DynamicSegmentTree<int, float, NonMovableAndNonCopyable<float>,
+                              NonMovableAndNonCopyableAvgCombiner<float, int>,
+                              NonMovableAndNonCopyable<float>::Construct>(
+          0, kTreeEnd, kFillValue);
+
+  constexpr auto kSetValue = 37.f;
+  tree.set(0, 2, kSetValue);
+  const auto moved = std::move(tree);
+
+  const auto avg = moved.rangeGet(0, kTreeEnd);
+  EXPECT_FLOAT_EQ(avg.get(), (kSetValue + kFillValue * 2) / 3.f);
 }
 
 TEST(DynamicAvgSegmentTree, SetRangeGetAvg) {

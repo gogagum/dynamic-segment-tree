@@ -590,7 +590,8 @@ GetValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   if (begin > currEnd || currBegin > end) {
     assert(false &&
            "_rangeGetImpl must not be called out of initial get range.");
-    return ValueT{};
+    return RangeGetInitVariationBase_::initGet_(currBegin, currEnd,
+                                                currNode->getValue());
   }
   if (end >= currEnd && begin <= currBegin && currNode->isLeaf()) {
     return RangeGetInitVariationBase_::initGet_(currBegin, currEnd,
