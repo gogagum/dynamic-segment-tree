@@ -97,7 +97,7 @@ void DynamicSegmentTreeUpdateVariationBase<
     return;
   }
   if (currNode->isLeaf()) {
-    currNode->initChildren(allocator);
+    currNode->initChildrenSiftingValue(allocator);
   }
   if constexpr (conc::UpdateOp<UpdateOp, ValueT, UpdateArgT>) {
     currNode->siftOptUpdate(updateOp_, allocator);
@@ -173,7 +173,7 @@ void DynamicSegmentTreeUpdateVariationBase<
     return;
   }
   if (currNode->isLeaf()) {
-    currNode->initChildren(allocator);
+    currNode->initChildrenSiftingValue(allocator);
   }
   currNode->siftOptUpdate(updateOp_, allocator);
   const auto mid = (currBegin + currEnd) / 2;

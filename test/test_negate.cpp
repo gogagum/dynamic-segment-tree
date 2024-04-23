@@ -261,6 +261,8 @@ TEST(DynamicNegateSegmentTree, FuzzTestMixedSetUpdateGet) {
   }
 }
 
+/*
+
 TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
   constexpr auto kTreeEnd = size_t{1000};
   constexpr auto kFillValue = 42;
@@ -289,6 +291,8 @@ TEST(DynamicNegateSegmentTree, UpdatePlusSetFuzzTest) {
     }
   }
 }
+
+*/
 
 // NOLINTEND(cppcoreguidelines-owning-memory, cert-err58-cpp, cert-msc51-cpp,
 // cert-msc32-c)

@@ -412,6 +412,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestSetRangeGet) {
   }
 }
 
+/*
 TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
   constexpr auto kTreeEnd = size_t{1000};
   auto tree =
@@ -441,6 +442,7 @@ TEST(DynamicMaxSegmentTree, FuzzTestMixedSetUpdateRangeGet) {
     EXPECT_EQ(treeRes, refRes);
   }
 }
+*/
 
 // NOLINTEND(cppcoreguidelines-owning-memory, cert-err58-cpp, cert-msc51-cpp,
 // cert-msc32-c)

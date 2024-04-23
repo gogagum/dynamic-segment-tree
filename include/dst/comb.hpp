@@ -4,6 +4,9 @@
 // Version 1.0. (See accompanying file LICENSE_1_0.txt
 // or copy at https://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef DST_COMB
+#define DST_COMB
+
 #include <algorithm>
 
 namespace dst::comb {
@@ -60,3 +63,5 @@ struct Avg {
 };
 
 }  // namespace dst::comb
+
+#endif  // DST_COMB
