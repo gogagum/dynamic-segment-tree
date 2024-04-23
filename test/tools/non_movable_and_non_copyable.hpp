@@ -7,7 +7,7 @@
 #ifndef NON_MOVABLE_AND_NON_COPYABLE
 #define NON_MOVABLE_AND_NON_COPYABLE
 
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <utility>
 
 template <class T>
