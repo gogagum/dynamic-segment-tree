@@ -57,4 +57,4 @@ endif()
 
 include(GoogleTest)
 
-target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree Boost::container range-v3)
+target_link_libraries(dst-test PUBLIC gtest_main dynamic-segment-tree Boost::container Boost::core range-v3)
