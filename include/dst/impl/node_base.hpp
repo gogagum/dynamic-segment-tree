@@ -179,13 +179,17 @@ inline void BaseNode<Derived<T, UpdateT, Allocator>>::clearChildren(
     AllocForDerived_& allocator) {
   if (!getLeft()->isLeaf()) {
     getLeft()->clearChildren(allocator);
+  } else {
+    std::destroy_at(getLeft()->getValuePtr());
   }
   if (!getRight()->isLeaf()) {
     getRight()->clearChildren(allocator);
+  } else {
+    std::destroy_at(getRight()->getValuePtr());
   }
-  std::allocator_traits<AllocForDerived_>::destroy(allocator, getRight());
-  std::allocator_traits<AllocForDerived_>::destroy(allocator, getLeft());
-  std::allocator_traits<AllocForDerived_>::deallocate(allocator, ptr, 2);
+  AllocTraits_::destroy(allocator, getRight());
+  AllocTraits_::destroy(allocator, getLeft());
+  AllocTraits_::deallocate(allocator, ptr, 2);
   ptr = nullptr;
 }
 
