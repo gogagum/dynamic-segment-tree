@@ -522,6 +522,8 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
                    UpdateArgT, Allocator>::~DynamicSegmentTree() {
   if (!rootNode_.isLeaf()) {
     rootNode_.clearChildren(nodeAllocator_);
+  } else {
+    std::destroy_at(rootNode_.getValuePtr());
   }
 }
 
