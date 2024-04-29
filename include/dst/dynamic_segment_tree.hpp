@@ -547,9 +547,15 @@ void DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
   if (end >= currEnd && begin <= currBegin) {
     currNode->setOrConstructValue(std::forward<ValueT1>(toUpdate),
                                   nodeAllocator_);
+    UpdateVariationBase_::resetOptionalUpdate(currNode);
     return;
   }
+  // TODO(gogagum): here two variants of what to do exist:
+  // 1. Apply delayed update, and then sift value. In this case we save
+  // updateOp calls, but not in all scenarios.
+  // 2. Sift value and then set delayed updates. Here we do more actions.
   if (currNode->isLeaf()) {
+    UpdateVariationBase_::applyOptionalUpdate(currNode);
     currNode->initChildrenSiftingValue(nodeAllocator_);
   }
   UpdateVariationBase_::optionalSiftNodeUpdate_(currNode, nodeAllocator_);
@@ -584,6 +590,7 @@ DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit, UpdateOp,
                                                     KeyT currEnd,
                                                     Node_* currNode) const {
   if (currNode->isLeaf()) {
+    UpdateVariationBase_::applyOptionalUpdate(currNode);
     return currNode->getValue();
   }
   UpdateVariationBase_::optionalSiftNodeUpdate_(currNode, nodeAllocator_);
@@ -613,10 +620,12 @@ GetValueT DynamicSegmentTree<KeyT, ValueT, GetValueT, SegGetComb, SegGetInit,
                                                 currNode->getValue());
   }
   if (end >= currEnd && begin <= currBegin && currNode->isLeaf()) {
+    UpdateVariationBase_::applyOptionalUpdate(currNode);
     return RangeGetInitVariationBase_::initGet_(currBegin, currEnd,
                                                 currNode->getValue());
   }
   if (currNode->isLeaf()) {
+    UpdateVariationBase_::applyOptionalUpdate(currNode);
     currNode->initChildrenSiftingValue(nodeAllocator_);
   }
 

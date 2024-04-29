@@ -58,6 +58,16 @@ class DynamicSegmentTreeUpdateVariationBase<
     nodePtr->siftOptUpdate(updateOp_, allocator);
   }
 
+  // TODO(gogagum): separate definition
+  void applyOptionalUpdate(Node_* node) const {
+    node->applyOptionalUpdate(updateOp_);
+  }
+
+  // TODO(gogagum): separate definition
+  void resetOptionalUpdate(Node_* node) const {
+    node->resetOptUpdate();
+  }
+
  private:
   UpdateOp updateOp_;
 };
@@ -97,11 +107,10 @@ void DynamicSegmentTreeUpdateVariationBase<
     return;
   }
   if (currNode->isLeaf()) {
+    applyOptionalUpdate(currNode);
     currNode->initChildrenSiftingValue(allocator);
   }
-  if constexpr (conc::UpdateOp<UpdateOp, ValueT, UpdateArgT>) {
-    currNode->siftOptUpdate(updateOp_, allocator);
-  }
+  currNode->siftOptUpdate(updateOp_, allocator);
   assert(currEnd >= currBegin + 2);
   const auto mid = (currBegin + currEnd) / 2;
   updateImpl_(begin, end, currBegin, mid, currNode->getLeft(), toUpdate,
@@ -141,6 +150,16 @@ class DynamicSegmentTreeUpdateVariationBase<
                 static_cast<Derived_*>(this)->end_,
                 &static_cast<Derived_*>(this)->rootNode_,
                 static_cast<Derived_*>(this)->nodeAllocator_);
+  }
+
+  // TODO(gogagum): separate definition.
+  void applyOptionalUpdate(Node_* node) const {
+    assert(node->isLeaf() && "Node must be a leaf here.");
+    node->applyOptionalUpdate(updateOp_);
+  }
+
+  void resetOptionalUpdate(Node_* node) const {
+    node->resetOptUpdate();
   }
 
  protected:
@@ -200,6 +219,14 @@ class DynamicSegmentTreeUpdateVariationBase<
 
  protected:
   explicit DynamicSegmentTreeUpdateVariationBase(NoUpdateOp){};
+
+  // TODO(gogagum): separate definition
+  void applyOptionalUpdate(Node_* node) const {
+  }
+
+  // TODO(gogagum): separate definition
+  void resetOptionalUpdate(Node_* node) const {
+  }
 
  protected:
   void optionalSiftNodeUpdate_(Node_*, NodeAlloc_&) const {

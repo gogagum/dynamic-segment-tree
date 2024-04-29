@@ -43,7 +43,7 @@ TEST(Node, UpdateBool) {
   node.update(op, alloc);
 
   EXPECT_TRUE(node.isLeaf());
-  EXPECT_EQ(node.getValue(), 24);
+  EXPECT_EQ(node.getValue(), 23);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ TEST(Node, UpdateInt) {
   node.update(op, 3, alloc);
 
   EXPECT_TRUE(node.isLeaf());
-  EXPECT_EQ(node.getValue(), 5);
+  EXPECT_EQ(node.getValue(), 2);
 }
 
 template <class ValueT, class UpdateT>

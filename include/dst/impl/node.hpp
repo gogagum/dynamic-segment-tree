@@ -54,6 +54,13 @@ class Node<T, std::optional<UpdateT>, Allocator>
    */
   void initChildrenSiftingValue(Alloc_& allocator);
 
+  template <class UpdateOp>
+  void applyOptionalUpdate(const UpdateOp& updateOp);
+
+  void resetOptUpdate() {
+    updateValue_.reset();
+  }
+
  public:
   /**
    * @brief Copy subtree from `src` to `dest`, using `nodeAlloc` for newly added
@@ -122,9 +129,10 @@ void Node<T, std::optional<UpdateT>, Allocator>::update(
     // _value continues to have delayed update meaning.
     updateValue_ = std::forward<UpdateT1>(updateVal);
   } else {  // isLeaf()
-    assert(!updateValue_.has_value());
-    Base_::getValue() =
-        updateOp(Base_::getValue(), std::forward<UpdateT1>(updateVal));
+    if (updateValue_.has_value()) {
+      Base_::getValue() = updateOp(Base_::getValue(), std::move(*updateValue_));
+    }
+    updateValue_ = std::forward<UpdateT1>(updateVal);
   }
 }
 
@@ -150,6 +158,17 @@ void Node<T, std::optional<UpdateT>, Allocator>::initChildrenSiftingValue(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+template <class T, class UpdateT, class Allocator>
+template <class UpdateOp>
+void Node<T, std::optional<UpdateT>, Allocator>::applyOptionalUpdate(
+    const UpdateOp& updateOp) {
+  if (updateValue_.has_value()) {
+    Base_::getValue() = updateOp(Base_::getValue(), std::move(*updateValue_));
+    updateValue_.reset();
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
 class Node<T, bool, Allocator> : public BaseNode<Node<T, bool, Allocator>> {
  private:
@@ -164,6 +183,13 @@ class Node<T, bool, Allocator> : public BaseNode<Node<T, bool, Allocator>> {
   void update(const UpdateOp& updateOp, Alloc_& allocator);
   template <class UpdateOp>
   void siftOptUpdate(const UpdateOp& updateOp, Alloc_& allocator);
+
+  template <class UpdateOp>
+  void applyOptionalUpdate(const UpdateOp& updateOp);
+
+  void resetOptUpdate() {
+    toUpdate_ = false;
+  }
 
   ~Node() = default;
 
@@ -191,8 +217,10 @@ void Node<T, bool, Allocator>::update(const UpdateOp& updateOp, Alloc_& alloc) {
     }
     toUpdate_ = true;
   } else {  // isLeaf()
-    assert(!toUpdate_);
-    Base_::getValue() = updateOp(Base_::getValue());
+    if (toUpdate_) {
+      Base_::getValue() = updateOp(Base_::getValue());
+    }
+    toUpdate_ = true;
   }
 }
 
@@ -211,12 +239,23 @@ void Node<T, bool, Allocator>::siftOptUpdate(const UpdateOp& updateOp,
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
+template <class UpdateOp>
+void Node<T, bool, Allocator>::applyOptionalUpdate(const UpdateOp& updateOp) {
+  if (toUpdate_) {
+    Base_::getValue() = updateOp(Base_::getValue());
+    toUpdate_ = false;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class T, class Allocator>
 void Node<T, bool, Allocator>::copySubtree(const Node& src, Node* dest,
                                            Alloc_& nodeAlloc) {
   Base_::copySubtree(src, dest, nodeAlloc);
   dest->toUpdate_ = src.toUpdate_;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template <class T, class Allocator>
 void Node<T, bool, Allocator>::copyToNewlyCreated(const Node& src, Node* dest,
                                                   Alloc_& nodeAlloc) {
@@ -245,15 +284,6 @@ class Node<T, void, Allocator> : public BaseNode<Node<T, void, Allocator>> {
   }
 
   ~Node() = default;
-
-  /**
-   * @brief Set the value to node. Clears children if they exist.
-   *
-   * @param value value to set.
-   */
-  template <class ValueT>
-    requires std::is_same_v<std::remove_cvref_t<ValueT>, T>
-  void setValue(ValueT&& value, Alloc_& allocator);
 
  private:
   friend class BaseNode<This_>;

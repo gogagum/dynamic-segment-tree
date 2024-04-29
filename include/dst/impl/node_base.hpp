@@ -146,7 +146,7 @@ template <template <class...> class Derived, class T, class UpdateT,
 void BaseNode<Derived<T, UpdateT, Allocator>>::initChildrenSiftingValue(
     AllocForDerived_& allocator) {
   assert(isLeaf() && "Can only init children for a leaf.");
-  auto nodesPtr = AllocTraits_::allocate(allocator, 2);
+  auto* const nodesPtr = AllocTraits_::allocate(allocator, 2);
   try {
     ptr = nodesPtr;
     std::construct_at(getLeft());
