@@ -87,6 +87,45 @@ TYPED_TEST(AllocatorsCommonTest, SetAndCopy) {
   EXPECT_TRUE(equal(kExpectedVals, treeVals));
 }
 
+TYPED_TEST(AllocatorsCommonTest, FuzzSetOnBothAndCopy) {
+  using DST = TestFixture::template DST<size_t, int>;
+
+  constexpr auto kTreeBegin = size_t{13};
+  constexpr auto kTreeEnd = size_t{37};
+  constexpr auto kFillValue = 19;
+  auto tree = DST(kTreeBegin, kTreeEnd, kFillValue);
+
+  constexpr auto kGenSeed = 42U;
+  std::mt19937 generator(kGenSeed);
+
+  for (auto i : iota(0, 15)) {
+    const auto [rngBegin, rngEnd] =
+        GenerateIndRng(kTreeBegin, kTreeEnd)(generator);
+    const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
+    tree.set(rngBegin, rngEnd, setVal);
+  }
+
+  constexpr auto kDestBegin = size_t{11};
+  constexpr auto kDestEnd = size_t{43};
+  constexpr auto kDestFillValue = 17;
+
+  auto dest = DST(kDestBegin, kDestEnd, kFillValue);
+
+  for (auto i : iota(0, 15)) {
+    const auto [rngBegin, rngEnd] =
+        GenerateIndRng(kDestBegin, kDestEnd)(generator);
+    const auto setVal = std::uniform_int_distribution(0, 1000)(generator);
+    dest.set(rngBegin, rngEnd, setVal);
+  }
+
+  dest = std::as_const(tree);
+
+  constexpr auto ids = iota(kTreeBegin, kTreeEnd);
+  auto treeVals = ids | transform(bind_front(&DST::get, &tree));
+  auto destVals = ids | transform(bind_front(&DST::get, &dest));
+  EXPECT_TRUE(equal(treeVals, destVals));
+}
+
 TYPED_TEST(AllocatorsCommonTest, SetAndCopyAssign) {
   using DST = TestFixture::template DST<size_t, int>;
 

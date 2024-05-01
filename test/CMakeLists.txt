@@ -29,6 +29,7 @@ FetchContent_MakeAvailable(range-v3)
 add_subdirectory(boost)
 
 add_executable(dst-test
+    allocate_n_times_then_throw.cpp
     allocator_common.cpp
     node.cpp
     test_negate.cpp

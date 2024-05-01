@@ -146,18 +146,18 @@ template <template <class...> class Derived, class T, class UpdateT,
 void BaseNode<Derived<T, UpdateT, Allocator>>::initChildrenSiftingValue(
     AllocForDerived_& allocator) {
   assert(isLeaf() && "Can only init children for a leaf.");
-  auto* const nodesPtr = AllocTraits_::allocate(allocator, 2);
+  auto* const nodesPtr = AllocTraits_::allocate(allocator, 2);  // Can throw
+  ptr = nodesPtr;
+  std::construct_at(getLeft());
   try {
-    ptr = nodesPtr;
-    std::construct_at(getLeft());
     std::construct_at(getLeft()->getValuePtr(), getValue());
   } catch (...) {
     AllocTraits_::deallocate(allocator, ptr, 2);
     ptr = nullptr;
     throw;
   }
+  std::construct_at(getRight());
   try {
-    std::construct_at(getRight());
     if constexpr (std::move_constructible<T>) {
       std::construct_at(getRight()->getValuePtr(), std::move(getValue()));
     } else {

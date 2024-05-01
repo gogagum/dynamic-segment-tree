@@ -19,6 +19,8 @@ class AllocateNTimesThenThrow : std::allocator<T> {
     }
   };
 
+  using value_type = T;
+
  public:
   AllocateNTimesThenThrow() = delete;
   AllocateNTimesThenThrow(const AllocateNTimesThenThrow&) = default;
