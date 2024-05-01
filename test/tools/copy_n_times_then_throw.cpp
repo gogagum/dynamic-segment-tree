@@ -7,10 +7,11 @@
 #include "copy_n_times_then_throw.hpp"
 
 CopyNTimesThenThrow::CopyNTimesThenThrow(const CopyNTimesThenThrow& other)
-    : counter_{other.counter_} {
-  if (*counter_ > 0) {
-    --*counter_;
-  } else {
-    throw Exception();
-  }
+    : counter_{[](const CopyNTimesThenThrow& other_) {
+        if (const auto& counter = other_.counter_; *counter > 0) {
+          --*counter;
+          return counter;
+        }
+        throw Exception();
+      }(other)} {
 }
