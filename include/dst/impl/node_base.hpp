@@ -152,6 +152,7 @@ void BaseNode<Derived<T, UpdateT, Allocator>>::initChildrenSiftingValue(
   try {
     std::construct_at(getLeft()->getValuePtr(), getValue());
   } catch (...) {
+    std::destroy_at(getLeft());
     AllocTraits_::deallocate(allocator, ptr, 2);
     ptr = nullptr;
     throw;
@@ -164,7 +165,9 @@ void BaseNode<Derived<T, UpdateT, Allocator>>::initChildrenSiftingValue(
       std::construct_at(getRight()->getValuePtr(), getValue());
     }
   } catch (...) {
-    getLeft()->~Derived_();
+    std::destroy_at(getLeft()->getValuePtr());
+    std::destroy_at(getLeft());
+    std::destroy_at(getRight());
     AllocTraits_::deallocate(allocator, ptr, 2);
     ptr = nullptr;
     throw;
