@@ -297,6 +297,8 @@ TEST(Node, ThrowOnSecondCopy) {
   EXPECT_THROW(node.initChildrenSiftingValue(nodeAlloc),
                CopyNTimesThenThrow::Exception);
   EXPECT_TRUE(node.isLeaf());
+
+  std::destroy_at(node.getValuePtr());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
