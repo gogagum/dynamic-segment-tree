@@ -30,7 +30,7 @@ class BaseNode<Derived<T, UpdateT, Allocator>> {
   using AllocTraits_ = std::allocator_traits<AllocForDerived_>;
 
  public:
-  BaseNode() = default;
+  BaseNode() noexcept = default;
 
   template <class T1>
   void setOrConstructValue(T1&& val, AllocForDerived_& alloc) {
@@ -69,23 +69,23 @@ class BaseNode<Derived<T, UpdateT, Allocator>> {
   }
 
   static void copySubtree(const Derived_& src, Derived_* dest,
-                          AllocForDerived_& nodeAllocator) {
+                          AllocForDerived_& nodeAlloc) {
     if (dest->isLeaf()) {
       if (src.isLeaf()) {
         dest->getValue() = src.getValue();  // That's all!
       } else {
         std::destroy_at(dest->getValuePtr());
         // dest is like newly created
-        copyChildrenToNewlyCreated(src, dest, nodeAllocator);
+        copyChildrenToNewlyCreated(src, dest, nodeAlloc);
       }
     } else {
       if (src.isLeaf()) {
-        dest->clearChildren(nodeAllocator);
+        dest->clearChildren(nodeAlloc);
         // Dest must not have value here
         std::construct_at(dest->getValuePtr(), src.getValue());
       } else {
         // No values in both, both have children
-        copyChildren(src, dest, nodeAllocator);
+        copyChildren(src, dest, nodeAlloc);
       }
     }
   }
@@ -105,19 +105,62 @@ class BaseNode<Derived<T, UpdateT, Allocator>> {
     assert(dest->isLeaf());
     assert(!src.isLeaf());
     dest->initEmptyChildren(nodeAlloc);
-    Derived_::copyToNewlyCreated(*src.getLeft(), dest->getLeft(), nodeAlloc);
-    Derived_::copyToNewlyCreated(*src.getRight(), dest->getRight(), nodeAlloc);
+    try {
+      Derived_::copyToNewlyCreated(*src.getLeft(), dest->getLeft(), nodeAlloc);
+    } catch (...) {
+      dest->rollbackEmptyChildrenInit(nodeAlloc);
+      throw;
+    }
+
+    try {
+      Derived_::copyToNewlyCreated(*src.getRight(), dest->getRight(),
+                                   nodeAlloc);
+    } catch (...) {
+      if (auto* left = dest->getLeft(); left->isLeaf()) {
+        std::destroy_at(left->getValuePtr());
+      } else {
+        left->clearChildren(nodeAlloc);
+      }
+      dest->rollbackEmptyChildrenInit(nodeAlloc);
+      throw;
+    }
   }
 
-  void initEmptyChildren(AllocForDerived_& alloc) {
-    ptr = AllocTraits_::allocate(alloc, 2);
-    AllocTraits_::construct(alloc, getLeft());
-    AllocTraits_::construct(alloc, getRight());
-  }
+  /**
+   * @brief Initializes children with no values. Exceptions can come only from
+   * allocation. If this happened, function gives no effect.
+   *
+   * @param alloc allocator to allocate nodes.
+   */
+  void initEmptyChildren(AllocForDerived_& alloc);
 
-  void initChildrenSiftingValue(AllocForDerived_& allocator);
+  /**
+   * @brief clears children destroying nodes, deallocating memory and setting
+   * children pointer to `nullptr`.
+   * 
+   * @param alloc allocator do deallocate nodes.
+   */
+  void rollbackEmptyChildrenInit(AllocForDerived_& alloc);
 
-  void clearChildren(AllocForDerived_& allocator);
+  /**
+   * @brief split leaf.
+   * Pre: node is a leaf node with constructed value.
+   * Post: one of two:
+   * - Node has two children with values constructed as a copy of its own value.
+   * - Exception on allocation or copy construction was thrown and there is no
+   * effect on the node.
+   *
+   * @param alloc allocator to allocate newly created nodes.
+   */
+  void initChildrenSiftingValue(AllocForDerived_& alloc);
+
+  /**
+   * @brief clear children for a node, which is a root of a correctly
+   * initialized subtree.
+   *
+   * @param alloc allocator, to call deallocate for node s in subtree.
+   */
+  void clearChildren(AllocForDerived_& alloc);
 
   [[nodiscard]] Derived_* getLeft() const {
     return ptr;
@@ -143,17 +186,38 @@ class BaseNode<Derived<T, UpdateT, Allocator>> {
 ////////////////////////////////////////////////////////////////////////////////
 template <template <class...> class Derived, class T, class UpdateT,
           class Allocator>
+void BaseNode<Derived<T, UpdateT, Allocator>>::initEmptyChildren(
+    AllocForDerived_& alloc) {
+  ptr = AllocTraits_::allocate(alloc, 2);
+  AllocTraits_::construct(alloc, getLeft());
+  AllocTraits_::construct(alloc, getRight());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <template <class...> class Derived, class T, class UpdateT,
+          class Allocator>
+void BaseNode<Derived<T, UpdateT, Allocator>>::rollbackEmptyChildrenInit(
+    AllocForDerived_& alloc) {
+  AllocTraits_::destroy(alloc, getRight());
+  AllocTraits_::destroy(alloc, getLeft());
+  AllocTraits_::deallocate(alloc, ptr, 2);
+  ptr = nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <template <class...> class Derived, class T, class UpdateT,
+          class Allocator>
 void BaseNode<Derived<T, UpdateT, Allocator>>::initChildrenSiftingValue(
-    AllocForDerived_& allocator) {
+    AllocForDerived_& alloc) {
   assert(isLeaf() && "Can only init children for a leaf.");
-  auto* const nodesPtr = AllocTraits_::allocate(allocator, 2);  // Can throw
+  auto* const nodesPtr = AllocTraits_::allocate(alloc, 2);  // Can throw
   ptr = nodesPtr;
   std::construct_at(getLeft());
   try {
     std::construct_at(getLeft()->getValuePtr(), getValue());
   } catch (...) {
     std::destroy_at(getLeft());
-    AllocTraits_::deallocate(allocator, ptr, 2);
+    AllocTraits_::deallocate(alloc, ptr, 2);
     ptr = nullptr;
     throw;
   }
@@ -168,7 +232,7 @@ void BaseNode<Derived<T, UpdateT, Allocator>>::initChildrenSiftingValue(
     std::destroy_at(getLeft()->getValuePtr());
     std::destroy_at(getLeft());
     std::destroy_at(getRight());
-    AllocTraits_::deallocate(allocator, ptr, 2);
+    AllocTraits_::deallocate(alloc, ptr, 2);
     ptr = nullptr;
     throw;
   }

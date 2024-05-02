@@ -260,9 +260,11 @@ TYPED_TEST(IntNodeUpdateParametrizedTests, CopySingleNodeToSmallTree) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST(Node, InitChildren) {
-  auto node = dst::impl::Node<int, bool>{};
-  auto alloc = std::allocator<dst::impl::Node<int, bool>>();
+TYPED_TEST(IntNodeUpdateParametrizedTests, InitChildren) {
+  using Node = TestFixture::Node;
+
+  auto node = Node{};
+  auto alloc = std::allocator<Node>();
 
   std::construct_at(node.getValuePtr(), 2);
 
@@ -275,11 +277,20 @@ TEST(Node, InitChildren) {
   node.clearChildren(alloc);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-TEST(Node, ThrowOnFirstCopy) {
-  auto nodeAlloc = std::allocator<dst::impl::Node<CopyNTimesThenThrow, bool>>();
+template <class UpdateT>
+using CopyNTimesThenThrowNodeUpdateParametrizedTests =
+    NodeValueAndUpdateParametrizedTests<CopyNTimesThenThrow, UpdateT>;
 
-  auto node = dst::impl::Node<CopyNTimesThenThrow, bool>{};
+TYPED_TEST_SUITE(CopyNTimesThenThrowNodeUpdateParametrizedTests, UpdateTypes);
+
+////////////////////////////////////////////////////////////////////////////////
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests,
+           ThrowOnFirstCopyInChildrenInit) {
+  using Node = TestFixture::Node;
+
+  auto nodeAlloc = std::allocator<Node>();
+
+  auto node = Node{};
   std::construct_at(node.getValuePtr(), 0);
 
   EXPECT_THROW(node.initChildrenSiftingValue(nodeAlloc),
@@ -290,10 +301,13 @@ TEST(Node, ThrowOnFirstCopy) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST(Node, ThrowOnSecondCopy) {
-  auto nodeAlloc = std::allocator<dst::impl::Node<CopyNTimesThenThrow, bool>>();
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests,
+           ThrowOnSecondCopyInChildrenInit) {
+  using Node = TestFixture::Node;
 
-  auto node = dst::impl::Node<CopyNTimesThenThrow, bool>{};
+  auto nodeAlloc = std::allocator<Node>();
+
+  auto node = Node{};
   std::construct_at(node.getValuePtr(), 1);
 
   EXPECT_THROW(node.initChildrenSiftingValue(nodeAlloc),
@@ -301,6 +315,58 @@ TEST(Node, ThrowOnSecondCopy) {
   EXPECT_TRUE(node.isLeaf());
 
   std::destroy_at(node.getValuePtr());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnFirstInCopy) {
+  using Node = TestFixture::Node;
+
+  auto nodeAlloc = std::allocator<Node>();
+
+  auto node = Node{};
+  auto children = std::array<Node, 2>{};
+  node.ptr = children.data();
+
+  auto val = CopyNTimesThenThrow{2};
+
+  std::construct_at(children[0].getValuePtr(), val);  // First
+  std::construct_at(children[1].getValuePtr(), val);  // Second
+
+  auto dest = Node{};
+
+  // No copies left expect throw on first copy.
+  EXPECT_THROW(Node::copyToNewlyCreated(node, &dest, nodeAlloc),
+               CopyNTimesThenThrow::Exception);
+
+  node.ptr = nullptr;
+
+  EXPECT_TRUE(dest.isLeaf());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnSecondInCopy) {
+  using Node = TestFixture::Node;
+
+  auto nodeAlloc = std::allocator<Node>();
+
+  auto node = Node{};
+  auto children = std::array<Node, 2>{};
+  node.ptr = children.data();
+
+  auto val = CopyNTimesThenThrow{3};
+
+  std::construct_at(children[0].getValuePtr(), val);  // First
+  std::construct_at(children[1].getValuePtr(), val);  // Second
+
+  auto dest = Node{};
+
+  // Only one of two copies will be finished successfully
+  EXPECT_THROW(Node::copyToNewlyCreated(node, &dest, nodeAlloc),
+               CopyNTimesThenThrow::Exception);
+
+  node.ptr = nullptr;
+
+  EXPECT_TRUE(dest.isLeaf());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
