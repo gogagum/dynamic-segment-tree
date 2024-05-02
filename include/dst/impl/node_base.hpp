@@ -255,15 +255,16 @@ void BaseNode<Derived<T, UpdateT, Allocator>>::copySubtree(
     if (src.isLeaf()) {
       dest->getValue() = src.getValue();  // That's all!
     } else {
-      std::destroy_at(dest->getValuePtr());
-      // dest is like newly created
+      // dest is like newly created, if we forget about its value
       copyChildrenToNewlyCreated(src, dest, nodeAlloc);
+      std::destroy_at(dest->getValuePtr());
     }
   } else {
     if (src.isLeaf()) {
-      dest->clearChildren(nodeAlloc);
       // Dest must not have value here
       std::construct_at(dest->getValuePtr(), src.getValue());
+      // After successful value copying, children can be cleared
+      dest->clearChildren(nodeAlloc);
     } else {
       // No values in both, both have children
       copyChildren(src, dest, nodeAlloc);

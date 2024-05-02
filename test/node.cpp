@@ -415,6 +415,12 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnFirstInCopy) {
   std::destroy_at(children[0].getValuePtr());
   std::destroy_at(children[1].getValuePtr());
 
+  // Destination values must not be touched.
+  // This property is not checked here (TODO(gogagum)), but we must call
+  // destructors by hands. 
+  std::destroy_at(dest.getLeft()->getValuePtr());
+  std::destroy_at(dest.getRight()->getValuePtr());
+
   AllocTraits::destroy(nodeAlloc, dest.getLeft());
   AllocTraits::destroy(nodeAlloc, dest.getRight());
 
@@ -458,6 +464,12 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnSecondInCopy) 
 
   std::destroy_at(children[0].getValuePtr());
   std::destroy_at(children[1].getValuePtr());
+
+  // Destination values must not be touched.
+  // This property is not checked here (TODO(gogagum)), but we must call
+  // destructors by hands. 
+  std::destroy_at(dest.getLeft()->getValuePtr());
+  std::destroy_at(dest.getRight()->getValuePtr());
 
   AllocTraits::destroy(nodeAlloc, dest.getLeft());
   AllocTraits::destroy(nodeAlloc, dest.getRight());
