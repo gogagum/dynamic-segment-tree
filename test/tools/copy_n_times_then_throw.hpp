@@ -25,7 +25,7 @@ class CopyNTimesThenThrow {
   CopyNTimesThenThrow(const CopyNTimesThenThrow& other);
   CopyNTimesThenThrow(CopyNTimesThenThrow&& other) noexcept = delete;
 
-  CopyNTimesThenThrow& operator=(const CopyNTimesThenThrow&) = delete;
+  CopyNTimesThenThrow& operator=(const CopyNTimesThenThrow&);
   CopyNTimesThenThrow& operator=(CopyNTimesThenThrow&&) noexcept = delete;
 
   ~CopyNTimesThenThrow() = default;

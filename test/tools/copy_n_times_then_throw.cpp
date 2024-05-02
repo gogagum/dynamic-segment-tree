@@ -15,3 +15,12 @@ CopyNTimesThenThrow::CopyNTimesThenThrow(const CopyNTimesThenThrow& other)
         throw Exception();
       }(other)} {
 }
+
+CopyNTimesThenThrow& CopyNTimesThenThrow::operator=(const CopyNTimesThenThrow& other) {
+  if (const auto& counter = other.counter_; *counter > 0) {
+    --*counter;
+    counter_ = counter;
+    return *this;
+  }
+  throw Exception();
+}

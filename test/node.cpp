@@ -5,8 +5,8 @@
 //  or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include <gtest/gtest.h>
-#include <array>
 
+#include <array>
 #include <dst/impl/node.hpp>
 
 #include "tools/allocate_n_times_then_throw.hpp"
@@ -319,7 +319,8 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnFirstInCopy) {
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests,
+           ThrowOnFirstInCopyToNewlyCreated) {
   using Node = TestFixture::Node;
 
   auto nodeAlloc = std::allocator<Node>();
@@ -348,7 +349,8 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnFirstInCopy) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnSecondInCopy) {
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests,
+           ThrowOnSecondInCopyToNewlyCreated) {
   using Node = TestFixture::Node;
 
   auto nodeAlloc = std::allocator<Node>();
@@ -374,6 +376,94 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnSecondInCopy) 
   std::destroy_at(children[1].getValuePtr());
 
   EXPECT_TRUE(dest.isLeaf());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnFirstInCopy) {
+  using Node = TestFixture::Node;
+  using Alloc = std::allocator<Node>;
+  using AllocTraits = std::allocator_traits<Alloc>;
+
+  auto nodeAlloc = std::allocator<Node>();
+
+  auto node = Node{};
+  auto children = std::array<Node, 2>{};
+  node.ptr = children.data();
+
+  auto val = CopyNTimesThenThrow{2};
+
+  std::construct_at(children[0].getValuePtr(), val);  // First
+  std::construct_at(children[1].getValuePtr(), val);  // Second
+
+  auto dest = Node{};
+  dest.ptr = AllocTraits::allocate(nodeAlloc, 2);
+
+  auto destVal = CopyNTimesThenThrow{std::numeric_limits<size_t>::max()};
+
+  AllocTraits::construct(nodeAlloc, dest.getLeft());
+  AllocTraits::construct(nodeAlloc, dest.getRight());
+
+  std::construct_at(dest.getLeft()->getValuePtr(), destVal);
+  std::construct_at(dest.getRight()->getValuePtr(), destVal);
+
+  // Only one of two copies will be finished successfully
+  EXPECT_THROW(Node::copySubtree(node, &dest, nodeAlloc),
+               CopyNTimesThenThrow::Exception);
+
+  node.ptr = nullptr;
+
+  std::destroy_at(children[0].getValuePtr());
+  std::destroy_at(children[1].getValuePtr());
+
+  AllocTraits::destroy(nodeAlloc, dest.getLeft());
+  AllocTraits::destroy(nodeAlloc, dest.getRight());
+
+  AllocTraits::deallocate(nodeAlloc, dest.ptr, 2);
+  dest.ptr = nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnSecondInCopy) {
+  using Node = TestFixture::Node;
+  using Alloc = std::allocator<Node>;
+  using AllocTraits = std::allocator_traits<Alloc>;
+
+  auto nodeAlloc = std::allocator<Node>();
+
+  auto node = Node{};
+  auto children = std::array<Node, 2>{};
+  node.ptr = children.data();
+
+  auto val = CopyNTimesThenThrow{3};
+
+  std::construct_at(children[0].getValuePtr(), val);  // First
+  std::construct_at(children[1].getValuePtr(), val);  // Second
+
+  auto dest = Node{};
+  dest.ptr = AllocTraits::allocate(nodeAlloc, 2);
+
+  auto destVal = CopyNTimesThenThrow{std::numeric_limits<size_t>::max()};
+
+  AllocTraits::construct(nodeAlloc, dest.getLeft());
+  AllocTraits::construct(nodeAlloc, dest.getRight());
+
+  std::construct_at(dest.getLeft()->getValuePtr(), destVal);
+  std::construct_at(dest.getRight()->getValuePtr(), destVal);
+
+  // Only one of two copies will be finished successfully
+  EXPECT_THROW(Node::copySubtree(node, &dest, nodeAlloc),
+               CopyNTimesThenThrow::Exception);
+
+  node.ptr = nullptr;
+
+  std::destroy_at(children[0].getValuePtr());
+  std::destroy_at(children[1].getValuePtr());
+
+  AllocTraits::destroy(nodeAlloc, dest.getLeft());
+  AllocTraits::destroy(nodeAlloc, dest.getRight());
+
+  AllocTraits::deallocate(nodeAlloc, dest.ptr, 2);
+  dest.ptr = nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
