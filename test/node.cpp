@@ -5,6 +5,7 @@
 //  or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include <gtest/gtest.h>
+#include <array>
 
 #include <dst/impl/node.hpp>
 
@@ -139,7 +140,7 @@ TYPED_TEST(IntNodeUpdateParametrizedTests, CopySmallTreeToSingleNodeNoUpdate) {
   // leaf(3)  leaf(4)
 
   auto root = Node{};
-  auto children = std::vector<Node>(2);
+  auto children = std::array<Node, 2>{};
   root.ptr = children.data();
 
   std::construct_at(root.getLeft()->getValuePtr(), 3);
@@ -340,6 +341,9 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnFirstInCopy) {
 
   node.ptr = nullptr;
 
+  std::destroy_at(children[0].getValuePtr());
+  std::destroy_at(children[1].getValuePtr());
+
   EXPECT_TRUE(dest.isLeaf());
 }
 
@@ -365,6 +369,9 @@ TYPED_TEST(CopyNTimesThenThrowNodeUpdateParametrizedTests, ThrowOnSecondInCopy) 
                CopyNTimesThenThrow::Exception);
 
   node.ptr = nullptr;
+
+  std::destroy_at(children[0].getValuePtr());
+  std::destroy_at(children[1].getValuePtr());
 
   EXPECT_TRUE(dest.isLeaf());
 }
