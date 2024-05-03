@@ -39,6 +39,7 @@ add_executable(dst-test
     test_avg.cpp
     test_copy_only_copy_counter.cpp
     test_copy_and_move_counter.cpp
+    counters/construction_and_destruction_counter.cpp
     counters/copy_only_copy_counter.cpp
     counters/copy_and_move_counter.cpp
     test_copy_count.cpp

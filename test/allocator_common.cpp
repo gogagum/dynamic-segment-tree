@@ -14,6 +14,7 @@
 #include <random>
 #include <ranges>
 
+#include "counters/construction_and_destruction_counter.hpp"
 #include "reference/seg_tree_reference_base.hpp"
 #include "tools/generate_index_range.hpp"
 
@@ -240,6 +241,123 @@ TYPED_TEST(AllocatorsCommonTest, FuzzGetSetMixed) {
     }
   }
 };
+
+TYPED_TEST(AllocatorsCommonTest,
+           ConstructionAndDestructionCountWithNoOperations) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  { const auto tree = DST(5, 17, ConstructionAndDestructionCounter{init}); }
+
+  EXPECT_EQ(init->constructionCnt, 2);
+  EXPECT_EQ(init->destructionCnt, 2);
+}
+
+TYPED_TEST(AllocatorsCommonTest,
+           ConstructionAndDestructionCountWithSetOperations) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  {
+    auto tree = DST(5, 17, ConstructionAndDestructionCounter{init});
+    tree.set(7, 11, ConstructionAndDestructionCounter{init});
+  }
+
+  EXPECT_EQ(init->constructionCnt, init->destructionCnt);
+}
+
+TYPED_TEST(AllocatorsCommonTest,
+           ConstructionAndDestructionCountWithWithFuzzSetOperations) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  constexpr auto kTreeEnd = size_t{1000};
+
+  {
+    auto tree = DST(0, kTreeEnd, ConstructionAndDestructionCounter{init});
+
+    constexpr auto kGenSeed = 42U;
+    std::mt19937 generator(kGenSeed);
+
+    for (auto i : iota(0, 100)) {
+      const auto [rngBegin, rngEnd] = GenerateIndRng(0, kTreeEnd)(generator);
+      tree.set(rngBegin, rngEnd, ConstructionAndDestructionCounter{init});
+    }
+
+    tree.set(7, 11, ConstructionAndDestructionCounter{init});
+  }
+
+  EXPECT_EQ(init->constructionCnt, init->destructionCnt);
+}
+
+TYPED_TEST(AllocatorsCommonTest, ConstructionAndDestructionCountCopy) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  {
+    const auto tree = DST(5, 17, ConstructionAndDestructionCounter{init});
+    const auto copy = tree;
+  }
+
+  EXPECT_EQ(init->constructionCnt, 3);
+  EXPECT_EQ(init->destructionCnt, 3);
+}
+
+TYPED_TEST(AllocatorsCommonTest, ConstructionAndDestructionCountCopyAssign) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  {
+    const auto tree = DST(5, 17, ConstructionAndDestructionCounter{init});
+    auto copy = DST(3, 14, ConstructionAndDestructionCounter{init});
+
+    copy = tree;
+  }
+
+  EXPECT_EQ(init->constructionCnt, 4);
+  EXPECT_EQ(init->destructionCnt, 4);
+}
+
+TYPED_TEST(AllocatorsCommonTest, ConstructionAndDestructionCountSetAndCopy) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  {
+    auto tree = DST(5, 17, ConstructionAndDestructionCounter{init});
+    tree.set(3, 11, ConstructionAndDestructionCounter{init});
+    const auto copy = tree;
+  }
+
+  EXPECT_EQ(init->constructionCnt, init->destructionCnt);
+}
+
+TYPED_TEST(AllocatorsCommonTest, ConstructionAndDestructionCountSetAndCopyAssign) {
+  using DST =
+      TestFixture::template DST<size_t, ConstructionAndDestructionCounter>;
+
+  const auto init = ConstructionAndDestructionCounter::init();
+
+  {
+    auto tree = DST(5, 17, ConstructionAndDestructionCounter{init});
+    tree.set(3, 11, ConstructionAndDestructionCounter{init});
+    auto copy = DST(3, 14, ConstructionAndDestructionCounter{init});
+    copy = tree;
+  }
+
+  EXPECT_EQ(init->constructionCnt, init->destructionCnt);
+}
 
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables,
 // cert-err58-cpp, cert-msc32-c)

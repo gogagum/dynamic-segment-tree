@@ -274,7 +274,7 @@ DynamicSegmentTree<
       RangeGetInitVariationBase_(other),
       RangeGetCombineVariationBase_(other),
       UpdateVariationBase_(other) {
-  Node_::copySubtree(other.rootNode_, &this->rootNode_, nodeAllocator_);
+  Node_::copyToNewlyCreated(other.rootNode_, &this->rootNode_, nodeAllocator_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +293,7 @@ DynamicSegmentTree<
       RangeGetInitVariationBase_(other),
       RangeGetCombineVariationBase_(other),
       UpdateVariationBase_(other) {
-  Node_::copySubtree(other.rootNode_, &this->rootNode_, nodeAllocator_);
+  Node_::copyToNewlyCreated(other.rootNode_, &this->rootNode_, nodeAllocator_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
